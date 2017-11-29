@@ -26,12 +26,44 @@ source "$ROOT/${KUBE_CONFIG_FILE:-"config-default.sh"}"
 source "$KUBE_ROOT/cluster/common.sh"
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
-export SERVICE_ACCOUNT_LOOKUP=${SERVICE_ACCOUNT_LOOKUP:-false}
-export ADMISSION_CONTROL=${ADMISSION_CONTROL:-NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota}
+export SERVICE_ACCOUNT_LOOKUP=${SERVICE_ACCOUNT_LOOKUP:-true}
+export ADMISSION_CONTROL=${ADMISSION_CONTROL:-Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,ResourceQuota}
 readonly POOL=kubernetes
 readonly POOL_PATH=/var/lib/libvirt/images/kubernetes
 
 [ ! -d "${POOL_PATH}" ] && (echo "$POOL_PATH" does not exist ; exit 1 )
+
+# Creates a kubeconfig file for the kubelet.
+# Args: address (e.g. "http://localhost:8080"), destination file path
+function create-kubelet-kubeconfig() {
+  local apiserver_address="${1}"
+  local destination="${2}"
+  if [[ -z "${apiserver_address}" ]]; then
+    echo "Must provide API server address to create Kubelet kubeconfig file!"
+    exit 1
+  fi
+  if [[ -z "${destination}" ]]; then
+    echo "Must provide destination path to create Kubelet kubeconfig file!"
+    exit 1
+  fi
+  echo "Creating Kubelet kubeconfig file"
+  local dest_dir="$(dirname "${destination}")"
+  mkdir -p "${dest_dir}" &>/dev/null || sudo mkdir -p "${dest_dir}"
+  sudo=$(test -w "${dest_dir}" || echo "sudo -E")
+  cat <<EOF | ${sudo} tee "${destination}" > /dev/null
+apiVersion: v1
+kind: Config
+clusters:
+  - cluster:
+      server: ${apiserver_address}
+    name: local
+contexts:
+  - context:
+      cluster: local
+    name: local
+current-context: local
+EOF
+}
 
 # join <delim> <list...>
 # Concatenates the list elements with the delimiter passed as first parameter
@@ -187,6 +219,8 @@ function initialize-pool {
       render-template "$ROOT/namespace.yaml" > "$POOL_PATH/kubernetes/addons/namespace.yaml"
       render-template "$ROOT/kubedns-svc.yaml" > "$POOL_PATH/kubernetes/addons/kubedns-svc.yaml"
       render-template "$ROOT/kubedns-controller.yaml"  > "$POOL_PATH/kubernetes/addons/kubedns-controller.yaml"
+      render-template "$ROOT/kubedns-sa.yaml"  > "$POOL_PATH/kubernetes/addons/kubedns-sa.yaml"
+      render-template "$ROOT/kubedns-cm.yaml"  > "$POOL_PATH/kubernetes/addons/kubedns-cm.yaml"
   fi
 
   virsh pool-refresh $POOL
@@ -213,7 +247,7 @@ function wait-cluster-readiness {
 
   local timeout=120
   while [[ $timeout -ne 0 ]]; do
-    nb_ready_nodes=$(kubectl get nodes -o go-template="{{range.items}}{{range.status.conditions}}{{.type}}{{end}}:{{end}}" --api-version=v1 2>/dev/null | tr ':' '\n' | grep -c Ready || true)
+    nb_ready_nodes=$(kubectl get nodes -o go-template="{{range.items}}{{range.status.conditions}}{{.type}}{{end}}:{{end}}" 2>/dev/null | tr ':' '\n' | grep -c Ready || true)
     echo "Nb ready nodes: $nb_ready_nodes / $NUM_NODES"
     if [[ "$nb_ready_nodes" -eq "$NUM_NODES" ]]; then
       return 0
@@ -277,6 +311,7 @@ function kube-up {
   export KUBE_SERVER="http://192.168.10.1:8080"
   export CONTEXT="libvirt-coreos"
   create-kubeconfig
+  create-kubelet-kubeconfig "http://${MASTER_IP}:8080" "${POOL_PATH}/kubernetes/kubeconfig/kubelet.kubeconfig"
 
   wait-cluster-readiness
 
@@ -345,6 +380,7 @@ function upload-server-tars {
   tar -x -C "$POOL_PATH/kubernetes" -f "$SERVER_BINARY_TAR" kubernetes
   rm -rf "$POOL_PATH/kubernetes/bin"
   mv "$POOL_PATH/kubernetes/kubernetes/server/bin" "$POOL_PATH/kubernetes/bin"
+  chmod -R 755 "$POOL_PATH/kubernetes/bin"
   rm -fr "$POOL_PATH/kubernetes/kubernetes"
 }
 

@@ -10,12 +10,12 @@ By default, a cluster has:
   minimum size and maximum size = 1, so they will run a single instance.  We do this so that the cloud will
   always relaunch masters, even if everything is terminated at once.  We have an instance group per zone
   because we need to force the cloud to run an instance in every zone, so we can mount the master volumes - we
-  can't do that across zones.
+  cannot do that across zones.
 
 ## Listing instance groups
 
 `kops get instancegroups`
-> ```
+```
 NAME                    ROLE    MACHINETYPE     MIN     MAX     ZONES
 master-us-east-1c       Master                  1       1       us-east-1c
 nodes                   Node    t2.medium       2       2
@@ -32,7 +32,7 @@ have not yet been applied (this may change soon though!).
 To preview the change:
 
 `kops update cluster <clustername>`
-> ```
+```
 ...
 Will modify resources:
   *awstasks.LaunchConfiguration launchConfiguration/mycluster.mydomain.com
@@ -50,6 +50,7 @@ Then restart the machines with: `kops rolling-update cluster --yes`
 
 NOTE: rolling-update does not yet perform a real rolling update - it just shuts down machines in sequence with a delay;
  there will be downtime [Issue #37](https://github.com/kubernetes/kops/issues/37)
+We have implemented a new feature that does drain and validate nodes.  This feature is experimental, and you can use the new feature by setting `export KOPS_FEATURE_FLAGS="+DrainAndValidateRollingUpdate"`.
 
 ## Resize an instance group
 
@@ -60,17 +61,19 @@ The procedure to resize an instance group works the same way:
 * Apply changes: `kops update cluster <clustername>  --yes`
 * (you do not need a `rolling-update` when changing instancegroup sizes)
 
-
 ## Changing the root volume size or type
+
+The default volume size for Masters is 64 GB, while the default volume size for a node is 128 GB.
 
 The procedure to resize the root volume works the same way:
 
 * Edit the instance group, set `rootVolumeSize` and/or `rootVolumeType` to the desired values: `kops edit ig nodes`
+* If `rootVolumeType` is set to `io1` then you can define the number of Iops by specifing `rootVolumeIops` (defaults to 100 if not defined)
 * Preview changes: `kops update cluster <clustername>`
 * Apply changes: `kops update cluster <clustername> --yes`
 * Rolling update to update existing instances: `kops rolling-update cluster --yes`
 
-For example, to set up a 100GB gp2 root volume, your InstanceGroup spec might look like:
+For example, to set up a 200GB gp2 root volume, your InstanceGroup spec might look like:
 
 ```
 metadata:
@@ -81,8 +84,24 @@ spec:
   maxSize: 2
   minSize: 2
   role: Node
-  rootVolumeSize: 100
+  rootVolumeSize: 200
   rootVolumeType: gp2
+```
+
+For example, to set up a 200GB io1 root volume with 200 provisioned Iops, your InstanceGroup spec might look like:
+
+```
+metadata:
+  creationTimestamp: "2016-07-11T04:14:00Z"
+  name: nodes
+spec:
+  machineType: t2.medium
+  maxSize: 2
+  minSize: 2
+  role: Node
+  rootVolumeSize: 200
+  rootVolumeType: io1
+  rootVolumeIops: 200
 ```
 
 ## Creating a new instance group
@@ -130,6 +149,27 @@ So the procedure is:
 * Rolling-update, only if you want to apply changes immediately: `kops rolling-update cluster`
 
 
+## Adding Taints to an Instance Group
+
+If you're running Kubernetes 1.6.0 or later, you can also control taints in the InstanceGroup.
+The taints property takes a list of strings. The following example would add two taints to an IG,
+using the same `edit` -> `update` -> `rolling-update` process as above.
+
+```
+metadata:
+  creationTimestamp: "2016-07-10T15:47:14Z"
+  name: nodes
+spec:
+  machineType: m3.medium
+  maxSize: 3
+  minSize: 3
+  role: Node
+  taints:
+  - dedicated=gpu:NoSchedule
+  - team=search:PreferNoSchedule
+```
+
+
 ## Resizing the master
 
 (This procedure should be pretty familiar by now!)
@@ -164,3 +204,64 @@ Example: `kops delete ig morenodes`
 
 No rolling-update is needed (and note this is not currently graceful, so there may be interruptions to
 workloads where the pods are running on those nodes).
+
+## EBS Volume Optimization
+
+EBS-Optimized instances can be created by setting the following field:
+
+```
+spec:
+  rootVolumeOptimization: true
+```
+
+## Additional user-data for cloud-init
+
+Kops utilizes cloud-init to initialize and setup a host at boot time. However in certain cases you may already be leaveraging certain features of cloud-init in your infrastructure and would like to continue doing so. More information on cloud-init can be found [here](http://cloudinit.readthedocs.io/en/latest/)
+
+
+Aditional user-user data can be passed to the host provisioning by setting the `AdditionalUserData` field. A list of valid user-data content-types can be found [here](http://cloudinit.readthedocs.io/en/latest/topics/format.html#mime-multi-part-archive) 
+
+Example:
+```
+spec:
+  additionalUserData:
+  - name: myscript.sh
+    type: text/x-shellscript
+    content: |
+      #!/bin/sh
+      echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
+  - name: local_repo.txt
+    type: text/cloud-config
+    content: |
+      #cloud-config
+      apt:
+        primary:
+          - arches: [default]
+            uri: http://local-mirror.mydomain
+            search:
+              - http://local-mirror.mydomain
+              - http://archive.ubuntu.com
+```
+
+## Add Tags on AWS autoscalling group and instance
+
+If you need to add tags on auto scaling groups or instnaces (propagate ASG tags), you can add it in the instance group specs with *cloudLabels*.
+
+```
+# Exemple for nodes
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels: 
+    kops.k8s.io/cluster: k8s.dev.local
+  name: nodes
+spec:
+  cloudLabels:
+    billing: infra
+    environment: dev
+  associatePublicIp: false
+  machineType: m4.xlarge
+  maxSize: 20
+  minSize: 2
+  role: Node
+```

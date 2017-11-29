@@ -18,23 +18,24 @@ package kops
 
 import (
 	"fmt"
+	"net/url"
+
 	"github.com/blang/semver"
 	"github.com/golang/glog"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kops/pkg/apis/kops/util"
-	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/util/pkg/vfs"
-	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/apis/meta/v1"
-	"net/url"
 )
 
-const DefaultChannelBase = "https://raw.githubusercontent.com/kubernetes/kops/master/channels/"
+var DefaultChannelBase = "https://raw.githubusercontent.com/kubernetes/kops/master/channels/"
+
 const DefaultChannel = "stable"
 const AlphaChannel = "alpha"
 
 type Channel struct {
 	v1.TypeMeta `json:",inline"`
-	ObjectMeta  api.ObjectMeta `json:"metadata,omitempty"`
+	ObjectMeta  metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec ChannelSpec `json:"spec,omitempty"`
 }
@@ -241,8 +242,17 @@ func FindKopsVersionSpec(versions []KopsVersionSpec, version semver.Version) *Ko
 	return nil
 }
 
+type CloudProviderID string
+
+const CloudProviderAWS CloudProviderID = "aws"
+const CloudProviderBareMetal CloudProviderID = "baremetal"
+const CloudProviderGCE CloudProviderID = "gce"
+const CloudProviderDO CloudProviderID = "digitalocean"
+const CloudProviderVSphere CloudProviderID = "vsphere"
+const CloudProviderOpenstack CloudProviderID = "openstack"
+
 // FindImage returns the image for the cloudprovider, or nil if none found
-func (c *Channel) FindImage(provider fi.CloudProviderID, kubernetesVersion semver.Version) *ChannelImageSpec {
+func (c *Channel) FindImage(provider CloudProviderID, kubernetesVersion semver.Version) *ChannelImageSpec {
 	var matches []*ChannelImageSpec
 
 	for _, image := range c.Spec.Images {

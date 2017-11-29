@@ -18,20 +18,32 @@ package model
 
 import (
 	"fmt"
-	"k8s.io/kops/upup/pkg/fi"
-	"k8s.io/kops/upup/pkg/fi/cloudup/awstasks"
 	"sort"
 	"strings"
+
+	"github.com/golang/glog"
+	"k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/apis/kops/model"
+	"k8s.io/kops/upup/pkg/fi"
+	"k8s.io/kops/upup/pkg/fi/cloudup/awstasks"
+	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
+	"k8s.io/kops/upup/pkg/fi/cloudup/dotasks"
+	"k8s.io/kops/upup/pkg/fi/cloudup/gce"
+	"k8s.io/kops/upup/pkg/fi/cloudup/gcetasks"
+	"k8s.io/kops/upup/pkg/fi/cloudup/openstack"
+	"k8s.io/kops/upup/pkg/fi/cloudup/openstacktasks"
 )
 
 const (
-	DefaultEtcdVolumeSize = 20
-	DefaultEtcdVolumeType = "gp2"
+	DefaultEtcdVolumeSize    = 20
+	DefaultAWSEtcdVolumeType = "gp2"
+	DefaultGCEEtcdVolumeType = "pd-ssd"
 )
 
 // MasterVolumeBuilder builds master EBS volumes
 type MasterVolumeBuilder struct {
 	*KopsModelContext
+	Lifecycle *fi.Lifecycle
 }
 
 var _ fi.ModelBuilder = &MasterVolumeBuilder{}
@@ -51,62 +63,182 @@ func (b *MasterVolumeBuilder) Build(c *fi.ModelBuilderContext) error {
 				return fmt.Errorf("InstanceGroup not found (for etcd %s/%s): %q", m.Name, etcd.Name, igName)
 			}
 
-			if len(ig.Spec.Subnets) == 0 {
-				return fmt.Errorf("Must specify a subnet for instancegroup %q used by etcd %s/%s", igName, m.Name, etcd.Name)
+			zones, err := model.FindZonesForInstanceGroup(b.Cluster, ig)
+			if err != nil {
+				return err
 			}
-			if len(ig.Spec.Subnets) != 1 {
-				return fmt.Errorf("Must specify a unique subnet for instancegroup %q used by etcd %s/%s", igName, m.Name, etcd.Name)
+			if len(zones) == 0 {
+				return fmt.Errorf("must specify a zone for instancegroup %q used by etcd %s/%s", igName, m.Name, etcd.Name)
 			}
+			if len(zones) != 1 {
+				return fmt.Errorf("must specify a unique zone for instancegroup %q used by etcd %s/%s", igName, m.Name, etcd.Name)
+			}
+			zone := zones[0]
 
-			subnet := b.FindSubnet(ig.Spec.Subnets[0])
-			if subnet == nil {
-				return fmt.Errorf("Subnet %q not found (specified by instancegroup %q)", ig.Spec.Subnets[0], igName)
-			}
-
-			if subnet.Zone == "" {
-				return fmt.Errorf("Subnet %q did not specify a zone", subnet.Name)
-			}
-
-			volumeSize := int64(fi.Int32Value(m.VolumeSize))
+			volumeSize := fi.Int32Value(m.VolumeSize)
 			if volumeSize == 0 {
 				volumeSize = DefaultEtcdVolumeSize
 			}
-			volumeType := fi.StringValue(m.VolumeType)
-			if volumeType == "" {
-				volumeType = DefaultEtcdVolumeType
+
+			var allMembers []string
+			for _, m := range etcd.Members {
+				allMembers = append(allMembers, m.Name)
 			}
+			sort.Strings(allMembers)
 
-			encrypted := fi.BoolValue(m.EncryptedVolume)
-
-			// The tags are how protokube knows to mount the volume and use it for etcd
-			tags := make(map[string]string)
-			{
-				var allMembers []string
-				for _, m := range etcd.Members {
-					allMembers = append(allMembers, m.Name)
+			switch kops.CloudProviderID(b.Cluster.Spec.CloudProvider) {
+			case kops.CloudProviderAWS:
+				b.addAWSVolume(c, name, volumeSize, zone, etcd, m, allMembers)
+			case kops.CloudProviderDO:
+				b.addDOVolume(c, name, volumeSize, zone, etcd, m, allMembers)
+			case kops.CloudProviderGCE:
+				b.addGCEVolume(c, name, volumeSize, zone, etcd, m, allMembers)
+			case kops.CloudProviderVSphere:
+				b.addVSphereVolume(c, name, volumeSize, zone, etcd, m, allMembers)
+			case kops.CloudProviderBareMetal:
+				glog.Fatalf("BareMetal not implemented")
+			case kops.CloudProviderOpenstack:
+				err = b.addOpenstackVolume(c, name, volumeSize, zone, etcd, m, allMembers)
+				if err != nil {
+					return err
 				}
-
-				sort.Strings(allMembers)
-
-				// This is the configuration of the etcd cluster
-				tags["k8s.io/etcd/"+etcd.Name] = m.Name + "/" + strings.Join(allMembers, ",")
-
-				// This says "only mount on a master"
-				tags["k8s.io/role/master"] = "1"
+			default:
+				return fmt.Errorf("unknown cloudprovider %q", b.Cluster.Spec.CloudProvider)
 			}
-
-			t := &awstasks.EBSVolume{
-				Name:             s(name),
-				AvailabilityZone: s(subnet.Zone),
-				SizeGB:           fi.Int64(volumeSize),
-				VolumeType:       s(volumeType),
-				KmsKeyId:         m.KmsKeyId,
-				Encrypted:        fi.Bool(encrypted),
-				Tags:             tags,
-			}
-
-			c.AddTask(t)
 		}
 	}
+	return nil
+}
+
+func (b *MasterVolumeBuilder) addAWSVolume(c *fi.ModelBuilderContext, name string, volumeSize int32, zone string, etcd *kops.EtcdClusterSpec, m *kops.EtcdMemberSpec, allMembers []string) {
+	volumeType := fi.StringValue(m.VolumeType)
+	if volumeType == "" {
+		volumeType = DefaultAWSEtcdVolumeType
+	}
+
+	// The tags are how protokube knows to mount the volume and use it for etcd
+	tags := make(map[string]string)
+
+	// Apply all user defined labels on the volumes
+	for k, v := range b.Cluster.Spec.CloudLabels {
+		tags[k] = v
+	}
+
+	//tags[awsup.TagClusterName] = b.C.cluster.Name
+	// This is the configuration of the etcd cluster
+	tags[awsup.TagNameEtcdClusterPrefix+etcd.Name] = m.Name + "/" + strings.Join(allMembers, ",")
+	// This says "only mount on a master"
+	tags[awsup.TagNameRolePrefix+"master"] = "1"
+
+	encrypted := fi.BoolValue(m.EncryptedVolume)
+
+	t := &awstasks.EBSVolume{
+		Name:      s(name),
+		Lifecycle: b.Lifecycle,
+
+		AvailabilityZone: s(zone),
+		SizeGB:           fi.Int64(int64(volumeSize)),
+		VolumeType:       s(volumeType),
+		KmsKeyId:         m.KmsKeyId,
+		Encrypted:        fi.Bool(encrypted),
+		Tags:             tags,
+	}
+
+	c.AddTask(t)
+}
+
+func (b *MasterVolumeBuilder) addDOVolume(c *fi.ModelBuilderContext, name string, volumeSize int32, zone string, etcd *kops.EtcdClusterSpec, m *kops.EtcdMemberSpec, allMembers []string) {
+	// required that names start with a lower case and only contains letters, numbers and hyphens
+	name = "kops-" + strings.Replace(name, ".", "-", -1)
+
+	// DO has a 64 character limit for volume names
+	if len(name) >= 64 {
+		name = name[:64]
+	}
+
+	t := &dotasks.Volume{
+		Name:      s(name),
+		Lifecycle: b.Lifecycle,
+		SizeGB:    fi.Int64(int64(volumeSize)),
+		Region:    s(zone),
+	}
+
+	c.AddTask(t)
+}
+
+func (b *MasterVolumeBuilder) addGCEVolume(c *fi.ModelBuilderContext, name string, volumeSize int32, zone string, etcd *kops.EtcdClusterSpec, m *kops.EtcdMemberSpec, allMembers []string) {
+	volumeType := fi.StringValue(m.VolumeType)
+	if volumeType == "" {
+		volumeType = DefaultGCEEtcdVolumeType
+	}
+
+	// TODO: Should no longer be needed because we trim prefixes
+	//// On GCE we are close to the length limits.  So,we remove the dashes from the keys
+	//// The name is normally something like "us-east1-a", and the dashes are particularly expensive
+	//// because of the escaping needed (3 characters for each dash)
+	//switch tf.cluster.Spec.CloudProvider {
+	//case string(kops.CloudProviderGCE):
+	//	// TODO: If we're still struggling for size, we don't need to put ourselves in the allmembers list
+	//	for i := range allMembers {
+	//		allMembers[i] = strings.Replace(allMembers[i], "-", "", -1)
+	//	}
+	//	meName = strings.Replace(meName, "-", "", -1)
+	//}
+
+	// This is the configuration of the etcd cluster
+	clusterSpec := m.Name + "/" + strings.Join(allMembers, ",")
+
+	// The tags are how protokube knows to mount the volume and use it for etcd
+	tags := make(map[string]string)
+	tags[gce.GceLabelNameKubernetesCluster] = gce.SafeClusterName(b.ClusterName())
+	tags[gce.GceLabelNameRolePrefix+"master"] = "master" // Can't start with a number
+	tags[gce.GceLabelNameEtcdClusterPrefix+etcd.Name] = gce.EncodeGCELabel(clusterSpec)
+
+	name = strings.Replace(name, ".", "-", -1)
+
+	t := &gcetasks.Disk{
+		Name:      s(name),
+		Lifecycle: b.Lifecycle,
+
+		Zone:       s(zone),
+		SizeGB:     fi.Int64(int64(volumeSize)),
+		VolumeType: s(volumeType),
+		Labels:     tags,
+	}
+
+	c.AddTask(t)
+}
+
+func (b *MasterVolumeBuilder) addVSphereVolume(c *fi.ModelBuilderContext, name string, volumeSize int32, zone string, etcd *kops.EtcdClusterSpec, m *kops.EtcdMemberSpec, allMembers []string) {
+	fmt.Print("addVSphereVolume to be implemented")
+}
+
+func (b *MasterVolumeBuilder) addOpenstackVolume(c *fi.ModelBuilderContext, name string, volumeSize int32, zone string, etcd *kops.EtcdClusterSpec, m *kops.EtcdMemberSpec, allMembers []string) error {
+	volumeType := fi.StringValue(m.VolumeType)
+	if volumeType == "" {
+		return fmt.Errorf("must set ETCDMemberSpec.VolumeType on Openstack platform")
+	}
+
+	// The tags are how protokube knows to mount the volume and use it for etcd
+	tags := make(map[string]string)
+	// Apply all user defined labels on the volumes
+	for k, v := range b.Cluster.Spec.CloudLabels {
+		tags[k] = v
+	}
+	// This is the configuration of the etcd cluster
+	tags[openstack.TagNameEtcdClusterPrefix+etcd.Name] = m.Name + "/" + strings.Join(allMembers, ",")
+	// This says "only mount on a master"
+	tags[openstack.TagNameRolePrefix+"master"] = "1"
+
+	t := &openstacktasks.Volume{
+		Name:             s(name),
+		AvailabilityZone: s(zone),
+		VolumeType:       s(volumeType),
+		SizeGB:           fi.Int64(int64(volumeSize)),
+		Tags:             tags,
+		Lifecycle:        b.Lifecycle,
+	}
+	c.AddTask(t)
+
 	return nil
 }

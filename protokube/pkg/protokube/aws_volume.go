@@ -18,61 +18,58 @@ package protokube
 
 import (
 	"fmt"
+	"net"
+	"strings"
+	"sync"
+	"time"
+
+	"k8s.io/kops/protokube/pkg/gossip"
+	gossipaws "k8s.io/kops/protokube/pkg/gossip/aws"
+	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"net"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
+	"k8s.io/kops/protokube/pkg/etcd"
 )
-
-// The tag name we use to differentiate multiple logically independent clusters running in the same region
-const TagNameKubernetesCluster = "KubernetesCluster"
-
-// The tag name we use for specifying that something is in the master role
-const TagNameRoleMaster = "k8s.io/role/master"
-
-const TagNameEtcdClusterPrefix = "k8s.io/etcd/"
-
-const TagNameMasterId = "k8s.io/master/id"
-
-//const DefaultAttachDevice = "/dev/xvdb"
 
 var devices = []string{"/dev/xvdu", "/dev/xvdv", "/dev/xvdx", "/dev/xvdx", "/dev/xvdy", "/dev/xvdz"}
 
+// AWSVolumes defines the aws volume implementation
 type AWSVolumes struct {
-	ec2      *ec2.EC2
-	metadata *ec2metadata.EC2Metadata
+	mutex sync.Mutex
 
-	zone       string
 	clusterTag string
+	deviceMap  map[string]string
+	ec2        *ec2.EC2
 	instanceId string
 	internalIP net.IP
-
-	mutex     sync.Mutex
-	deviceMap map[string]string
+	metadata   *ec2metadata.EC2Metadata
+	zone       string
 }
 
 var _ Volumes = &AWSVolumes{}
 
+// NewAWSVolumes returns a new aws volume provider
 func NewAWSVolumes() (*AWSVolumes, error) {
 	a := &AWSVolumes{
 		deviceMap: make(map[string]string),
 	}
 
-	s := session.New()
+	config := aws.NewConfig()
+	config = config.WithCredentialsChainVerboseErrors(true)
+
+	s, err := session.NewSession(config)
+	if err != nil {
+		return nil, fmt.Errorf("error starting new AWS session: %v", err)
+	}
 	s.Handlers.Send.PushFront(func(r *request.Request) {
 		// Log requests
 		glog.V(4).Infof("AWS API Request: %s/%s", r.ClientInfo.ServiceName, r.Operation.Name)
 	})
-
-	config := aws.NewConfig()
-	config = config.WithCredentialsChainVerboseErrors(true)
 
 	a.metadata = ec2metadata.New(s, config)
 
@@ -120,9 +117,9 @@ func (a *AWSVolumes) discoverTags() error {
 		tagMap[aws.StringValue(tag.Key)] = aws.StringValue(tag.Value)
 	}
 
-	clusterID := tagMap[TagNameKubernetesCluster]
+	clusterID := tagMap[awsup.TagClusterName]
 	if clusterID == "" {
-		return fmt.Errorf("Cluster tag %q not found on this instance (%q)", TagNameKubernetesCluster, a.instanceId)
+		return fmt.Errorf("Cluster tag %q not found on this instance (%q)", awsup.TagClusterName, a.instanceId)
 	}
 
 	a.clusterTag = clusterID
@@ -190,6 +187,13 @@ func (a *AWSVolumes) findVolumes(request *ec2.DescribeVolumesInput) ([]*Volume, 
 				}
 			}
 
+			// never mount root volumes
+			// these are volumes that aws sets aside for root volumes mount points
+			if vol.LocalDevice == "/dev/sda1" || vol.LocalDevice == "/dev/xvda" {
+				glog.Warningf("Not mounting: %q, since it is a root volume", vol.LocalDevice)
+				continue
+			}
+
 			skipVolume := false
 
 			for _, tag := range v.Tags {
@@ -197,26 +201,30 @@ func (a *AWSVolumes) findVolumes(request *ec2.DescribeVolumesInput) ([]*Volume, 
 				v := aws.StringValue(tag.Value)
 
 				switch k {
-				case TagNameKubernetesCluster, TagNameRoleMaster, "Name":
-				// Ignore
-				case TagNameMasterId:
-					id, err := strconv.Atoi(v)
-					if err != nil {
-						glog.Warningf("error parsing master-id tag on volume %q %s=%s; skipping volume", volumeID, k, v)
-						skipVolume = true
-					} else {
-						vol.Info.MasterID = id
+				case awsup.TagClusterName, "Name":
+					{
+						// Ignore
 					}
+				//case TagNameMasterId:
+				//	id, err := strconv.Atoi(v)
+				//	if err != nil {
+				//		glog.Warningf("error parsing master-id tag on volume %q %s=%s; skipping volume", volumeID, k, v)
+				//		skipVolume = true
+				//	} else {
+				//		vol.Info.MasterID = id
+				//	}
 				default:
-					if strings.HasPrefix(k, TagNameEtcdClusterPrefix) {
-						etcdClusterName := k[len(TagNameEtcdClusterPrefix):]
-						spec, err := ParseEtcdClusterSpec(etcdClusterName, v)
+					if strings.HasPrefix(k, awsup.TagNameEtcdClusterPrefix) {
+						etcdClusterName := strings.TrimPrefix(k, awsup.TagNameEtcdClusterPrefix)
+						spec, err := etcd.ParseEtcdClusterSpec(etcdClusterName, v)
 						if err != nil {
 							// Fail safe
 							glog.Warningf("error parsing etcd cluster tag %q on volume %q; skipping volume: %v", v, volumeID, err)
 							skipVolume = true
 						}
 						vol.Info.EtcdClusters = append(vol.Info.EtcdClusters, spec)
+					} else if strings.HasPrefix(k, awsup.TagNameRolePrefix) {
+						// Ignore
 					} else {
 						glog.Warningf("unknown tag on volume %q: %s=%s", volumeID, k, v)
 					}
@@ -261,8 +269,8 @@ func (a *AWSVolumes) findVolumes(request *ec2.DescribeVolumesInput) ([]*Volume, 
 func (a *AWSVolumes) FindVolumes() ([]*Volume, error) {
 	request := &ec2.DescribeVolumesInput{}
 	request.Filters = []*ec2.Filter{
-		newEc2Filter("tag:"+TagNameKubernetesCluster, a.clusterTag),
-		newEc2Filter("tag-key", TagNameRoleMaster),
+		newEc2Filter("tag:"+awsup.TagClusterName, a.clusterTag),
+		newEc2Filter("tag-key", awsup.TagNameRolePrefix+awsup.TagRoleMaster),
 		newEc2Filter("availability-zone", a.zone),
 	}
 
@@ -342,6 +350,8 @@ func (a *AWSVolumes) AttachVolume(volume *Volume) error {
 		v := volumes[0]
 		if v.AttachedTo != "" {
 			if v.AttachedTo == a.instanceId {
+				// TODO: Wait for device to appear?
+
 				volume.LocalDevice = device
 				return nil
 			} else {
@@ -362,4 +372,15 @@ func (a *AWSVolumes) AttachVolume(volume *Volume) error {
 
 		time.Sleep(10 * time.Second)
 	}
+}
+
+func (a *AWSVolumes) GossipSeeds() (gossip.SeedProvider, error) {
+	tags := make(map[string]string)
+	tags[awsup.TagClusterName] = a.clusterTag
+
+	return gossipaws.NewSeedProvider(a.ec2, tags)
+}
+
+func (a *AWSVolumes) InstanceID() string {
+	return a.instanceId
 }

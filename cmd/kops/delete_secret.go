@@ -18,12 +18,24 @@ package main
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/spf13/cobra"
-	"io"
 	"k8s.io/kops/cmd/kops/util"
-	"k8s.io/kops/pkg/apis/kops/registry"
 	"k8s.io/kops/upup/pkg/fi"
+	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
+)
+
+var (
+	delete_secret_long = templates.LongDesc(i18n.T(`
+		Delete a secret.`))
+
+	delete_secret_example = templates.Examples(i18n.T(`
+
+		`))
+
+	delete_secret_short = i18n.T(`Delete a secret`)
 )
 
 type DeleteSecretOptions struct {
@@ -37,9 +49,10 @@ func NewCmdDeleteSecret(f *util.Factory, out io.Writer) *cobra.Command {
 	options := &DeleteSecretOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "secret",
-		Short: "Delete secret",
-		Long:  `Delete a secret.`,
+		Use:     "secret",
+		Short:   delete_secret_short,
+		Long:    delete_secret_long,
+		Example: delete_secret_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 2 && len(args) != 3 {
 				exitWithError(fmt.Errorf("Syntax: <type> <name> [<id>]"))
@@ -74,17 +87,22 @@ func RunDeleteSecret(f *util.Factory, out io.Writer, options *DeleteSecretOption
 		return fmt.Errorf("SecretName is required")
 	}
 
+	clientset, err := f.Clientset()
+	if err != nil {
+		return err
+	}
+
 	cluster, err := GetCluster(f, options.ClusterName)
 	if err != nil {
 		return err
 	}
 
-	keyStore, err := registry.KeyStore(cluster)
+	keyStore, err := clientset.KeyStore(cluster)
 	if err != nil {
 		return err
 	}
 
-	secretStore, err := registry.SecretStore(cluster)
+	secretStore, err := clientset.SecretStore(cluster)
 	if err != nil {
 		return err
 	}
@@ -113,7 +131,12 @@ func RunDeleteSecret(f *util.Factory, out io.Writer, options *DeleteSecretOption
 		return fmt.Errorf("found multiple matching secrets; specify the id of the key")
 	}
 
-	err = keyStore.DeleteSecret(secrets[0])
+	switch secrets[0].Type {
+	case fi.SecretTypeSecret:
+		err = secretStore.DeleteSecret(secrets[0])
+	default:
+		err = keyStore.DeleteSecret(secrets[0])
+	}
 	if err != nil {
 		return fmt.Errorf("error deleting secret: %v", err)
 	}

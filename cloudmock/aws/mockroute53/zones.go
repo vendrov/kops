@@ -18,6 +18,7 @@ package mockroute53
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/golang/glog"
@@ -45,7 +46,7 @@ func (m *MockRoute53) GetHostedZone(request *route53.GetHostedZoneInput) (*route
 	response := &route53.GetHostedZoneOutput{
 		// DelegationSet ???
 		HostedZone: &copy,
-		// VPCs
+		VPCs:       zone.vpcs,
 	}
 	return response, nil
 }
@@ -89,6 +90,13 @@ func (m *MockRoute53) ListHostedZonesByNameRequest(*route53.ListHostedZonesByNam
 }
 
 func (m *MockRoute53) ListHostedZonesByName(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesByNameOutput, error) {
-	panic("MockRoute53 ListHostedZonesByName not implemented")
-	return nil, nil
+	var zones []*route53.HostedZone
+
+	for _, z := range m.Zones {
+		zones = append(zones, z.hostedZone)
+	}
+
+	return &route53.ListHostedZonesByNameOutput{
+		HostedZones: zones,
+	}, nil
 }

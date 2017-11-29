@@ -16,13 +16,18 @@ limitations under the License.
 
 package kops
 
-// This should be replaced by the makefile
-var Version = "1.5.0"
+import "strings"
 
-// This should be replaced by the makefile
+// Version should be replaced by the makefile
+var Version = "1.7.0"
+
+// GitVersion should be replaced by the makefile
 var GitVersion = ""
 
 // DefaultProtokubeImageName is the name of the protokube image, as we would pass to "docker run"
 func DefaultProtokubeImageName() string {
-	return "protokube:" + Version
+	// + is valid in semver, but not in docker tags.
+	// Note that this mirrors the logic in the makefile for PROTOKUBE_TAG.
+	dockerTag := strings.Replace(Version, "+", "-", -1)
+	return "protokube:" + dockerTag
 }

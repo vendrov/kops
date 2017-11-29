@@ -1,8 +1,8 @@
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: cluster-autoscaler
+  namespace: kube-system
   labels:
     k8s-app: cluster-autoscaler
 spec:
@@ -15,6 +15,7 @@ spec:
       labels:
         k8s-app: cluster-autoscaler
       annotations:
+         # For 1.6, we keep the old tolerations in case of a downgrade to 1.5
         scheduler.alpha.kubernetes.io/tolerations: '[{"key":"dedicated", "value":"master"}]'
     spec:
         containers:
@@ -42,5 +43,9 @@ spec:
           - name: ssl-certs
             hostPath:
               path: {{SSL_CERT_PATH}}
+        dnsPolicy: "Default"
         nodeSelector:
-          kubernetes.io/role: master
+          node-role.kubernetes.io/master: ""
+        tolerations:
+          - key: "node-role.kubernetes.io/master"
+            effect: NoSchedule

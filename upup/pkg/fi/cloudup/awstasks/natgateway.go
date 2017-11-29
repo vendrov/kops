@@ -31,6 +31,8 @@ import (
 //go:generate fitask -type=NatGateway
 type NatGateway struct {
 	Name      *string
+	Lifecycle *fi.Lifecycle
+
 	ElasticIP *ElasticIP
 	Subnet    *Subnet
 	ID        *string
@@ -107,6 +109,7 @@ func (e *NatGateway) Find(c *fi.Context) (*NatGateway, error) {
 
 	// NATGateways don't have a Name (no tags), so we set the name to avoid spurious changes
 	actual.Name = e.Name
+	actual.Lifecycle = e.Lifecycle
 
 	actual.AssociatedRouteTable = e.AssociatedRouteTable
 
@@ -190,7 +193,7 @@ func findNatGatewayById(cloud awsup.AWSCloud, id *string) (*ec2.NatGateway, erro
 func findNatGatewayFromRouteTable(cloud awsup.AWSCloud, routeTable *RouteTable) (*ec2.NatGateway, error) {
 	// Find via route on private route table
 	if routeTable.ID != nil {
-		glog.V(2).Infof("trying to match NatGateway via RouteTable %s", routeTable.ID)
+		glog.V(2).Infof("trying to match NatGateway via RouteTable %s", *routeTable.ID)
 		rt, err := routeTable.findEc2RouteTable(cloud)
 		if err != nil {
 			return nil, fmt.Errorf("error finding associated RouteTable to NatGateway: %v", err)
@@ -220,11 +223,13 @@ func findNatGatewayFromRouteTable(cloud awsup.AWSCloud, routeTable *RouteTable) 
 func (s *NatGateway) CheckChanges(a, e, changes *NatGateway) error {
 	// New
 	if a == nil {
-		if e.ElasticIP == nil {
-			return fi.RequiredField("ElasticIp")
-		}
-		if e.Subnet == nil {
-			return fi.RequiredField("Subnet")
+		if !fi.BoolValue(e.Shared) {
+			if e.ElasticIP == nil {
+				return fi.RequiredField("ElasticIp")
+			}
+			if e.Subnet == nil {
+				return fi.RequiredField("Subnet")
+			}
 		}
 		if e.AssociatedRouteTable == nil {
 			return fi.RequiredField("AssociatedRouteTable")
@@ -278,6 +283,11 @@ func (_ *NatGateway) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *NatGateway)
 
 	var id *string
 	if a == nil {
+
+		if fi.BoolValue(e.Shared) {
+			return fmt.Errorf("NAT gateway %q not found", fi.StringValue(e.ID))
+		}
+
 		glog.V(2).Infof("Creating Nat Gateway")
 
 		request := &ec2.CreateNatGatewayInput{}
@@ -319,6 +329,9 @@ func (_ *NatGateway) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *NatGateway)
 		}
 		glog.V(2).Infof("tagging route table %s to track shared NGW", fi.StringValue(e.AssociatedRouteTable.ID))
 		err = t.AddAWSTags(fi.StringValue(e.AssociatedRouteTable.ID), tags)
+		if err != nil {
+			return fmt.Errorf("unable to tag route table %v", err)
+		}
 	}
 
 	return nil
@@ -330,6 +343,15 @@ type terraformNATGateway struct {
 }
 
 func (_ *NatGateway) RenderTerraform(t *terraform.TerraformTarget, a, e, changes *NatGateway) error {
+	if fi.BoolValue(e.Shared) {
+		if e.ID == nil {
+			return fmt.Errorf("ID must be set, if NatGateway is shared: %s", e)
+		}
+
+		glog.V(4).Infof("reusing existing NatGateway with id %q", *e.ID)
+		return nil
+	}
+
 	tf := &terraformNATGateway{
 		AllocationID: e.ElasticIP.TerraformLink(),
 		SubnetID:     e.Subnet.TerraformLink(),
@@ -339,6 +361,14 @@ func (_ *NatGateway) RenderTerraform(t *terraform.TerraformTarget, a, e, changes
 }
 
 func (e *NatGateway) TerraformLink() *terraform.Literal {
+	if fi.BoolValue(e.Shared) {
+		if e.ID == nil {
+			glog.Fatalf("ID must be set, if NatGateway is shared: %s", e)
+		}
+
+		return terraform.LiteralFromStringValue(*e.ID)
+	}
+
 	return terraform.LiteralProperty("aws_nat_gateway", *e.Name, "id")
 }
 
@@ -348,6 +378,15 @@ type cloudformationNATGateway struct {
 }
 
 func (_ *NatGateway) RenderCloudformation(t *cloudformation.CloudformationTarget, a, e, changes *NatGateway) error {
+	if fi.BoolValue(e.Shared) {
+		if e.ID == nil {
+			return fmt.Errorf("ID must be set, if NatGateway is shared: %s", e)
+		}
+
+		glog.V(4).Infof("reusing existing NatGateway with id %q", *e.ID)
+		return nil
+	}
+
 	tf := &cloudformationNATGateway{
 		AllocationID: e.ElasticIP.CloudformationAllocationID(),
 		SubnetID:     e.Subnet.CloudformationLink(),
@@ -357,5 +396,13 @@ func (_ *NatGateway) RenderCloudformation(t *cloudformation.CloudformationTarget
 }
 
 func (e *NatGateway) CloudformationLink() *cloudformation.Literal {
+	if fi.BoolValue(e.Shared) {
+		if e.ID == nil {
+			glog.Fatalf("ID must be set, if NatGateway is shared: %s", e)
+		}
+
+		return cloudformation.LiteralString(*e.ID)
+	}
+
 	return cloudformation.Ref("AWS::EC2::NatGateway", *e.Name)
 }

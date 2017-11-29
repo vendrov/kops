@@ -20,16 +20,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"path"
+	"path/filepath"
 
 	"github.com/golang/glog"
+	cadvisorapiv1 "github.com/google/cadvisor/info/v1"
+
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
-	"k8s.io/kubernetes/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/kubelet/cm"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
-	"k8s.io/kubernetes/pkg/types"
-	"k8s.io/kubernetes/pkg/util"
-	nodeutil "k8s.io/kubernetes/pkg/util/node"
+	utilfile "k8s.io/kubernetes/pkg/util/file"
+	utilnode "k8s.io/kubernetes/pkg/util/node"
 	volumeutil "k8s.io/kubernetes/pkg/volume/util"
 )
 
@@ -44,7 +46,7 @@ func (kl *Kubelet) getRootDir() string {
 // getPodsDir returns the full path to the directory under which pod
 // directories are created.
 func (kl *Kubelet) getPodsDir() string {
-	return path.Join(kl.getRootDir(), options.DefaultKubeletPodsDirName)
+	return filepath.Join(kl.getRootDir(), options.DefaultKubeletPodsDirName)
 }
 
 // getPluginsDir returns the full path to the directory under which plugin
@@ -52,14 +54,14 @@ func (kl *Kubelet) getPodsDir() string {
 // they need to persist.  Plugins should create subdirectories under this named
 // after their own names.
 func (kl *Kubelet) getPluginsDir() string {
-	return path.Join(kl.getRootDir(), options.DefaultKubeletPluginsDirName)
+	return filepath.Join(kl.getRootDir(), options.DefaultKubeletPluginsDirName)
 }
 
 // getPluginDir returns a data directory name for a given plugin name.
 // Plugins can use these directories to store data that they need to persist.
 // For per-pod plugin data, see getPodPluginDir.
 func (kl *Kubelet) getPluginDir(pluginName string) string {
-	return path.Join(kl.getPluginsDir(), pluginName)
+	return filepath.Join(kl.getPluginsDir(), pluginName)
 }
 
 // GetPodDir returns the full path to the per-pod data directory for the
@@ -71,74 +73,42 @@ func (kl *Kubelet) GetPodDir(podUID types.UID) string {
 // getPodDir returns the full path to the per-pod directory for the pod with
 // the given UID.
 func (kl *Kubelet) getPodDir(podUID types.UID) string {
-	// Backwards compat.  The "old" stuff should be removed before 1.0
-	// release.  The thinking here is this:
-	//     !old && !new = use new
-	//     !old && new  = use new
-	//     old && !new  = use old
-	//     old && new   = use new (but warn)
-	oldPath := path.Join(kl.getRootDir(), string(podUID))
-	oldExists := dirExists(oldPath)
-	newPath := path.Join(kl.getPodsDir(), string(podUID))
-	newExists := dirExists(newPath)
-	if oldExists && !newExists {
-		return oldPath
-	}
-	if oldExists {
-		glog.Warningf("Data dir for pod %q exists in both old and new form, using new", podUID)
-	}
-	return newPath
+	return filepath.Join(kl.getPodsDir(), string(podUID))
 }
 
 // getPodVolumesDir returns the full path to the per-pod data directory under
 // which volumes are created for the specified pod.  This directory may not
 // exist if the pod does not exist.
 func (kl *Kubelet) getPodVolumesDir(podUID types.UID) string {
-	return path.Join(kl.getPodDir(podUID), options.DefaultKubeletVolumesDirName)
+	return filepath.Join(kl.getPodDir(podUID), options.DefaultKubeletVolumesDirName)
 }
 
 // getPodVolumeDir returns the full path to the directory which represents the
 // named volume under the named plugin for specified pod.  This directory may not
 // exist if the pod does not exist.
 func (kl *Kubelet) getPodVolumeDir(podUID types.UID, pluginName string, volumeName string) string {
-	return path.Join(kl.getPodVolumesDir(podUID), pluginName, volumeName)
+	return filepath.Join(kl.getPodVolumesDir(podUID), pluginName, volumeName)
 }
 
 // getPodPluginsDir returns the full path to the per-pod data directory under
 // which plugins may store data for the specified pod.  This directory may not
 // exist if the pod does not exist.
 func (kl *Kubelet) getPodPluginsDir(podUID types.UID) string {
-	return path.Join(kl.getPodDir(podUID), options.DefaultKubeletPluginsDirName)
+	return filepath.Join(kl.getPodDir(podUID), options.DefaultKubeletPluginsDirName)
 }
 
 // getPodPluginDir returns a data directory name for a given plugin name for a
 // given pod UID.  Plugins can use these directories to store data that they
 // need to persist.  For non-per-pod plugin data, see getPluginDir.
 func (kl *Kubelet) getPodPluginDir(podUID types.UID, pluginName string) string {
-	return path.Join(kl.getPodPluginsDir(podUID), pluginName)
+	return filepath.Join(kl.getPodPluginsDir(podUID), pluginName)
 }
 
 // getPodContainerDir returns the full path to the per-pod data directory under
 // which container data is held for the specified pod.  This directory may not
 // exist if the pod or container does not exist.
 func (kl *Kubelet) getPodContainerDir(podUID types.UID, ctrName string) string {
-	// Backwards compat.  The "old" stuff should be removed before 1.0
-	// release.  The thinking here is this:
-	//     !old && !new = use new
-	//     !old && new  = use new
-	//     old && !new  = use old
-	//     old && new   = use new (but warn)
-	oldPath := path.Join(kl.getPodDir(podUID), ctrName)
-	oldExists := dirExists(oldPath)
-	newPath := path.Join(kl.getPodDir(podUID), options.DefaultKubeletContainersDirName, ctrName)
-	newExists := dirExists(newPath)
-	if oldExists && !newExists {
-		return oldPath
-	}
-	if oldExists {
-		glog.Warningf("Data dir for pod %q, container %q exists in both old and new form, using new", podUID, ctrName)
-	}
-	return newPath
+	return filepath.Join(kl.getPodDir(podUID), options.DefaultKubeletContainersDirName, ctrName)
 }
 
 // GetPods returns all pods bound to the kubelet and their spec, and the mirror
@@ -189,7 +159,7 @@ func (kl *Kubelet) GetRuntime() kubecontainer.Runtime {
 
 // GetNode returns the node info for the configured node name of this Kubelet.
 func (kl *Kubelet) GetNode() (*v1.Node, error) {
-	if kl.standaloneMode {
+	if kl.kubeClient == nil {
 		return kl.initialNode()
 	}
 	return kl.nodeInfo.GetNodeInfo(string(kl.nodeName))
@@ -201,7 +171,7 @@ func (kl *Kubelet) GetNode() (*v1.Node, error) {
 // in which case return a manufactured nodeInfo representing a node with no pods,
 // zero capacity, and the default labels.
 func (kl *Kubelet) getNodeAnyWay() (*v1.Node, error) {
-	if !kl.standaloneMode {
+	if kl.kubeClient != nil {
 		if n, err := kl.nodeInfo.GetNodeInfo(string(kl.nodeName)); err == nil {
 			return n, nil
 		}
@@ -214,13 +184,13 @@ func (kl *Kubelet) GetNodeConfig() cm.NodeConfig {
 	return kl.containerManager.GetNodeConfig()
 }
 
-// Returns host IP or nil in case of error.
+// GetHostIP returns host IP or nil in case of error.
 func (kl *Kubelet) GetHostIP() (net.IP, error) {
 	node, err := kl.GetNode()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get node: %v", err)
 	}
-	return nodeutil.GetNodeHostIP(node)
+	return utilnode.GetNodeHostIP(node)
 }
 
 // getHostIPAnyway attempts to return the host IP from kubelet's nodeInfo, or
@@ -230,7 +200,7 @@ func (kl *Kubelet) getHostIPAnyWay() (net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nodeutil.GetNodeHostIP(node)
+	return utilnode.GetNodeHostIP(node)
 }
 
 // GetExtraSupplementalGroupsForPod returns a list of the extra
@@ -260,14 +230,31 @@ func (kl *Kubelet) getPodVolumePathListFromDisk(podUID types.UID) ([]string, err
 	}
 	for _, volumePluginDir := range volumePluginDirs {
 		volumePluginName := volumePluginDir.Name()
-		volumePluginPath := path.Join(podVolDir, volumePluginName)
-		volumeDirs, err := util.ReadDirNoStat(volumePluginPath)
+		volumePluginPath := filepath.Join(podVolDir, volumePluginName)
+		volumeDirs, err := utilfile.ReadDirNoStat(volumePluginPath)
 		if err != nil {
 			return volumes, fmt.Errorf("Could not read directory %s: %v", volumePluginPath, err)
 		}
 		for _, volumeDir := range volumeDirs {
-			volumes = append(volumes, path.Join(volumePluginPath, volumeDir))
+			volumes = append(volumes, filepath.Join(volumePluginPath, volumeDir))
 		}
 	}
 	return volumes, nil
+}
+
+// GetVersionInfo returns information about the version of cAdvisor in use.
+func (kl *Kubelet) GetVersionInfo() (*cadvisorapiv1.VersionInfo, error) {
+	return kl.cadvisor.VersionInfo()
+}
+
+// GetCachedMachineInfo assumes that the machine info can't change without a reboot
+func (kl *Kubelet) GetCachedMachineInfo() (*cadvisorapiv1.MachineInfo, error) {
+	if kl.machineInfo == nil {
+		info, err := kl.cadvisor.MachineInfo()
+		if err != nil {
+			return nil, err
+		}
+		kl.machineInfo = info
+	}
+	return kl.machineInfo, nil
 }

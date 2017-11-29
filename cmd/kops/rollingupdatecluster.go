@@ -23,31 +23,116 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kops/cmd/kops/util"
 	api "k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/cloudinstances"
+	"k8s.io/kops/pkg/featureflag"
+	"k8s.io/kops/pkg/instancegroups"
+	"k8s.io/kops/pkg/pretty"
 	"k8s.io/kops/upup/pkg/fi/cloudup"
 	"k8s.io/kops/upup/pkg/kutil"
 	"k8s.io/kops/util/pkg/tables"
-	k8sapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/v1"
-	k8s_clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
+	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
 )
 
+var (
+	rollingupdate_long = pretty.LongDesc(i18n.T(`
+	This command updates a kubernetes cluster to match the cloud and kops specifications.
+
+	To perform a rolling update, you need to update the cloud resources first with the command
+	` + pretty.Bash("kops update cluster") + `.
+
+	If rolling-update does not report that the cluster needs to be rolled, you can force the cluster to be
+	rolled with the force flag.  Rolling update drains and validates the cluster by default.  A cluster is
+	deemed validated when all required nodes are running and all pods in the kube-system namespace are operational.
+	When a node is deleted, rolling-update sleeps the interval for the node type, and then tries for the same period
+	of time for the cluster to be validated.  For instance, setting --master-interval=3m causes rolling-update
+	to wait for 3 minutes after a master is rolled, and another 3 minutes for the cluster to stabilize and pass
+	validation.
+
+	Note: terraform users will need to run all of the following commands from the same directory
+	` + pretty.Bash("kops update cluster --target=terraform") + ` then ` + pretty.Bash("terraform plan") + ` then
+	` + pretty.Bash("terraform apply") + ` prior to running ` + pretty.Bash("kops rolling-update cluster") + `.`))
+
+	rollingupdate_example = templates.Examples(i18n.T(`
+		# Preview a rolling-update.
+		kops rolling-update cluster
+
+		# Roll the currently selected kops cluster with defaults.
+		# Nodes will be drained and the cluster will be validated between node replacement.
+		kops rolling-update cluster --yes
+
+		# Roll the k8s-cluster.example.com kops cluster,
+		# do not fail if the cluster does not validate,
+		# wait 8 min to create new node, and wait at least
+		# 8 min to validate the cluster.
+		kops rolling-update cluster k8s-cluster.example.com --yes \
+		  --fail-on-validate-error="false" \
+		  --master-interval=8m \
+		  --node-interval=8m
+
+		# Roll the k8s-cluster.example.com kops cluster,
+		# do not validate the cluster because of the cloudonly flag.
+	    # Force the entire cluster to roll, even if rolling update
+	    # reports that the cluster does not need to be rolled.
+		kops rolling-update cluster k8s-cluster.example.com --yes \
+	      --cloudonly \
+		  --force
+
+		# Roll the k8s-cluster.example.com kops cluster,
+		# only roll the node instancegroup,
+		# use the new drain an validate functionality.
+		kops rolling-update cluster k8s-cluster.example.com --yes \
+		  --fail-on-validate-error="false" \
+		  --node-interval 8m \
+		  --instance-group nodes
+		`))
+
+	rollingupdate_short = i18n.T(`Rolling update a cluster.`)
+)
+
+// RollingUpdateOptions is the command Object for a Rolling Update.
 type RollingUpdateOptions struct {
 	Yes       bool
 	Force     bool
 	CloudOnly bool
 
-	MasterInterval  time.Duration
-	NodeInterval    time.Duration
+	// The following two variables are when kops is validating a cluster
+	// during a rolling update.
+
+	// FailOnDrainError fail rolling-update if drain errors.
+	FailOnDrainError bool
+
+	// FailOnValidate fail the cluster rolling-update when the cluster
+	// does not validate, after a validation period.
+	FailOnValidate bool
+
+	// PostDrainDelay is the duration of a pause after a drain operation
+	PostDrainDelay time.Duration
+
+	// ValidationTimeout is the timeout for validation to succeed after the drain and pause
+	ValidationTimeout time.Duration
+
+	// MasterInterval is the minimum time to wait after stopping a master node.  This does not include drain and validate time.
+	MasterInterval time.Duration
+
+	// NodeInterval is the minimum time to wait after stopping a (non-master) node.  This does not include drain and validate time.
+	NodeInterval time.Duration
+
+	// BastionInterval is the minimum time to wait after stopping a bastion.  This does not include drain and validate time.
 	BastionInterval time.Duration
 
 	ClusterName string
 
 	// InstanceGroups is the list of instance groups to rolling-update;
-	// if not specified all instance groups will be updated
+	// if not specified, all instance groups will be updated
 	InstanceGroups []string
 }
 
@@ -55,35 +140,43 @@ func (o *RollingUpdateOptions) InitDefaults() {
 	o.Yes = false
 	o.Force = false
 	o.CloudOnly = false
+	o.FailOnDrainError = false
+	o.FailOnValidate = true
 
 	o.MasterInterval = 5 * time.Minute
-	o.NodeInterval = 2 * time.Minute
+	o.NodeInterval = 4 * time.Minute
 	o.BastionInterval = 5 * time.Minute
+
+	o.PostDrainDelay = 90 * time.Second
+	o.ValidationTimeout = 5 * time.Minute
+
 }
 
 func NewCmdRollingUpdateCluster(f *util.Factory, out io.Writer) *cobra.Command {
+
 	var options RollingUpdateOptions
 	options.InitDefaults()
 
 	cmd := &cobra.Command{
-		Use:   "cluster",
-		Short: "Rolling update a cluster",
-		Long: `Rolling update a cluster instance groups.
-
-This command updates the running instances to match the cloud specifications.
-
-To perform rolling update, you need to update the cloud resources first with "kops update cluster"`,
+		Use:     "cluster",
+		Short:   rollingupdate_short,
+		Long:    rollingupdate_long,
+		Example: rollingupdate_example,
 	}
 
-	cmd.Flags().BoolVar(&options.Yes, "yes", options.Yes, "perform rolling update without confirmation")
+	cmd.Flags().BoolVarP(&options.Yes, "yes", "y", options.Yes, "Perform rolling update immediately, without --yes rolling-update executes a dry-run")
 	cmd.Flags().BoolVar(&options.Force, "force", options.Force, "Force rolling update, even if no changes")
 	cmd.Flags().BoolVar(&options.CloudOnly, "cloudonly", options.CloudOnly, "Perform rolling update without confirming progress with k8s")
 
 	cmd.Flags().DurationVar(&options.MasterInterval, "master-interval", options.MasterInterval, "Time to wait between restarting masters")
 	cmd.Flags().DurationVar(&options.NodeInterval, "node-interval", options.NodeInterval, "Time to wait between restarting nodes")
 	cmd.Flags().DurationVar(&options.BastionInterval, "bastion-interval", options.BastionInterval, "Time to wait between restarting bastions")
-
 	cmd.Flags().StringSliceVar(&options.InstanceGroups, "instance-group", options.InstanceGroups, "List of instance groups to update (defaults to all if not specified)")
+
+	if featureflag.DrainAndValidateRollingUpdate.Enabled() {
+		cmd.Flags().BoolVar(&options.FailOnDrainError, "fail-on-drain-error", true, "The rolling-update will fail if draining a node fails.")
+		cmd.Flags().BoolVar(&options.FailOnValidate, "fail-on-validate-error", true, "The rolling-update will fail if the cluster fails to validate.")
+	}
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		err := rootCommand.ProcessArgs(args)
@@ -105,12 +198,14 @@ To perform rolling update, you need to update the cloud resources first with "ko
 			exitWithError(err)
 			return
 		}
+
 	}
 
 	return cmd
 }
 
 func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpdateOptions) error {
+
 	clientset, err := f.Clientset()
 	if err != nil {
 		return err
@@ -130,14 +225,14 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 	}
 
 	var nodes []v1.Node
-	var k8sClient *k8s_clientset.Clientset
+	var k8sClient kubernetes.Interface
 	if !options.CloudOnly {
-		k8sClient, err = k8s_clientset.NewForConfig(config)
+		k8sClient, err = kubernetes.NewForConfig(config)
 		if err != nil {
 			return fmt.Errorf("cannot build kube client for %q: %v", contextName, err)
 		}
 
-		nodeList, err := k8sClient.Core().Nodes().List(v1.ListOptions{})
+		nodeList, err := k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to reach the kubernetes API.\n")
 			fmt.Fprintf(os.Stderr, "Use --cloudonly to do a rolling-update without confirming progress with the k8s API\n\n")
@@ -149,7 +244,7 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 		}
 	}
 
-	list, err := clientset.InstanceGroups(cluster.ObjectMeta.Name).List(k8sapi.ListOptions{})
+	list, err := clientset.InstanceGroupsFor(cluster).List(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -158,6 +253,8 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 	for i := range list.Items {
 		instanceGroups = append(instanceGroups, &list.Items[i])
 	}
+
+	warnUnmatched := true
 
 	if len(options.InstanceGroups) != 0 {
 		var filtered []*api.InstanceGroup
@@ -178,6 +275,9 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 		}
 
 		instanceGroups = filtered
+
+		// Don't warn if we find more ASGs than IGs
+		warnUnmatched = false
 	}
 
 	cloud, err := cloudup.BuildCloud(cluster)
@@ -185,40 +285,32 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 		return err
 	}
 
-	d := &kutil.RollingUpdateCluster{
-		MasterInterval: options.MasterInterval,
-		NodeInterval:   options.NodeInterval,
-		Force:          options.Force,
-	}
-	d.Cloud = cloud
-
-	warnUnmatched := true
-	groups, err := kutil.FindCloudInstanceGroups(cloud, cluster, instanceGroups, warnUnmatched, nodes)
+	groups, err := cloud.GetCloudGroups(cluster, instanceGroups, warnUnmatched, nodes)
 	if err != nil {
 		return err
 	}
 
 	{
 		t := &tables.Table{}
-		t.AddColumn("NAME", func(r *kutil.CloudInstanceGroup) string {
+		t.AddColumn("NAME", func(r *cloudinstances.CloudInstanceGroup) string {
 			return r.InstanceGroup.ObjectMeta.Name
 		})
-		t.AddColumn("STATUS", func(r *kutil.CloudInstanceGroup) string {
-			return r.Status
+		t.AddColumn("STATUS", func(r *cloudinstances.CloudInstanceGroup) string {
+			return r.Status()
 		})
-		t.AddColumn("NEEDUPDATE", func(r *kutil.CloudInstanceGroup) string {
+		t.AddColumn("NEEDUPDATE", func(r *cloudinstances.CloudInstanceGroup) string {
 			return strconv.Itoa(len(r.NeedUpdate))
 		})
-		t.AddColumn("READY", func(r *kutil.CloudInstanceGroup) string {
+		t.AddColumn("READY", func(r *cloudinstances.CloudInstanceGroup) string {
 			return strconv.Itoa(len(r.Ready))
 		})
-		t.AddColumn("MIN", func(r *kutil.CloudInstanceGroup) string {
-			return strconv.Itoa(r.MinSize())
+		t.AddColumn("MIN", func(r *cloudinstances.CloudInstanceGroup) string {
+			return strconv.Itoa(r.MinSize)
 		})
-		t.AddColumn("MAX", func(r *kutil.CloudInstanceGroup) string {
-			return strconv.Itoa(r.MaxSize())
+		t.AddColumn("MAX", func(r *cloudinstances.CloudInstanceGroup) string {
+			return strconv.Itoa(r.MaxSize)
 		})
-		t.AddColumn("NODES", func(r *kutil.CloudInstanceGroup) string {
+		t.AddColumn("NODES", func(r *cloudinstances.CloudInstanceGroup) string {
 			var nodes []*v1.Node
 			for _, i := range r.Ready {
 				if i.Node != nil {
@@ -232,7 +324,7 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 			}
 			return strconv.Itoa(len(nodes))
 		})
-		var l []*kutil.CloudInstanceGroup
+		var l []*cloudinstances.CloudInstanceGroup
 		for _, v := range groups {
 			l = append(l, v)
 		}
@@ -255,14 +347,32 @@ func RunRollingUpdateCluster(f *util.Factory, out io.Writer, options *RollingUpd
 	}
 
 	if !needUpdate && !options.Force {
-		fmt.Printf("\nNo rolling-update required\n")
+		fmt.Printf("\nNo rolling-update required.\n")
 		return nil
 	}
 
 	if !options.Yes {
-		fmt.Printf("\nMust specify --yes to rolling-update\n")
+		fmt.Printf("\nMust specify --yes to rolling-update.\n")
 		return nil
 	}
 
-	return d.RollingUpdate(groups, k8sClient)
+	if featureflag.DrainAndValidateRollingUpdate.Enabled() {
+		glog.V(2).Infof("Rolling update with drain and validate enabled.")
+	}
+	d := &instancegroups.RollingUpdateCluster{
+		MasterInterval:    options.MasterInterval,
+		NodeInterval:      options.NodeInterval,
+		BastionInterval:   options.BastionInterval,
+		Force:             options.Force,
+		Cloud:             cloud,
+		K8sClient:         k8sClient,
+		ClientConfig:      kutil.NewClientConfig(config, "kube-system"),
+		FailOnDrainError:  options.FailOnDrainError,
+		FailOnValidate:    options.FailOnValidate,
+		CloudOnly:         options.CloudOnly,
+		ClusterName:       options.ClusterName,
+		PostDrainDelay:    options.PostDrainDelay,
+		ValidationTimeout: options.ValidationTimeout,
+	}
+	return d.RollingUpdate(groups, list)
 }

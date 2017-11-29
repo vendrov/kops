@@ -20,8 +20,9 @@ import (
 	"reflect"
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/util/intstr"
 )
 
 func TestServiceBasicGenerate(t *testing.T) {
@@ -39,7 +40,7 @@ func TestServiceBasicGenerate(t *testing.T) {
 			clusterip:   "",
 			serviceType: api.ServiceTypeClusterIP,
 			expected: &api.Service{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "clusterip-ok",
 					Labels: map[string]string{"app": "clusterip-ok"},
 				},
@@ -57,13 +58,6 @@ func TestServiceBasicGenerate(t *testing.T) {
 			expectErr:   true,
 		},
 		{
-			name:        "clusterip-none and port mapping",
-			tcp:         []string{"456:9898"},
-			clusterip:   "None",
-			serviceType: api.ServiceTypeClusterIP,
-			expectErr:   true,
-		},
-		{
 			name:        "clusterip-none-wrong-type",
 			tcp:         []string{},
 			clusterip:   "None",
@@ -76,7 +70,7 @@ func TestServiceBasicGenerate(t *testing.T) {
 			clusterip:   "None",
 			serviceType: api.ServiceTypeClusterIP,
 			expected: &api.Service{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "clusterip-none-ok",
 					Labels: map[string]string{"app": "clusterip-none-ok"},
 				},
@@ -88,12 +82,29 @@ func TestServiceBasicGenerate(t *testing.T) {
 			expectErr: false,
 		},
 		{
+			name:        "clusterip-none-and-port-mapping",
+			tcp:         []string{"456:9898"},
+			clusterip:   "None",
+			serviceType: api.ServiceTypeClusterIP,
+			expected: &api.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:   "clusterip-none-and-port-mapping",
+					Labels: map[string]string{"app": "clusterip-none-and-port-mapping"},
+				},
+				Spec: api.ServiceSpec{Type: "ClusterIP",
+					Ports:     []api.ServicePort{{Name: "456-9898", Protocol: "TCP", Port: 456, TargetPort: intstr.IntOrString{Type: 0, IntVal: 9898, StrVal: ""}, NodePort: 0}},
+					Selector:  map[string]string{"app": "clusterip-none-and-port-mapping"},
+					ClusterIP: "None", ExternalIPs: []string(nil), LoadBalancerIP: ""},
+			},
+			expectErr: false,
+		},
+		{
 			name:        "loadbalancer-ok",
 			tcp:         []string{"456:9898"},
 			clusterip:   "",
 			serviceType: api.ServiceTypeLoadBalancer,
 			expected: &api.Service{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "loadbalancer-ok",
 					Labels: map[string]string{"app": "loadbalancer-ok"},
 				},

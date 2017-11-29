@@ -47,7 +47,7 @@ const basePath = "https://www.googleapis.com/apps/licensing/v1/product/"
 
 // OAuth2 scopes used by this API.
 const (
-	// View and manage Google Apps licenses for your domain
+	// View and manage G Suite licenses for your domain
 	AppsLicensingScope = "https://www.googleapis.com/auth/apps.licensing"
 )
 
@@ -92,14 +92,20 @@ type LicenseAssignment struct {
 	// Kind: Identifies the resource as a LicenseAssignment.
 	Kind string `json:"kind,omitempty"`
 
-	// ProductId: Name of the product.
+	// ProductId: Id of the product.
 	ProductId string `json:"productId,omitempty"`
+
+	// ProductName: Display Name of the product.
+	ProductName string `json:"productName,omitempty"`
 
 	// SelfLink: Link to this page.
 	SelfLink string `json:"selfLink,omitempty"`
 
-	// SkuId: Name of the sku of the product.
+	// SkuId: Id of the sku of the product.
 	SkuId string `json:"skuId,omitempty"`
+
+	// SkuName: Display Name of the sku of the product.
+	SkuName string `json:"skuName,omitempty"`
 
 	// UserId: Email id of the user.
 	UserId string `json:"userId,omitempty"`
@@ -115,12 +121,20 @@ type LicenseAssignment struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etags") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *LicenseAssignment) MarshalJSON() ([]byte, error) {
 	type noMethod LicenseAssignment
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // LicenseAssignmentInsert: Template for LicenseAssignment Insert
@@ -136,12 +150,20 @@ type LicenseAssignmentInsert struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "UserId") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *LicenseAssignmentInsert) MarshalJSON() ([]byte, error) {
 	type noMethod LicenseAssignmentInsert
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // LicenseAssignmentList: LicesnseAssignment List for a given
@@ -172,12 +194,20 @@ type LicenseAssignmentList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *LicenseAssignmentList) MarshalJSON() ([]byte, error) {
 	type noMethod LicenseAssignmentList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "licensing.licenseAssignments.delete":
@@ -189,6 +219,7 @@ type LicenseAssignmentsDeleteCall struct {
 	userId     string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Revoke License.
@@ -216,8 +247,20 @@ func (c *LicenseAssignmentsDeleteCall) Context(ctx context.Context) *LicenseAssi
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -230,10 +273,7 @@ func (c *LicenseAssignmentsDeleteCall) doRequest(alt string) (*http.Response, er
 		"skuId":     c.skuId,
 		"userId":    c.userId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.delete" call.
@@ -295,6 +335,7 @@ type LicenseAssignmentsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get license assignment of a particular product and sku for a
@@ -333,8 +374,20 @@ func (c *LicenseAssignmentsGetCall) Context(ctx context.Context) *LicenseAssignm
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -350,10 +403,7 @@ func (c *LicenseAssignmentsGetCall) doRequest(alt string) (*http.Response, error
 		"skuId":     c.skuId,
 		"userId":    c.userId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.get" call.
@@ -442,6 +492,7 @@ type LicenseAssignmentsInsertCall struct {
 	licenseassignmentinsert *LicenseAssignmentInsert
 	urlParams_              gensupport.URLParams
 	ctx_                    context.Context
+	header_                 http.Header
 }
 
 // Insert: Assign License.
@@ -469,8 +520,20 @@ func (c *LicenseAssignmentsInsertCall) Context(ctx context.Context) *LicenseAssi
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.licenseassignmentinsert)
@@ -487,10 +550,7 @@ func (c *LicenseAssignmentsInsertCall) doRequest(alt string) (*http.Response, er
 		"productId": c.productId,
 		"skuId":     c.skuId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.insert" call.
@@ -574,6 +634,7 @@ type LicenseAssignmentsListForProductCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // ListForProduct: List license assignments for given product of the
@@ -626,8 +687,20 @@ func (c *LicenseAssignmentsListForProductCall) Context(ctx context.Context) *Lic
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsListForProductCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsListForProductCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -641,10 +714,7 @@ func (c *LicenseAssignmentsListForProductCall) doRequest(alt string) (*http.Resp
 	googleapi.Expand(req.URL, map[string]string{
 		"productId": c.productId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.listForProduct" call.
@@ -762,6 +832,7 @@ type LicenseAssignmentsListForProductAndSkuCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // ListForProductAndSku: List license assignments for given product and
@@ -815,8 +886,20 @@ func (c *LicenseAssignmentsListForProductAndSkuCall) Context(ctx context.Context
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsListForProductAndSkuCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsListForProductAndSkuCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -831,10 +914,7 @@ func (c *LicenseAssignmentsListForProductAndSkuCall) doRequest(alt string) (*htt
 		"productId": c.productId,
 		"skuId":     c.skuId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.listForProductAndSku" call.
@@ -960,6 +1040,7 @@ type LicenseAssignmentsPatchCall struct {
 	licenseassignment *LicenseAssignment
 	urlParams_        gensupport.URLParams
 	ctx_              context.Context
+	header_           http.Header
 }
 
 // Patch: Assign License. This method supports patch semantics.
@@ -988,8 +1069,20 @@ func (c *LicenseAssignmentsPatchCall) Context(ctx context.Context) *LicenseAssig
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.licenseassignment)
@@ -1007,10 +1100,7 @@ func (c *LicenseAssignmentsPatchCall) doRequest(alt string) (*http.Response, err
 		"skuId":     c.skuId,
 		"userId":    c.userId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.patch" call.
@@ -1103,6 +1193,7 @@ type LicenseAssignmentsUpdateCall struct {
 	licenseassignment *LicenseAssignment
 	urlParams_        gensupport.URLParams
 	ctx_              context.Context
+	header_           http.Header
 }
 
 // Update: Assign License.
@@ -1131,8 +1222,20 @@ func (c *LicenseAssignmentsUpdateCall) Context(ctx context.Context) *LicenseAssi
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *LicenseAssignmentsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *LicenseAssignmentsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.licenseassignment)
@@ -1150,10 +1253,7 @@ func (c *LicenseAssignmentsUpdateCall) doRequest(alt string) (*http.Response, er
 		"skuId":     c.skuId,
 		"userId":    c.userId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "licensing.licenseAssignments.update" call.

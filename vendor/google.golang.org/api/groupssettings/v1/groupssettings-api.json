@@ -1,18 +1,18 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"C5oy1hgQsABtYOYIOXWcR3BgYqU/WmR-pRQA43Avmy6ShfhWJLW2ne8\"",
+ "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/OtGmapWnnxLrnB8PsHnXNA0QJ0I\"",
  "discoveryVersion": "v1",
  "id": "groupssettings:v1",
  "name": "groupssettings",
  "version": "v1",
- "revision": "20160525",
+ "revision": "20170607",
  "title": "Groups Settings API",
  "description": "Lets you manage permission levels and related settings of a group.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "http://www.google.com/images/icons/product/search-16.gif",
-  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
+  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
  },
  "documentationLink": "https://developers.google.com/google-apps/groups-settings/get_started",
  "protocol": "rest",
@@ -72,7 +72,7 @@
   "oauth2": {
    "scopes": {
     "https://www.googleapis.com/auth/apps.groups.settings": {
-     "description": "View and manage the settings of a Google Apps Group"
+     "description": "View and manage the settings of a G Suite group"
     }
    }
   }
@@ -199,7 +199,7 @@
     },
     "whoCanPostMessage": {
      "type": "string",
-     "description": "Permissions to post messages to the group. Possible values are: NONE_CAN_POST ALL_MANAGERS_CAN_POST ALL_MEMBERS_CAN_POST ALL_IN_DOMAIN_CAN_POST ANYONE_CAN_POST"
+     "description": "Permissions to post messages to the group. Possible values are: NONE_CAN_POST ALL_MANAGERS_CAN_POST ALL_MEMBERS_CAN_POST ALL_OWNERS_CAN_POST ALL_IN_DOMAIN_CAN_POST ANYONE_CAN_POST"
     },
     "whoCanViewGroup": {
      "type": "string",

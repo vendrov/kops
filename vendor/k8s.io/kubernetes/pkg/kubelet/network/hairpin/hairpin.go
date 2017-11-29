@@ -26,7 +26,7 @@ import (
 	"strconv"
 
 	"github.com/golang/glog"
-	"k8s.io/kubernetes/pkg/util/exec"
+	"k8s.io/utils/exec"
 )
 
 const (
@@ -50,7 +50,7 @@ func SetUpContainerPath(netnsPath string, containerInterfaceName string) error {
 	if netnsPath[0] != '/' {
 		return fmt.Errorf("netnsPath path '%s' was invalid", netnsPath)
 	}
-	nsenterArgs := []string{"-n", netnsPath}
+	nsenterArgs := []string{"--net=" + netnsPath}
 	return setUpContainerInternal(containerInterfaceName, netnsPath, nsenterArgs)
 }
 

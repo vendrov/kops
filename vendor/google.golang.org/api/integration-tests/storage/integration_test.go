@@ -1,3 +1,17 @@
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // +build integration
 
 package storage
@@ -130,20 +144,20 @@ func createService() *storage.Service {
 		return nil
 	}
 	if bucket = os.Getenv(envBucket); bucket == "" {
-		log.Print("no project ID specified")
+		log.Print("no bucket specified")
 		return nil
 	}
 
 	ctx := context.Background()
 	ts, err := tokenSource(ctx, storage.DevstorageFullControlScope)
 	if err != nil {
-		log.Print("createService: %v", err)
+		log.Printf("tokenSource: %v", err)
 		return nil
 	}
 	client := oauth2.NewClient(ctx, ts)
 	s, err := storage.New(client)
 	if err != nil {
-		log.Print("unable to create service: %v", err)
+		log.Printf("unable to create service: %v", err)
 		return nil
 	}
 	return s
@@ -185,12 +199,14 @@ func TestContentType(t *testing.T) {
 	// The content type configured via googleapi.ContentType, if any, is always "text/html".
 	for _, tc := range []testCase{
 		// With content type specified in the object struct
-		{
-			objectContentType:    "text/plain",
-			useOptionContentType: true,
-			optionContentType:    "text/html",
-			wantContentType:      "text/html",
-		},
+		// Temporarily disable this test during rollout of strict Content-Type.
+		// TODO(djd): Re-enable once strict check is 100%.
+		// {
+		// 	objectContentType:    "text/plain",
+		// 	useOptionContentType: true,
+		// 	optionContentType:    "text/html",
+		// 	wantContentType:      "text/html",
+		// },
 		{
 			objectContentType:    "text/plain",
 			useOptionContentType: true,
@@ -200,7 +216,7 @@ func TestContentType(t *testing.T) {
 		{
 			objectContentType:    "text/plain",
 			useOptionContentType: false,
-			wantContentType:      "text/plain; charset=utf-8", // sniffed.
+			wantContentType:      "text/plain",
 		},
 
 		// Without content type specified in the object struct
@@ -294,7 +310,7 @@ func TestFunctions(t *testing.T) {
 		}
 		slurp, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			t.Errorf("unable to read response body %q: %v", obj.name, err)
+			t.Fatalf("unable to read response body %q: %v", obj.name, err)
 		}
 		resp.Body.Close()
 		if got, want := string(slurp), obj.contents; got != want {
@@ -319,7 +335,7 @@ func TestFunctions(t *testing.T) {
 	t.Logf("Rewriting %q to %q", name, copyObj)
 	copy, err := s.Objects.Rewrite(bucket, name, bucket, copyObj, nil).Do()
 	if err != nil {
-		t.Errorf("unable to rewrite object %q to %q: %v", name, copyObj, err)
+		t.Fatalf("unable to rewrite object %q to %q: %v", name, copyObj, err)
 	}
 	if copy.Resource.Name != copyObj {
 		t.Errorf("copy object's name = %q; want %q", copy.Resource.Name, copyObj)
@@ -335,7 +351,7 @@ func TestFunctions(t *testing.T) {
 	t.Logf("Updating attributes of %q", name)
 	obj, err := s.Objects.Get(bucket, name).Projection("full").Fields("acl").Do()
 	if err != nil {
-		t.Errorf("Objects.Get(%q, %q): %v", bucket, name, err)
+		t.Fatalf("Objects.Get(%q, %q): %v", bucket, name, err)
 	}
 	if err := verifyAcls(obj, "", ""); err != nil {
 		t.Errorf("before update ACLs: %v", err)
@@ -346,7 +362,7 @@ func TestFunctions(t *testing.T) {
 	}
 	updated, err := s.Objects.Patch(bucket, name, obj).Projection("full").Fields("contentType", "acl").Do()
 	if err != nil {
-		t.Errorf("Objects.Patch(%q, %q, %#v) failed with %v", bucket, name, obj, err)
+		t.Fatalf("Objects.Patch(%q, %q, %#v) failed with %v", bucket, name, obj, err)
 	}
 	if want := "text/html"; updated.ContentType != want {
 		t.Errorf("updated.ContentType == %q; want %q", updated.ContentType, want)
@@ -396,7 +412,7 @@ func TestFunctions(t *testing.T) {
 		}
 		md5, err := base64.StdEncoding.DecodeString(obj.Md5Hash)
 		if err != nil {
-			t.Errorf("object %q base64 decode of MD5 %q: %v", c.name, obj.Md5Hash, err)
+			t.Fatalf("object %q base64 decode of MD5 %q: %v", c.name, obj.Md5Hash, err)
 		}
 		if got, want := fmt.Sprintf("%x", md5), c.md5; got != want {
 			t.Errorf("object %q MD5 = %q; want %q", c.name, got, want)

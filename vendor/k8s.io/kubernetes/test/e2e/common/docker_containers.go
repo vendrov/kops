@@ -17,9 +17,11 @@ limitations under the License.
 package common
 
 import (
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/util/uuid"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/kubernetes/test/e2e/framework"
+	imageutils "k8s.io/kubernetes/test/utils/image"
 
 	. "github.com/onsi/ginkgo"
 )
@@ -70,18 +72,20 @@ const testContainerName = "test-container"
 func entrypointTestPod() *v1.Pod {
 	podName := "client-containers-" + string(uuid.NewUUID())
 
+	one := int64(1)
 	return &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: podName,
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{
 				{
 					Name:  testContainerName,
-					Image: "gcr.io/google_containers/eptest:0.1",
+					Image: imageutils.GetE2EImage(imageutils.EntrypointTester),
 				},
 			},
-			RestartPolicy: v1.RestartPolicyNever,
+			RestartPolicy:                 v1.RestartPolicyNever,
+			TerminationGracePeriodSeconds: &one,
 		},
 	}
 }

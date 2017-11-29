@@ -21,11 +21,9 @@ limitations under the License.
 package app
 
 import (
-	"k8s.io/kubernetes/pkg/apis/batch"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/kubernetes/pkg/controller/cronjob"
 	"k8s.io/kubernetes/pkg/controller/job"
-	"k8s.io/kubernetes/pkg/runtime/schema"
 )
 
 func startJobController(ctx ControllerContext) (bool, error) {
@@ -33,22 +31,19 @@ func startJobController(ctx ControllerContext) (bool, error) {
 		return false, nil
 	}
 	go job.NewJobController(
-		ctx.InformerFactory.Pods().Informer(),
-		ctx.InformerFactory.Jobs(),
+		ctx.InformerFactory.Core().V1().Pods(),
+		ctx.InformerFactory.Batch().V1().Jobs(),
 		ctx.ClientBuilder.ClientOrDie("job-controller"),
 	).Run(int(ctx.Options.ConcurrentJobSyncs), ctx.Stop)
 	return true, nil
 }
 
 func startCronJobController(ctx ControllerContext) (bool, error) {
-	if !ctx.AvailableResources[schema.GroupVersionResource{Group: "batch", Version: "v2alpha1", Resource: "cronjobs"}] {
+	if !ctx.AvailableResources[schema.GroupVersionResource{Group: "batch", Version: "v1beta1", Resource: "cronjobs"}] {
 		return false, nil
 	}
-	// TODO: this is a temp fix for allowing kubeClient list v2alpha1 sj, should switch to using clientset
-	cronjobConfig := ctx.ClientBuilder.ConfigOrDie("cronjob-controller")
-	cronjobConfig.ContentConfig.GroupVersion = &schema.GroupVersion{Group: batch.GroupName, Version: "v2alpha1"}
 	go cronjob.NewCronJobController(
-		clientset.NewForConfigOrDie(cronjobConfig),
+		ctx.ClientBuilder.ClientOrDie("cronjob-controller"),
 	).Run(ctx.Stop)
 	return true, nil
 }

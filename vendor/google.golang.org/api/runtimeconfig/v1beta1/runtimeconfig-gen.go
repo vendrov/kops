@@ -1,4 +1,4 @@
-// Package runtimeconfig provides access to the Google Cloud RuntimeConfig API.
+// Package runtimeconfig provides access to the Google Cloud Runtime Configuration API.
 //
 // See https://cloud.google.com/deployment-manager/runtime-configurator/
 //
@@ -135,6 +135,72 @@ type ProjectsConfigsWaitersService struct {
 	s *Service
 }
 
+// Binding: Associates `members` with a `role`.
+type Binding struct {
+	// Members: Specifies the identities requesting access for a Cloud
+	// Platform resource.
+	// `members` can have the following values:
+	//
+	// * `allUsers`: A special identifier that represents anyone who is
+	//    on the internet; with or without a Google account.
+	//
+	// * `allAuthenticatedUsers`: A special identifier that represents
+	// anyone
+	//    who is authenticated with a Google account or a service
+	// account.
+	//
+	// * `user:{emailid}`: An email address that represents a specific
+	// Google
+	//    account. For example, `alice@gmail.com` or `joe@example.com`.
+	//
+	//
+	// * `serviceAccount:{emailid}`: An email address that represents a
+	// service
+	//    account. For example,
+	// `my-other-app@appspot.gserviceaccount.com`.
+	//
+	// * `group:{emailid}`: An email address that represents a Google
+	// group.
+	//    For example, `admins@example.com`.
+	//
+	//
+	// * `domain:{domain}`: A Google Apps domain name that represents all
+	// the
+	//    users of that domain. For example, `google.com` or
+	// `example.com`.
+	//
+	//
+	Members []string `json:"members,omitempty"`
+
+	// Role: Role that is assigned to `members`.
+	// For example, `roles/viewer`, `roles/editor`, or
+	// `roles/owner`.
+	// Required
+	Role string `json:"role,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Members") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Members") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Binding) MarshalJSON() ([]byte, error) {
+	type noMethod Binding
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // Cardinality: A Cardinality condition for the Waiter resource. A
 // cardinality condition is
 // met when the number of variables under a specified path prefix
@@ -174,12 +240,20 @@ type Cardinality struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Number") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Cardinality) MarshalJSON() ([]byte, error) {
 	type noMethod Cardinality
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Empty: A generic empty message that you can re-use to avoid defining
@@ -212,12 +286,20 @@ type EndCondition struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Cardinality") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *EndCondition) MarshalJSON() ([]byte, error) {
 	type noMethod EndCondition
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListConfigsResponse: `ListConfigs()` returns the following response.
@@ -253,12 +335,20 @@ type ListConfigsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Configs") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ListConfigsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListConfigsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListVariablesResponse: Response for the `ListVariables()` method.
@@ -290,12 +380,20 @@ type ListVariablesResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NextPageToken") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ListVariablesResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListVariablesResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListWaitersResponse: Response for the `ListWaiters()` method.
@@ -326,12 +424,20 @@ type ListWaitersResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NextPageToken") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ListWaitersResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListWaitersResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Operation: This resource represents a long-running operation that is
@@ -345,7 +451,8 @@ type Operation struct {
 	// available.
 	Done bool `json:"done,omitempty"`
 
-	// Error: The error result of the operation in case of failure.
+	// Error: The error result of the operation in case of failure or
+	// cancellation.
 	Error *Status `json:"error,omitempty"`
 
 	// Metadata: Service-specific metadata associated with the operation.
@@ -355,7 +462,7 @@ type Operation struct {
 	// Some services might not provide such metadata.  Any method that
 	// returns a
 	// long-running operation should document the metadata type, if any.
-	Metadata OperationMetadata `json:"metadata,omitempty"`
+	Metadata googleapi.RawMessage `json:"metadata,omitempty"`
 
 	// Name: The server-assigned name, which is only unique within the same
 	// service that
@@ -379,7 +486,7 @@ type Operation struct {
 	// is `TakeSnapshot()`, the inferred response type
 	// is
 	// `TakeSnapshotResponse`.
-	Response OperationResponse `json:"response,omitempty"`
+	Response googleapi.RawMessage `json:"response,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -392,17 +499,112 @@ type Operation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Done") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Operation) MarshalJSON() ([]byte, error) {
 	type noMethod Operation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-type OperationMetadata interface{}
+// Policy: Defines an Identity and Access Management (IAM) policy. It is
+// used to
+// specify access control policies for Cloud Platform resources.
+//
+//
+// A `Policy` consists of a list of `bindings`. A `Binding` binds a list
+// of
+// `members` to a `role`, where the members can be user accounts, Google
+// groups,
+// Google domains, and service accounts. A `role` is a named list of
+// permissions
+// defined by IAM.
+//
+// **Example**
+//
+//     {
+//       "bindings": [
+//         {
+//           "role": "roles/owner",
+//           "members": [
+//             "user:mike@example.com",
+//             "group:admins@example.com",
+//             "domain:google.com",
+//
+// "serviceAccount:my-other-app@appspot.gserviceaccount.com",
+//           ]
+//         },
+//         {
+//           "role": "roles/viewer",
+//           "members": ["user:sean@example.com"]
+//         }
+//       ]
+//     }
+//
+// For a description of IAM and its features, see the
+// [IAM developer's guide](https://cloud.google.com/iam).
+type Policy struct {
+	// Bindings: Associates a list of `members` to a `role`.
+	// `bindings` with no members will result in an error.
+	Bindings []*Binding `json:"bindings,omitempty"`
 
-type OperationResponse interface{}
+	// Etag: `etag` is used for optimistic concurrency control as a way to
+	// help
+	// prevent simultaneous updates of a policy from overwriting each
+	// other.
+	// It is strongly suggested that systems make use of the `etag` in
+	// the
+	// read-modify-write cycle to perform policy updates in order to avoid
+	// race
+	// conditions: An `etag` is returned in the response to `getIamPolicy`,
+	// and
+	// systems are expected to put that etag in the request to
+	// `setIamPolicy` to
+	// ensure that their change will be applied to the same version of the
+	// policy.
+	//
+	// If no `etag` is provided in the call to `setIamPolicy`, then the
+	// existing
+	// policy is overwritten blindly.
+	Etag string `json:"etag,omitempty"`
+
+	// Version: Version of the `Policy`. The default version is 0.
+	Version int64 `json:"version,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Bindings") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Bindings") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Policy) MarshalJSON() ([]byte, error) {
+	type noMethod Policy
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
 
 // RuntimeConfig: A RuntimeConfig resource is the primary resource in
 // the Cloud RuntimeConfig
@@ -411,7 +613,6 @@ type OperationResponse interface{}
 // variables.
 type RuntimeConfig struct {
 	// Description: An optional description of the RuntimeConfig object.
-	// The length of the description must be less than 256 bytes.
 	Description string `json:"description,omitempty"`
 
 	// Name: The resource name of a runtime config. The name must have the
@@ -443,12 +644,53 @@ type RuntimeConfig struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Description") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *RuntimeConfig) MarshalJSON() ([]byte, error) {
 	type noMethod RuntimeConfig
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// SetIamPolicyRequest: Request message for `SetIamPolicy` method.
+type SetIamPolicyRequest struct {
+	// Policy: REQUIRED: The complete policy to be applied to the
+	// `resource`. The size of
+	// the policy is limited to a few 10s of KB. An empty policy is a
+	// valid policy but certain Cloud Platform services (such as
+	// Projects)
+	// might reject them.
+	Policy *Policy `json:"policy,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Policy") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Policy") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SetIamPolicyRequest) MarshalJSON() ([]byte, error) {
+	type noMethod SetIamPolicyRequest
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Status: The `Status` type defines a logical error model that is
@@ -479,7 +721,7 @@ func (s *RuntimeConfig) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -512,7 +754,7 @@ func (s *RuntimeConfig) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the
@@ -538,7 +780,7 @@ type Status struct {
 	// Details: A list of messages that carry the error details.  There will
 	// be a
 	// common set of message types for APIs to use.
-	Details []StatusDetails `json:"details,omitempty"`
+	Details []googleapi.RawMessage `json:"details,omitempty"`
 
 	// Message: A developer-facing error message, which should be in
 	// English. Any
@@ -554,15 +796,91 @@ type Status struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Status) MarshalJSON() ([]byte, error) {
 	type noMethod Status
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-type StatusDetails interface{}
+// TestIamPermissionsRequest: Request message for `TestIamPermissions`
+// method.
+type TestIamPermissionsRequest struct {
+	// Permissions: The set of permissions to check for the `resource`.
+	// Permissions with
+	// wildcards (such as '*' or 'storage.*') are not allowed. For
+	// more
+	// information see
+	// [IAM
+	// Overview](https://cloud.google.com/iam/docs/overview#permissions).
+	Permissions []string `json:"permissions,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Permissions") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Permissions") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TestIamPermissionsRequest) MarshalJSON() ([]byte, error) {
+	type noMethod TestIamPermissionsRequest
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TestIamPermissionsResponse: Response message for `TestIamPermissions`
+// method.
+type TestIamPermissionsResponse struct {
+	// Permissions: A subset of `TestPermissionsRequest.permissions` that
+	// the caller is
+	// allowed.
+	Permissions []string `json:"permissions,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Permissions") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Permissions") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TestIamPermissionsResponse) MarshalJSON() ([]byte, error) {
+	type noMethod TestIamPermissionsResponse
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
 
 // Variable: Describes a single variable within a RuntimeConfig
 // resource.
@@ -615,13 +933,20 @@ type Variable struct {
 	// executing.
 	State string `json:"state,omitempty"`
 
+	// Text: The string value of the variable. The length of the value must
+	// be less
+	// than 4096 bytes. Empty values are also accepted. For example,
+	// `text: "my text value". The string must be valid UTF-8.
+	Text string `json:"text,omitempty"`
+
 	// UpdateTime: [Output Only] The time of the last variable update.
 	UpdateTime string `json:"updateTime,omitempty"`
 
-	// Value: The value of the variable. The length of the value must be
-	// less than 4096
-	// bytes. Empty values are also accepted. The value must be Base64
-	// encoded.
+	// Value: The binary value of the variable. The length of the value must
+	// be less
+	// than 4096 bytes. Empty values are also accepted. The value must
+	// be
+	// base64 encoded. Only one of `value` or `text` can be set.
 	Value string `json:"value,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -635,12 +960,20 @@ type Variable struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Name") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Variable) MarshalJSON() ([]byte, error) {
 	type noMethod Variable
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Waiter: A Waiter resource waits for some end condition within a
@@ -663,9 +996,9 @@ func (s *Variable) MarshalJSON() ([]byte, error) {
 //
 // To learn more about using waiters, read the
 // [Creating a
-// Waiter](/deployment-manager/runtime-config/creating-a-water)
-// documenta
-// tion.
+// Waiter](/deployment-manager/runtime-configurator/creating-a-waiter)
+// do
+// cumentation.
 type Waiter struct {
 	// CreateTime: [Output Only] The instant at which this Waiter resource
 	// was created. Adding
@@ -686,7 +1019,6 @@ type Waiter struct {
 	// Error: [Output Only] If the waiter ended due to a failure or timeout,
 	// this value
 	// will be set.
-	//
 	Error *Status `json:"error,omitempty"`
 
 	// Failure: [Optional] The failure condition of this waiter. If this
@@ -747,12 +1079,20 @@ type Waiter struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreateTime") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Waiter) MarshalJSON() ([]byte, error) {
 	type noMethod Waiter
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // WatchVariableRequest: Request for the `WatchVariable()` method.
@@ -775,12 +1115,20 @@ type WatchVariableRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NewerThan") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *WatchVariableRequest) MarshalJSON() ([]byte, error) {
 	type noMethod WatchVariableRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "runtimeconfig.projects.configs.create":
@@ -791,6 +1139,7 @@ type ProjectsConfigsCreateCall struct {
 	runtimeconfig *RuntimeConfig
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
+	header_       http.Header
 }
 
 // Create: Creates a new RuntimeConfig resource. The configuration name
@@ -800,6 +1149,23 @@ func (r *ProjectsConfigsService) Create(parent string, runtimeconfig *RuntimeCon
 	c := &ProjectsConfigsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
 	c.runtimeconfig = runtimeconfig
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional but
+// recommended unique `request_id`. If the server
+// receives two `create()` requests  with the same
+// `request_id`, then the second request will be ignored and the
+// first resource created and stored in the backend is returned.
+// Empty `request_id` fields are ignored.
+//
+// It is responsibility of the client to ensure uniqueness of
+// the
+// `request_id` strings.
+//
+// `request_id` strings are limited to 64 characters.
+func (c *ProjectsConfigsCreateCall) RequestId(requestId string) *ProjectsConfigsCreateCall {
+	c.urlParams_.Set("requestId", requestId)
 	return c
 }
 
@@ -819,8 +1185,20 @@ func (c *ProjectsConfigsCreateCall) Context(ctx context.Context) *ProjectsConfig
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsCreateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.runtimeconfig)
@@ -836,10 +1214,7 @@ func (c *ProjectsConfigsCreateCall) doRequest(alt string) (*http.Response, error
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.create" call.
@@ -891,8 +1266,13 @@ func (c *ProjectsConfigsCreateCall) Do(opts ...googleapi.CallOption) (*RuntimeCo
 	//     "parent": {
 	//       "description": "The [project ID](https://support.google.com/cloud/answer/6158840?hl=en\u0026ref_topic=6158848)\nfor this request, in the format `projects/[PROJECT_ID]`.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional but recommended unique `request_id`. If the server\nreceives two `create()` requests  with the same\n`request_id`, then the second request will be ignored and the\nfirst resource created and stored in the backend is returned.\nEmpty `request_id` fields are ignored.\n\nIt is responsibility of the client to ensure uniqueness of the\n`request_id` strings.\n\n`request_id` strings are limited to 64 characters.",
+	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -918,6 +1298,7 @@ type ProjectsConfigsDeleteCall struct {
 	name       string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes a RuntimeConfig resource.
@@ -943,8 +1324,20 @@ func (c *ProjectsConfigsDeleteCall) Context(ctx context.Context) *ProjectsConfig
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -955,10 +1348,7 @@ func (c *ProjectsConfigsDeleteCall) doRequest(alt string) (*http.Response, error
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.delete" call.
@@ -1010,7 +1400,7 @@ func (c *ProjectsConfigsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, er
 	//     "name": {
 	//       "description": "The RuntimeConfig resource to delete, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1035,6 +1425,7 @@ type ProjectsConfigsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets information about a RuntimeConfig resource.
@@ -1070,8 +1461,20 @@ func (c *ProjectsConfigsGetCall) Context(ctx context.Context) *ProjectsConfigsGe
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1085,10 +1488,7 @@ func (c *ProjectsConfigsGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.get" call.
@@ -1140,7 +1540,7 @@ func (c *ProjectsConfigsGetCall) Do(opts ...googleapi.CallOption) (*RuntimeConfi
 	//     "name": {
 	//       "description": "The name of the RuntimeConfig resource to retrieve, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1148,6 +1548,149 @@ func (c *ProjectsConfigsGetCall) Do(opts ...googleapi.CallOption) (*RuntimeConfi
 	//   "path": "v1beta1/{+name}",
 	//   "response": {
 	//     "$ref": "RuntimeConfig"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
+}
+
+// method id "runtimeconfig.projects.configs.getIamPolicy":
+
+type ProjectsConfigsGetIamPolicyCall struct {
+	s            *Service
+	resource     string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// GetIamPolicy: Gets the access control policy for a resource.
+// Returns an empty policy if the resource exists and does not have a
+// policy
+// set.
+func (r *ProjectsConfigsService) GetIamPolicy(resource string) *ProjectsConfigsGetIamPolicyCall {
+	c := &ProjectsConfigsGetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsGetIamPolicyCall) Fields(s ...googleapi.Field) *ProjectsConfigsGetIamPolicyCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *ProjectsConfigsGetIamPolicyCall) IfNoneMatch(entityTag string) *ProjectsConfigsGetIamPolicyCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsGetIamPolicyCall) Context(ctx context.Context) *ProjectsConfigsGetIamPolicyCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsGetIamPolicyCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:getIamPolicy")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.getIamPolicy" call.
+// Exactly one of *Policy or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Policy.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *ProjectsConfigsGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Policy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Gets the access control policy for a resource.\nReturns an empty policy if the resource exists and does not have a policy\nset.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}:getIamPolicy",
+	//   "httpMethod": "GET",
+	//   "id": "runtimeconfig.projects.configs.getIamPolicy",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:getIamPolicy",
+	//   "response": {
+	//     "$ref": "Policy"
 	//   },
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
@@ -1165,6 +1708,7 @@ type ProjectsConfigsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Lists all the RuntimeConfig resources within project.
@@ -1216,8 +1760,20 @@ func (c *ProjectsConfigsListCall) Context(ctx context.Context) *ProjectsConfigsL
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1231,10 +1787,7 @@ func (c *ProjectsConfigsListCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.list" call.
@@ -1297,7 +1850,7 @@ func (c *ProjectsConfigsListCall) Do(opts ...googleapi.CallOption) (*ListConfigs
 	//     "parent": {
 	//       "description": "The [project ID](https://support.google.com/cloud/answer/6158840?hl=en\u0026ref_topic=6158848)\nfor this request, in the format `projects/[PROJECT_ID]`.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1335,6 +1888,290 @@ func (c *ProjectsConfigsListCall) Pages(ctx context.Context, f func(*ListConfigs
 	}
 }
 
+// method id "runtimeconfig.projects.configs.setIamPolicy":
+
+type ProjectsConfigsSetIamPolicyCall struct {
+	s                   *Service
+	resource            string
+	setiampolicyrequest *SetIamPolicyRequest
+	urlParams_          gensupport.URLParams
+	ctx_                context.Context
+	header_             http.Header
+}
+
+// SetIamPolicy: Sets the access control policy on the specified
+// resource. Replaces any
+// existing policy.
+func (r *ProjectsConfigsService) SetIamPolicy(resource string, setiampolicyrequest *SetIamPolicyRequest) *ProjectsConfigsSetIamPolicyCall {
+	c := &ProjectsConfigsSetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	c.setiampolicyrequest = setiampolicyrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsSetIamPolicyCall) Fields(s ...googleapi.Field) *ProjectsConfigsSetIamPolicyCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsSetIamPolicyCall) Context(ctx context.Context) *ProjectsConfigsSetIamPolicyCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsSetIamPolicyCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.setiampolicyrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:setIamPolicy")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.setIamPolicy" call.
+// Exactly one of *Policy or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Policy.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *ProjectsConfigsSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Policy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Sets the access control policy on the specified resource. Replaces any\nexisting policy.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}:setIamPolicy",
+	//   "httpMethod": "POST",
+	//   "id": "runtimeconfig.projects.configs.setIamPolicy",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy is being specified.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:setIamPolicy",
+	//   "request": {
+	//     "$ref": "SetIamPolicyRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "Policy"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
+}
+
+// method id "runtimeconfig.projects.configs.testIamPermissions":
+
+type ProjectsConfigsTestIamPermissionsCall struct {
+	s                         *Service
+	resource                  string
+	testiampermissionsrequest *TestIamPermissionsRequest
+	urlParams_                gensupport.URLParams
+	ctx_                      context.Context
+	header_                   http.Header
+}
+
+// TestIamPermissions: Returns permissions that a caller has on the
+// specified resource.
+// If the resource does not exist, this will return an empty set
+// of
+// permissions, not a NOT_FOUND error.
+//
+// Note: This operation is designed to be used for building
+// permission-aware
+// UIs and command-line tools, not for authorization checking. This
+// operation
+// may "fail open" without warning.
+func (r *ProjectsConfigsService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *ProjectsConfigsTestIamPermissionsCall {
+	c := &ProjectsConfigsTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	c.testiampermissionsrequest = testiampermissionsrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsTestIamPermissionsCall) Fields(s ...googleapi.Field) *ProjectsConfigsTestIamPermissionsCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsTestIamPermissionsCall) Context(ctx context.Context) *ProjectsConfigsTestIamPermissionsCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsTestIamPermissionsCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:testIamPermissions")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.testIamPermissions" call.
+// Exactly one of *TestIamPermissionsResponse or error will be non-nil.
+// Any non-2xx status code is an error. Response headers are in either
+// *TestIamPermissionsResponse.ServerResponse.Header or (if a response
+// was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *ProjectsConfigsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*TestIamPermissionsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TestIamPermissionsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns permissions that a caller has on the specified resource.\nIf the resource does not exist, this will return an empty set of\npermissions, not a NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}:testIamPermissions",
+	//   "httpMethod": "POST",
+	//   "id": "runtimeconfig.projects.configs.testIamPermissions",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:testIamPermissions",
+	//   "request": {
+	//     "$ref": "TestIamPermissionsRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "TestIamPermissionsResponse"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
+}
+
 // method id "runtimeconfig.projects.configs.update":
 
 type ProjectsConfigsUpdateCall struct {
@@ -1343,6 +2180,7 @@ type ProjectsConfigsUpdateCall struct {
 	runtimeconfig *RuntimeConfig
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
+	header_       http.Header
 }
 
 // Update: Updates a RuntimeConfig resource. The configuration must
@@ -1370,8 +2208,20 @@ func (c *ProjectsConfigsUpdateCall) Context(ctx context.Context) *ProjectsConfig
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.runtimeconfig)
@@ -1387,10 +2237,7 @@ func (c *ProjectsConfigsUpdateCall) doRequest(alt string) (*http.Response, error
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.update" call.
@@ -1442,7 +2289,7 @@ func (c *ProjectsConfigsUpdateCall) Do(opts ...googleapi.CallOption) (*RuntimeCo
 	//     "name": {
 	//       "description": "The name of the RuntimeConfig resource to update, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1470,6 +2317,7 @@ type ProjectsConfigsOperationsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets the latest state of a long-running operation.  Clients can
@@ -1509,8 +2357,20 @@ func (c *ProjectsConfigsOperationsGetCall) Context(ctx context.Context) *Project
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsOperationsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsOperationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1524,10 +2384,7 @@ func (c *ProjectsConfigsOperationsGetCall) doRequest(alt string) (*http.Response
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.operations.get" call.
@@ -1579,7 +2436,7 @@ func (c *ProjectsConfigsOperationsGetCall) Do(opts ...googleapi.CallOption) (*Op
 	//     "name": {
 	//       "description": "The name of the operation resource.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/operations/.*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/operations/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1587,6 +2444,152 @@ func (c *ProjectsConfigsOperationsGetCall) Do(opts ...googleapi.CallOption) (*Op
 	//   "path": "v1beta1/{+name}",
 	//   "response": {
 	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
+}
+
+// method id "runtimeconfig.projects.configs.operations.testIamPermissions":
+
+type ProjectsConfigsOperationsTestIamPermissionsCall struct {
+	s                         *Service
+	resource                  string
+	testiampermissionsrequest *TestIamPermissionsRequest
+	urlParams_                gensupport.URLParams
+	ctx_                      context.Context
+	header_                   http.Header
+}
+
+// TestIamPermissions: Returns permissions that a caller has on the
+// specified resource.
+// If the resource does not exist, this will return an empty set
+// of
+// permissions, not a NOT_FOUND error.
+//
+// Note: This operation is designed to be used for building
+// permission-aware
+// UIs and command-line tools, not for authorization checking. This
+// operation
+// may "fail open" without warning.
+func (r *ProjectsConfigsOperationsService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *ProjectsConfigsOperationsTestIamPermissionsCall {
+	c := &ProjectsConfigsOperationsTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	c.testiampermissionsrequest = testiampermissionsrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsOperationsTestIamPermissionsCall) Fields(s ...googleapi.Field) *ProjectsConfigsOperationsTestIamPermissionsCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsOperationsTestIamPermissionsCall) Context(ctx context.Context) *ProjectsConfigsOperationsTestIamPermissionsCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsOperationsTestIamPermissionsCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsOperationsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:testIamPermissions")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.operations.testIamPermissions" call.
+// Exactly one of *TestIamPermissionsResponse or error will be non-nil.
+// Any non-2xx status code is an error. Response headers are in either
+// *TestIamPermissionsResponse.ServerResponse.Header or (if a response
+// was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *ProjectsConfigsOperationsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*TestIamPermissionsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TestIamPermissionsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns permissions that a caller has on the specified resource.\nIf the resource does not exist, this will return an empty set of\npermissions, not a NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}/operations/{operationsId}:testIamPermissions",
+	//   "httpMethod": "POST",
+	//   "id": "runtimeconfig.projects.configs.operations.testIamPermissions",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/operations/.+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:testIamPermissions",
+	//   "request": {
+	//     "$ref": "TestIamPermissionsRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "TestIamPermissionsResponse"
 	//   },
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
@@ -1604,6 +2607,7 @@ type ProjectsConfigsVariablesCreateCall struct {
 	variable   *Variable
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Create: Creates a variable within the given configuration. You cannot
@@ -1614,13 +2618,30 @@ type ProjectsConfigsVariablesCreateCall struct {
 //
 // To learn more about creating a variable, read the
 // [Setting and Getting
-// Data](/deployment-manager/runtime-configurator/seta-and-get-variables)
+// Data](/deployment-manager/runtime-configurator/set-and-get-variables)
 //
 // documentation.
 func (r *ProjectsConfigsVariablesService) Create(parent string, variable *Variable) *ProjectsConfigsVariablesCreateCall {
 	c := &ProjectsConfigsVariablesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
 	c.variable = variable
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional but
+// recommended unique `request_id`. If the server
+// receives two `create()` requests  with the same
+// `request_id`, then the second request will be ignored and the
+// first resource created and stored in the backend is returned.
+// Empty `request_id` fields are ignored.
+//
+// It is responsibility of the client to ensure uniqueness of
+// the
+// `request_id` strings.
+//
+// `request_id` strings are limited to 64 characters.
+func (c *ProjectsConfigsVariablesCreateCall) RequestId(requestId string) *ProjectsConfigsVariablesCreateCall {
+	c.urlParams_.Set("requestId", requestId)
 	return c
 }
 
@@ -1640,8 +2661,20 @@ func (c *ProjectsConfigsVariablesCreateCall) Context(ctx context.Context) *Proje
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesCreateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.variable)
@@ -1657,10 +2690,7 @@ func (c *ProjectsConfigsVariablesCreateCall) doRequest(alt string) (*http.Respon
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.create" call.
@@ -1701,7 +2731,7 @@ func (c *ProjectsConfigsVariablesCreateCall) Do(opts ...googleapi.CallOption) (*
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a variable within the given configuration. You cannot create\na variable with a name that is a prefix of an existing variable name, or a\nname that has an existing variable name as a prefix.\n\nTo learn more about creating a variable, read the\n[Setting and Getting Data](/deployment-manager/runtime-configurator/seta-and-get-variables)\ndocumentation.",
+	//   "description": "Creates a variable within the given configuration. You cannot create\na variable with a name that is a prefix of an existing variable name, or a\nname that has an existing variable name as a prefix.\n\nTo learn more about creating a variable, read the\n[Setting and Getting Data](/deployment-manager/runtime-configurator/set-and-get-variables)\ndocumentation.",
 	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}/variables",
 	//   "httpMethod": "POST",
 	//   "id": "runtimeconfig.projects.configs.variables.create",
@@ -1712,8 +2742,13 @@ func (c *ProjectsConfigsVariablesCreateCall) Do(opts ...googleapi.CallOption) (*
 	//     "parent": {
 	//       "description": "The path to the RutimeConfig resource that this variable should belong to.\nThe configuration must exist beforehand; the path must by in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional but recommended unique `request_id`. If the server\nreceives two `create()` requests  with the same\n`request_id`, then the second request will be ignored and the\nfirst resource created and stored in the backend is returned.\nEmpty `request_id` fields are ignored.\n\nIt is responsibility of the client to ensure uniqueness of the\n`request_id` strings.\n\n`request_id` strings are limited to 64 characters.",
+	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -1739,6 +2774,7 @@ type ProjectsConfigsVariablesDeleteCall struct {
 	name       string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes a variable or multiple variables.
@@ -1780,8 +2816,20 @@ func (c *ProjectsConfigsVariablesDeleteCall) Context(ctx context.Context) *Proje
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -1792,10 +2840,7 @@ func (c *ProjectsConfigsVariablesDeleteCall) doRequest(alt string) (*http.Respon
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.delete" call.
@@ -1847,7 +2892,7 @@ func (c *ProjectsConfigsVariablesDeleteCall) Do(opts ...googleapi.CallOption) (*
 	//     "name": {
 	//       "description": "The name of the variable to delete, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]/variables/[VARIABLE_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/variables/.*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/variables/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     },
@@ -1877,6 +2922,7 @@ type ProjectsConfigsVariablesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets information about a single variable.
@@ -1912,8 +2958,20 @@ func (c *ProjectsConfigsVariablesGetCall) Context(ctx context.Context) *Projects
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1927,10 +2985,7 @@ func (c *ProjectsConfigsVariablesGetCall) doRequest(alt string) (*http.Response,
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.get" call.
@@ -1982,7 +3037,7 @@ func (c *ProjectsConfigsVariablesGetCall) Do(opts ...googleapi.CallOption) (*Var
 	//     "name": {
 	//       "description": "The name of the variable to return, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]/variables/[VARIBLE_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/variables/.*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/variables/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -2007,11 +3062,16 @@ type ProjectsConfigsVariablesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Lists variables within given a configuration, matching any
 // provided filters.
-// This only lists variable names, not the values.
+// This only lists variable names, not the values, unless
+// `return_values` is
+// true, in which case only variables that user has IAM permission to
+// GetVariable
+// will be returned.
 func (r *ProjectsConfigsVariablesService) List(parent string) *ProjectsConfigsVariablesListCall {
 	c := &ProjectsConfigsVariablesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -2045,6 +3105,16 @@ func (c *ProjectsConfigsVariablesListCall) PageToken(pageToken string) *Projects
 	return c
 }
 
+// ReturnValues sets the optional parameter "returnValues": The flag
+// indicates whether the user wants to return values of variables.
+// If true, then only those variables that user has IAM GetVariable
+// permission
+// will be returned along with their values.
+func (c *ProjectsConfigsVariablesListCall) ReturnValues(returnValues bool) *ProjectsConfigsVariablesListCall {
+	c.urlParams_.Set("returnValues", fmt.Sprint(returnValues))
+	return c
+}
+
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -2071,8 +3141,20 @@ func (c *ProjectsConfigsVariablesListCall) Context(ctx context.Context) *Project
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -2086,10 +3168,7 @@ func (c *ProjectsConfigsVariablesListCall) doRequest(alt string) (*http.Response
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.list" call.
@@ -2130,7 +3209,7 @@ func (c *ProjectsConfigsVariablesListCall) Do(opts ...googleapi.CallOption) (*Li
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists variables within given a configuration, matching any provided filters.\nThis only lists variable names, not the values.",
+	//   "description": "Lists variables within given a configuration, matching any provided filters.\nThis only lists variable names, not the values, unless `return_values` is\ntrue, in which case only variables that user has IAM permission to GetVariable\nwill be returned.",
 	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}/variables",
 	//   "httpMethod": "GET",
 	//   "id": "runtimeconfig.projects.configs.variables.list",
@@ -2157,9 +3236,14 @@ func (c *ProjectsConfigsVariablesListCall) Do(opts ...googleapi.CallOption) (*Li
 	//     "parent": {
 	//       "description": "The path to the RuntimeConfig resource for which you want to list variables.\nThe configuration must exist beforehand; the path must by in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
+	//     },
+	//     "returnValues": {
+	//       "description": "The flag indicates whether the user wants to return values of variables.\nIf true, then only those variables that user has IAM GetVariable permission\nwill be returned along with their values.",
+	//       "location": "query",
+	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "v1beta1/{+parent}/variables",
@@ -2195,6 +3279,152 @@ func (c *ProjectsConfigsVariablesListCall) Pages(ctx context.Context, f func(*Li
 	}
 }
 
+// method id "runtimeconfig.projects.configs.variables.testIamPermissions":
+
+type ProjectsConfigsVariablesTestIamPermissionsCall struct {
+	s                         *Service
+	resource                  string
+	testiampermissionsrequest *TestIamPermissionsRequest
+	urlParams_                gensupport.URLParams
+	ctx_                      context.Context
+	header_                   http.Header
+}
+
+// TestIamPermissions: Returns permissions that a caller has on the
+// specified resource.
+// If the resource does not exist, this will return an empty set
+// of
+// permissions, not a NOT_FOUND error.
+//
+// Note: This operation is designed to be used for building
+// permission-aware
+// UIs and command-line tools, not for authorization checking. This
+// operation
+// may "fail open" without warning.
+func (r *ProjectsConfigsVariablesService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *ProjectsConfigsVariablesTestIamPermissionsCall {
+	c := &ProjectsConfigsVariablesTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	c.testiampermissionsrequest = testiampermissionsrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsVariablesTestIamPermissionsCall) Fields(s ...googleapi.Field) *ProjectsConfigsVariablesTestIamPermissionsCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsVariablesTestIamPermissionsCall) Context(ctx context.Context) *ProjectsConfigsVariablesTestIamPermissionsCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesTestIamPermissionsCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsVariablesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:testIamPermissions")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.variables.testIamPermissions" call.
+// Exactly one of *TestIamPermissionsResponse or error will be non-nil.
+// Any non-2xx status code is an error. Response headers are in either
+// *TestIamPermissionsResponse.ServerResponse.Header or (if a response
+// was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *ProjectsConfigsVariablesTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*TestIamPermissionsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TestIamPermissionsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns permissions that a caller has on the specified resource.\nIf the resource does not exist, this will return an empty set of\npermissions, not a NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}/variables/{variablesId}:testIamPermissions",
+	//   "httpMethod": "POST",
+	//   "id": "runtimeconfig.projects.configs.variables.testIamPermissions",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/variables/.+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:testIamPermissions",
+	//   "request": {
+	//     "$ref": "TestIamPermissionsRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "TestIamPermissionsResponse"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
+}
+
 // method id "runtimeconfig.projects.configs.variables.update":
 
 type ProjectsConfigsVariablesUpdateCall struct {
@@ -2203,6 +3433,7 @@ type ProjectsConfigsVariablesUpdateCall struct {
 	variable   *Variable
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Updates an existing variable with a new value.
@@ -2229,8 +3460,20 @@ func (c *ProjectsConfigsVariablesUpdateCall) Context(ctx context.Context) *Proje
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.variable)
@@ -2246,10 +3489,7 @@ func (c *ProjectsConfigsVariablesUpdateCall) doRequest(alt string) (*http.Respon
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.update" call.
@@ -2301,7 +3541,7 @@ func (c *ProjectsConfigsVariablesUpdateCall) Do(opts ...googleapi.CallOption) (*
 	//     "name": {
 	//       "description": "The name of the variable to update, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]/variables/[VARIABLE_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/variables/.*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/variables/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -2329,6 +3569,7 @@ type ProjectsConfigsVariablesWatchCall struct {
 	watchvariablerequest *WatchVariableRequest
 	urlParams_           gensupport.URLParams
 	ctx_                 context.Context
+	header_              http.Header
 }
 
 // Watch: Watches a specific variable and waits for a change in the
@@ -2375,8 +3616,20 @@ func (c *ProjectsConfigsVariablesWatchCall) Context(ctx context.Context) *Projec
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsVariablesWatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsVariablesWatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.watchvariablerequest)
@@ -2392,10 +3645,7 @@ func (c *ProjectsConfigsVariablesWatchCall) doRequest(alt string) (*http.Respons
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.variables.watch" call.
@@ -2447,7 +3697,7 @@ func (c *ProjectsConfigsVariablesWatchCall) Do(opts ...googleapi.CallOption) (*V
 	//     "name": {
 	//       "description": "The name of the variable to watch, in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/variables/.*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/variables/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -2475,6 +3725,7 @@ type ProjectsConfigsWaitersCreateCall struct {
 	waiter     *Waiter
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Create: Creates a Waiter resource. This operation returns a
@@ -2494,6 +3745,23 @@ func (r *ProjectsConfigsWaitersService) Create(parent string, waiter *Waiter) *P
 	return c
 }
 
+// RequestId sets the optional parameter "requestId": An optional but
+// recommended unique `request_id`. If the server
+// receives two `create()` requests  with the same
+// `request_id`, then the second request will be ignored and the
+// first resource created and stored in the backend is returned.
+// Empty `request_id` fields are ignored.
+//
+// It is responsibility of the client to ensure uniqueness of
+// the
+// `request_id` strings.
+//
+// `request_id` strings are limited to 64 characters.
+func (c *ProjectsConfigsWaitersCreateCall) RequestId(requestId string) *ProjectsConfigsWaitersCreateCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -2510,8 +3778,20 @@ func (c *ProjectsConfigsWaitersCreateCall) Context(ctx context.Context) *Project
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsWaitersCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsWaitersCreateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.waiter)
@@ -2527,10 +3807,7 @@ func (c *ProjectsConfigsWaitersCreateCall) doRequest(alt string) (*http.Response
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.waiters.create" call.
@@ -2582,8 +3859,13 @@ func (c *ProjectsConfigsWaitersCreateCall) Do(opts ...googleapi.CallOption) (*Op
 	//     "parent": {
 	//       "description": "The path to the configuration that will own the waiter.\nThe configuration must exist beforehand; the path must by in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional but recommended unique `request_id`. If the server\nreceives two `create()` requests  with the same\n`request_id`, then the second request will be ignored and the\nfirst resource created and stored in the backend is returned.\nEmpty `request_id` fields are ignored.\n\nIt is responsibility of the client to ensure uniqueness of the\n`request_id` strings.\n\n`request_id` strings are limited to 64 characters.",
+	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -2609,6 +3891,7 @@ type ProjectsConfigsWaitersDeleteCall struct {
 	name       string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes the waiter with the specified name.
@@ -2634,8 +3917,20 @@ func (c *ProjectsConfigsWaitersDeleteCall) Context(ctx context.Context) *Project
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsWaitersDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsWaitersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -2646,10 +3941,7 @@ func (c *ProjectsConfigsWaitersDeleteCall) doRequest(alt string) (*http.Response
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.waiters.delete" call.
@@ -2701,7 +3993,7 @@ func (c *ProjectsConfigsWaitersDeleteCall) Do(opts ...googleapi.CallOption) (*Em
 	//     "name": {
 	//       "description": "The Waiter resource to delete, in the format:\n\n `projects/[PROJECT_ID]/configs/[CONFIG_NAME]/waiters/[WAITER_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/waiters/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/waiters/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -2726,6 +4018,7 @@ type ProjectsConfigsWaitersGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets information about a single waiter.
@@ -2761,8 +4054,20 @@ func (c *ProjectsConfigsWaitersGetCall) Context(ctx context.Context) *ProjectsCo
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsWaitersGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsWaitersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -2776,10 +4081,7 @@ func (c *ProjectsConfigsWaitersGetCall) doRequest(alt string) (*http.Response, e
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.waiters.get" call.
@@ -2831,7 +4133,7 @@ func (c *ProjectsConfigsWaitersGetCall) Do(opts ...googleapi.CallOption) (*Waite
 	//     "name": {
 	//       "description": "The fully-qualified name of the Waiter resource object to retrieve, in the\nformat:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]/waiters/[WAITER_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*/waiters/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/waiters/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -2856,6 +4158,7 @@ type ProjectsConfigsWaitersListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List waiters within the given configuration.
@@ -2907,8 +4210,20 @@ func (c *ProjectsConfigsWaitersListCall) Context(ctx context.Context) *ProjectsC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsWaitersListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsConfigsWaitersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -2922,10 +4237,7 @@ func (c *ProjectsConfigsWaitersListCall) doRequest(alt string) (*http.Response, 
 	googleapi.Expand(req.URL, map[string]string{
 		"parent": c.parent,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "runtimeconfig.projects.configs.waiters.list" call.
@@ -2988,7 +4300,7 @@ func (c *ProjectsConfigsWaitersListCall) Do(opts ...googleapi.CallOption) (*List
 	//     "parent": {
 	//       "description": "The path to the configuration for which you want to get a list of waiters.\nThe configuration must exist beforehand; the path must by in the format:\n\n`projects/[PROJECT_ID]/configs/[CONFIG_NAME]`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/configs/[^/]*$",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -3024,4 +4336,150 @@ func (c *ProjectsConfigsWaitersListCall) Pages(ctx context.Context, f func(*List
 		}
 		c.PageToken(x.NextPageToken)
 	}
+}
+
+// method id "runtimeconfig.projects.configs.waiters.testIamPermissions":
+
+type ProjectsConfigsWaitersTestIamPermissionsCall struct {
+	s                         *Service
+	resource                  string
+	testiampermissionsrequest *TestIamPermissionsRequest
+	urlParams_                gensupport.URLParams
+	ctx_                      context.Context
+	header_                   http.Header
+}
+
+// TestIamPermissions: Returns permissions that a caller has on the
+// specified resource.
+// If the resource does not exist, this will return an empty set
+// of
+// permissions, not a NOT_FOUND error.
+//
+// Note: This operation is designed to be used for building
+// permission-aware
+// UIs and command-line tools, not for authorization checking. This
+// operation
+// may "fail open" without warning.
+func (r *ProjectsConfigsWaitersService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *ProjectsConfigsWaitersTestIamPermissionsCall {
+	c := &ProjectsConfigsWaitersTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.resource = resource
+	c.testiampermissionsrequest = testiampermissionsrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsConfigsWaitersTestIamPermissionsCall) Fields(s ...googleapi.Field) *ProjectsConfigsWaitersTestIamPermissionsCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsConfigsWaitersTestIamPermissionsCall) Context(ctx context.Context) *ProjectsConfigsWaitersTestIamPermissionsCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsConfigsWaitersTestIamPermissionsCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsConfigsWaitersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:testIamPermissions")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "runtimeconfig.projects.configs.waiters.testIamPermissions" call.
+// Exactly one of *TestIamPermissionsResponse or error will be non-nil.
+// Any non-2xx status code is an error. Response headers are in either
+// *TestIamPermissionsResponse.ServerResponse.Header or (if a response
+// was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *ProjectsConfigsWaitersTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*TestIamPermissionsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TestIamPermissionsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns permissions that a caller has on the specified resource.\nIf the resource does not exist, this will return an empty set of\npermissions, not a NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.",
+	//   "flatPath": "v1beta1/projects/{projectsId}/configs/{configsId}/waiters/{waitersId}:testIamPermissions",
+	//   "httpMethod": "POST",
+	//   "id": "runtimeconfig.projects.configs.waiters.testIamPermissions",
+	//   "parameterOrder": [
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "resource": {
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/configs/[^/]+/waiters/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v1beta1/{+resource}:testIamPermissions",
+	//   "request": {
+	//     "$ref": "TestIamPermissionsRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "TestIamPermissionsResponse"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/cloudruntimeconfig"
+	//   ]
+	// }
+
 }

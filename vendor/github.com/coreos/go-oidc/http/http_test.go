@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -175,6 +174,13 @@ func TestExpiresPass(t *testing.T) {
 		// no Expires
 		{
 			date:    "Thu, 01 Dec 1983 22:00:00 GMT",
+			wantTTL: 0,
+			wantOK:  false,
+		},
+		// Expires set to false
+		{
+			date:    "Thu, 01 Dec 1983 22:00:00 GMT",
+			exp:     "0",
 			wantTTL: 0,
 			wantOK:  false,
 		},
@@ -364,17 +370,5 @@ func TestNewResourceLocation(t *testing.T) {
 		if tt.want != got {
 			t.Errorf("case %d: want=%s, got=%s", i, tt.want, got)
 		}
-	}
-}
-
-func TestCopyRequest(t *testing.T) {
-	r1, err := http.NewRequest("GET", "http://example.com", strings.NewReader("foo"))
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	r2 := CopyRequest(r1)
-	if !reflect.DeepEqual(r1, r2) {
-		t.Fatalf("Result of CopyRequest incorrect: %#v != %#v", r1, r2)
 	}
 }

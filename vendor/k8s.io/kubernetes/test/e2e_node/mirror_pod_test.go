@@ -23,16 +23,17 @@ import (
 	"path/filepath"
 	"time"
 
-	"k8s.io/kubernetes/pkg/api/errors"
-	"k8s.io/kubernetes/pkg/api/v1"
-	metav1 "k8s.io/kubernetes/pkg/apis/meta/v1"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
-	"k8s.io/kubernetes/pkg/types"
-	"k8s.io/kubernetes/pkg/util/uuid"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/uuid"
+	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	imageutils "k8s.io/kubernetes/test/utils/image"
 )
 
 var _ = framework.KubeDescribe("MirrorPod", func() {
@@ -48,7 +49,7 @@ var _ = framework.KubeDescribe("MirrorPod", func() {
 
 			By("create the static pod")
 			err := createStaticPod(manifestPath, staticPodName, ns,
-				"gcr.io/google_containers/nginx-slim:0.7", v1.RestartPolicyAlways)
+				imageutils.GetE2EImage(imageutils.NginxSlim), v1.RestartPolicyAlways)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			By("wait for the mirror pod to be running")
@@ -85,7 +86,7 @@ var _ = framework.KubeDescribe("MirrorPod", func() {
 			uid := pod.UID
 
 			By("delete the mirror pod with grace period 30s")
-			err = f.ClientSet.Core().Pods(ns).Delete(mirrorPodName, v1.NewDeleteOptions(30))
+			err = f.ClientSet.Core().Pods(ns).Delete(mirrorPodName, metav1.NewDeleteOptions(30))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			By("wait for the mirror pod to be recreated")
@@ -100,7 +101,7 @@ var _ = framework.KubeDescribe("MirrorPod", func() {
 			uid := pod.UID
 
 			By("delete the mirror pod with grace period 0s")
-			err = f.ClientSet.Core().Pods(ns).Delete(mirrorPodName, v1.NewDeleteOptions(0))
+			err = f.ClientSet.Core().Pods(ns).Delete(mirrorPodName, metav1.NewDeleteOptions(0))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			By("wait for the mirror pod to be recreated")

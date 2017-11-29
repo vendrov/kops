@@ -1,4 +1,7 @@
-reviewers:
+approvers:
 - mikedanese
-- kargakis
+reviewers:
+- janetkuo
 - lukaszo
+- mikedanese
+- tnozicka

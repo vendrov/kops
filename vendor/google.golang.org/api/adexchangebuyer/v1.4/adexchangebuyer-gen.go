@@ -261,24 +261,35 @@ type Account struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BidderLocation") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Account) MarshalJSON() ([]byte, error) {
 	type noMethod Account
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type AccountBidderLocation struct {
-	// BidProtocol: The protocol that the bidder endpoint is using. By
-	// default, OpenRTB protocols use JSON, except
-	// PROTOCOL_OPENRTB_PROTOBUF. PROTOCOL_OPENRTB_PROTOBUF uses protobuf
-	// encoding over the latest OpenRTB protocol version, which is 2.3 right
-	// now. Allowed values:
+	// BidProtocol: The protocol that the bidder endpoint is using. OpenRTB
+	// protocols with prefix PROTOCOL_OPENRTB_PROTOBUF use proto buffer,
+	// otherwise use JSON.  Allowed values:
 	// - PROTOCOL_ADX
 	// - PROTOCOL_OPENRTB_2_2
 	// - PROTOCOL_OPENRTB_2_3
-	// - PROTOCOL_OPENRTB_PROTOBUF
+	// - PROTOCOL_OPENRTB_2_4
+	// - PROTOCOL_OPENRTB_2_5
+	// - PROTOCOL_OPENRTB_PROTOBUF_2_3
+	// - PROTOCOL_OPENRTB_PROTOBUF_2_4
+	// - PROTOCOL_OPENRTB_PROTOBUF_2_5
 	BidProtocol string `json:"bidProtocol,omitempty"`
 
 	// MaximumQps: The maximum queries per second the Ad Exchange will send.
@@ -303,12 +314,20 @@ type AccountBidderLocation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BidProtocol") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AccountBidderLocation) MarshalJSON() ([]byte, error) {
 	type noMethod AccountBidderLocation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // AccountsList: An account feed lists Ad Exchange buyer accounts that
@@ -332,12 +351,20 @@ type AccountsList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Items") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AccountsList) MarshalJSON() ([]byte, error) {
 	type noMethod AccountsList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type AddOrderDealsRequest struct {
@@ -357,12 +384,20 @@ type AddOrderDealsRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AddOrderDealsRequest) MarshalJSON() ([]byte, error) {
 	type noMethod AddOrderDealsRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type AddOrderDealsResponse struct {
@@ -384,12 +419,20 @@ type AddOrderDealsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AddOrderDealsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AddOrderDealsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type AddOrderNotesRequest struct {
@@ -403,12 +446,20 @@ type AddOrderNotesRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Notes") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AddOrderNotesRequest) MarshalJSON() ([]byte, error) {
 	type noMethod AddOrderNotesRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type AddOrderNotesResponse struct {
@@ -425,12 +476,20 @@ type AddOrderNotesResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Notes") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *AddOrderNotesResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AddOrderNotesResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // BillingInfo: The configuration data for an Ad Exchange billing info.
@@ -460,12 +519,20 @@ type BillingInfo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *BillingInfo) MarshalJSON() ([]byte, error) {
 	type noMethod BillingInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // BillingInfoList: A billing info feed lists Billing Info the Ad
@@ -489,12 +556,20 @@ type BillingInfoList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Items") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *BillingInfoList) MarshalJSON() ([]byte, error) {
 	type noMethod BillingInfoList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Budget: The configuration data for Ad Exchange RTB - Budget API.
@@ -533,12 +608,20 @@ type Budget struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Budget) MarshalJSON() ([]byte, error) {
 	type noMethod Budget
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type Buyer struct {
@@ -552,12 +635,20 @@ type Buyer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Buyer) MarshalJSON() ([]byte, error) {
 	type noMethod Buyer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type ContactInformation struct {
@@ -574,12 +665,20 @@ type ContactInformation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Email") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ContactInformation) MarshalJSON() ([]byte, error) {
 	type noMethod ContactInformation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreateOrdersRequest struct {
@@ -596,12 +695,20 @@ type CreateOrdersRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Proposals") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreateOrdersRequest) MarshalJSON() ([]byte, error) {
 	type noMethod CreateOrdersRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreateOrdersResponse struct {
@@ -619,12 +726,20 @@ type CreateOrdersResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Proposals") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreateOrdersResponse) MarshalJSON() ([]byte, error) {
 	type noMethod CreateOrdersResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Creative: A creative and its classification data.
@@ -645,7 +760,7 @@ type Creative struct {
 	AdvertiserId googleapi.Int64s `json:"advertiserId,omitempty"`
 
 	// AdvertiserName: The name of the company being advertised in the
-	// creative.
+	// creative. The value provided must exist in the advertisers.txt file.
 	AdvertiserName string `json:"advertiserName,omitempty"`
 
 	// AgencyId: The agency id for this creative.
@@ -657,8 +772,9 @@ type Creative struct {
 	// timestamp).
 	ApiUploadTimestamp string `json:"apiUploadTimestamp,omitempty"`
 
-	// Attribute: All attributes for the ads that may be shown from this
-	// snippet.
+	// Attribute: List of buyer selectable attributes for the ads that may
+	// be shown from this snippet. Each attribute is represented by an
+	// integer as defined in  buyer-declarable-creative-attributes.txt.
 	Attribute []int64 `json:"attribute,omitempty"`
 
 	// BuyerCreativeId: A buyer-specific id identifying the creative in this
@@ -680,6 +796,10 @@ type Creative struct {
 	// servingRestrictions directly.
 	DealsStatus string `json:"dealsStatus,omitempty"`
 
+	// DetectedDomains: Detected domains for this creative. Read-only. This
+	// field should not be set in requests.
+	DetectedDomains []string `json:"detectedDomains,omitempty"`
+
 	// FilteringReasons: The filtering reasons for the creative. Read-only.
 	// This field should not be set in requests.
 	FilteringReasons *CreativeFilteringReasons `json:"filteringReasons,omitempty"`
@@ -698,8 +818,9 @@ type Creative struct {
 	// field should not be set in requests.
 	Languages []string `json:"languages,omitempty"`
 
-	// NativeAd: If nativeAd is set, HTMLSnippet and videoURL should not be
-	// set.
+	// NativeAd: If nativeAd is set, HTMLSnippet and the videoURL outside of
+	// nativeAd should not be set. (The videoURL inside nativeAd can be
+	// set.)
 	NativeAd *CreativeNativeAd `json:"nativeAd,omitempty"`
 
 	// OpenAuctionStatus: Top-level open auction status. Read-only. This
@@ -710,35 +831,43 @@ type Creative struct {
 	// ServingRestrictions directly.
 	OpenAuctionStatus string `json:"openAuctionStatus,omitempty"`
 
-	// ProductCategories: Detected product categories, if any. Read-only.
-	// This field should not be set in requests.
+	// ProductCategories: Detected product categories, if any. Each category
+	// is represented by an integer as defined in
+	// ad-product-categories.txt. Read-only. This field should not be set in
+	// requests.
 	ProductCategories []int64 `json:"productCategories,omitempty"`
 
 	// RestrictedCategories: All restricted categories for the ads that may
-	// be shown from this snippet.
+	// be shown from this snippet. Each category is represented by an
+	// integer as defined in the  ad-restricted-categories.txt.
 	RestrictedCategories []int64 `json:"restrictedCategories,omitempty"`
 
-	// SensitiveCategories: Detected sensitive categories, if any.
-	// Read-only. This field should not be set in requests.
+	// SensitiveCategories: Detected sensitive categories, if any. Each
+	// category is represented by an integer as defined in
+	// ad-sensitive-categories.txt. Read-only. This field should not be set
+	// in requests.
 	SensitiveCategories []int64 `json:"sensitiveCategories,omitempty"`
 
 	// ServingRestrictions: The granular status of this ad in specific
 	// contexts. A context here relates to where something ultimately serves
 	// (for example, a physical location, a platform, an HTTPS vs HTTP
 	// request, or the type of auction). Read-only. This field should not be
-	// set in requests.
+	// set in requests. See the examples in the Creatives guide for more
+	// details.
 	ServingRestrictions []*CreativeServingRestrictions `json:"servingRestrictions,omitempty"`
 
-	// VendorType: All vendor types for the ads that may be shown from this
-	// snippet.
+	// VendorType: List of vendor types for the ads that may be shown from
+	// this snippet. Each vendor type is represented by an integer as
+	// defined in vendors.txt.
 	VendorType []int64 `json:"vendorType,omitempty"`
 
 	// Version: The version for this creative. Read-only. This field should
 	// not be set in requests.
 	Version int64 `json:"version,omitempty"`
 
-	// VideoURL: The url to fetch a video ad. If set, HTMLSnippet should not
-	// be set.
+	// VideoURL: The URL to fetch a video ad. If set, HTMLSnippet and the
+	// nativeAd should not be set. Note, this is different from
+	// resource.native_ad.video_url above.
 	VideoURL string `json:"videoURL,omitempty"`
 
 	// Width: Ad width.
@@ -755,12 +884,20 @@ type Creative struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HTMLSnippet") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Creative) MarshalJSON() ([]byte, error) {
 	type noMethod Creative
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeCorrections struct {
@@ -781,12 +918,20 @@ type CreativeCorrections struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Contexts") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeCorrections) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeCorrections
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeCorrectionsContexts struct {
@@ -813,12 +958,20 @@ type CreativeCorrectionsContexts struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AuctionType") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeCorrectionsContexts) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeCorrectionsContexts
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CreativeFilteringReasons: The filtering reasons for the creative.
@@ -838,12 +991,20 @@ type CreativeFilteringReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Date") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeFilteringReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeFilteringReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeFilteringReasonsReasons struct {
@@ -852,8 +1013,8 @@ type CreativeFilteringReasonsReasons struct {
 	// exchange.
 	FilteringCount int64 `json:"filteringCount,omitempty,string"`
 
-	// FilteringStatus: The filtering status code. Please refer to the
-	// creative-status-codes.txt file for different statuses.
+	// FilteringStatus: The filtering status code as defined in
+	// creative-status-codes.txt.
 	FilteringStatus int64 `json:"filteringStatus,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "FilteringCount") to
@@ -863,16 +1024,26 @@ type CreativeFilteringReasonsReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FilteringCount") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeFilteringReasonsReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeFilteringReasonsReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// CreativeNativeAd: If nativeAd is set, HTMLSnippet and videoURL should
-// not be set.
+// CreativeNativeAd: If nativeAd is set, HTMLSnippet and the videoURL
+// outside of nativeAd should not be set. (The videoURL inside nativeAd
+// can be set.)
 type CreativeNativeAd struct {
 	Advertiser string `json:"advertiser,omitempty"`
 
@@ -885,6 +1056,10 @@ type CreativeNativeAd struct {
 	// CallToAction: A label for the button that the user is supposed to
 	// click.
 	CallToAction string `json:"callToAction,omitempty"`
+
+	// ClickLinkUrl: The URL that the browser/SDK will load when the user
+	// clicks the ad.
+	ClickLinkUrl string `json:"clickLinkUrl,omitempty"`
 
 	// ClickTrackingUrl: The URL to use for click tracking.
 	ClickTrackingUrl string `json:"clickTrackingUrl,omitempty"`
@@ -913,6 +1088,10 @@ type CreativeNativeAd struct {
 	// app.
 	Store string `json:"store,omitempty"`
 
+	// VideoURL: The URL of the XML VAST for a native ad. Note this is a
+	// separate field from resource.video_url.
+	VideoURL string `json:"videoURL,omitempty"`
+
 	// ForceSendFields is a list of field names (e.g. "Advertiser") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
@@ -920,12 +1099,34 @@ type CreativeNativeAd struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Advertiser") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAd) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAd
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *CreativeNativeAd) UnmarshalJSON(data []byte) error {
+	type noMethod CreativeNativeAd
+	var s1 struct {
+		StarRating gensupport.JSONFloat64 `json:"starRating"`
+		*noMethod
+	}
+	s1.noMethod = (*noMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.StarRating = float64(s1.StarRating)
+	return nil
 }
 
 // CreativeNativeAdAppIcon: The app icon, for app download ads.
@@ -943,12 +1144,20 @@ type CreativeNativeAdAppIcon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Height") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdAppIcon) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdAppIcon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CreativeNativeAdImage: A large image.
@@ -966,12 +1175,20 @@ type CreativeNativeAdImage struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Height") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdImage) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdImage
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CreativeNativeAdLogo: A smaller image, for the advertiser logo.
@@ -989,12 +1206,20 @@ type CreativeNativeAdLogo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Height") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdLogo) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdLogo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeServingRestrictions struct {
@@ -1020,12 +1245,20 @@ type CreativeServingRestrictions struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Contexts") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeServingRestrictions) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeServingRestrictions
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeServingRestrictionsContexts struct {
@@ -1038,7 +1271,9 @@ type CreativeServingRestrictionsContexts struct {
 	ContextType string `json:"contextType,omitempty"`
 
 	// GeoCriteriaId: Only set when contextType=LOCATION. Represents the geo
-	// criterias this restriction applies to.
+	// criterias this restriction applies to. Impressions are considered to
+	// match a context if either the user location or publisher location
+	// matches a given geoCriteriaId.
 	GeoCriteriaId []int64 `json:"geoCriteriaId,omitempty"`
 
 	// Platform: Only set when contextType=PLATFORM. Represents the
@@ -1052,12 +1287,20 @@ type CreativeServingRestrictionsContexts struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AuctionType") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeServingRestrictionsContexts) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeServingRestrictionsContexts
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type CreativeServingRestrictionsDisapprovalReasons struct {
@@ -1074,12 +1317,88 @@ type CreativeServingRestrictionsDisapprovalReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Details") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativeServingRestrictionsDisapprovalReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeServingRestrictionsDisapprovalReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// CreativeDealIds: The external deal ids associated with a creative.
+type CreativeDealIds struct {
+	// DealStatuses: A list of external deal ids and ARC approval status.
+	DealStatuses []*CreativeDealIdsDealStatuses `json:"dealStatuses,omitempty"`
+
+	// Kind: Resource type.
+	Kind string `json:"kind,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "DealStatuses") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DealStatuses") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *CreativeDealIds) MarshalJSON() ([]byte, error) {
+	type noMethod CreativeDealIds
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type CreativeDealIdsDealStatuses struct {
+	// ArcStatus: ARC approval status.
+	ArcStatus string `json:"arcStatus,omitempty"`
+
+	// DealId: External deal ID.
+	DealId int64 `json:"dealId,omitempty,string"`
+
+	// WebPropertyId: Publisher ID.
+	WebPropertyId int64 `json:"webPropertyId,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "ArcStatus") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ArcStatus") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *CreativeDealIdsDealStatuses) MarshalJSON() ([]byte, error) {
+	type noMethod CreativeDealIdsDealStatuses
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CreativesList: The creatives feed lists the active creatives for the
@@ -1108,32 +1427,54 @@ type CreativesList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Items") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CreativesList) MarshalJSON() ([]byte, error) {
 	type noMethod CreativesList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealServingMetadata struct {
+	// AlcoholAdsAllowed: True if alcohol ads are allowed for this deal
+	// (read-only). This field is only populated when querying for finalized
+	// orders using the method GetFinalizedOrderDeals
+	AlcoholAdsAllowed bool `json:"alcoholAdsAllowed,omitempty"`
+
 	// DealPauseStatus: Tracks which parties (if any) have paused a deal.
 	// (readonly, except via PauseResumeOrderDeals action)
 	DealPauseStatus *DealServingMetadataDealPauseStatus `json:"dealPauseStatus,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "DealPauseStatus") to
-	// unconditionally include in API requests. By default, fields with
+	// ForceSendFields is a list of field names (e.g. "AlcoholAdsAllowed")
+	// to unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AlcoholAdsAllowed") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealServingMetadata) MarshalJSON() ([]byte, error) {
 	type noMethod DealServingMetadata
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // DealServingMetadataDealPauseStatus: Tracks which parties (if any)
@@ -1141,6 +1482,8 @@ func (s *DealServingMetadata) MarshalJSON() ([]byte, error) {
 // || has_seller_paused. Each of the has_buyer_paused or the
 // has_seller_paused bits can be set independently.
 type DealServingMetadataDealPauseStatus struct {
+	BuyerPauseReason string `json:"buyerPauseReason,omitempty"`
+
 	// FirstPausedBy: If the deal is paused, records which party paused the
 	// deal first.
 	FirstPausedBy string `json:"firstPausedBy,omitempty"`
@@ -1149,24 +1492,41 @@ type DealServingMetadataDealPauseStatus struct {
 
 	HasSellerPaused bool `json:"hasSellerPaused,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "FirstPausedBy") to
+	SellerPauseReason string `json:"sellerPauseReason,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "BuyerPauseReason") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BuyerPauseReason") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealServingMetadataDealPauseStatus) MarshalJSON() ([]byte, error) {
 	type noMethod DealServingMetadataDealPauseStatus
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealTerms struct {
 	// BrandingType: Visibilty of the URL in bid requests.
 	BrandingType string `json:"brandingType,omitempty"`
+
+	// CrossListedExternalDealIdType: Indicates that this ExternalDealId
+	// exists under at least two different AdxInventoryDeals. Currently, the
+	// only case that the same ExternalDealId will exist is programmatic
+	// cross sell case.
+	CrossListedExternalDealIdType string `json:"crossListedExternalDealIdType,omitempty"`
 
 	// Description: Description for the proposed terms of the deal.
 	Description string `json:"description,omitempty"`
@@ -1191,6 +1551,10 @@ type DealTerms struct {
 	// price deals.
 	NonGuaranteedFixedPriceTerms *DealTermsNonGuaranteedFixedPriceTerms `json:"nonGuaranteedFixedPriceTerms,omitempty"`
 
+	// RubiconNonGuaranteedTerms: The terms for rubicon non-guaranteed
+	// deals.
+	RubiconNonGuaranteedTerms *DealTermsRubiconNonGuaranteedTerms `json:"rubiconNonGuaranteedTerms,omitempty"`
+
 	// SellerTimeZone: For deals with Cost Per Day billing, defines the
 	// timezone used to mark the boundaries of a day (buyer-readonly)
 	SellerTimeZone string `json:"sellerTimeZone,omitempty"`
@@ -1202,12 +1566,20 @@ type DealTerms struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BrandingType") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealTerms) MarshalJSON() ([]byte, error) {
 	type noMethod DealTerms
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealTermsGuaranteedFixedPriceTerms struct {
@@ -1225,8 +1597,14 @@ type DealTermsGuaranteedFixedPriceTerms struct {
 	GuaranteedImpressions int64 `json:"guaranteedImpressions,omitempty,string"`
 
 	// GuaranteedLooks: Count of guaranteed looks. Required for deal,
-	// optional for product.
+	// optional for product. For CPD deals, buyer changes to
+	// guaranteed_looks will be ignored.
 	GuaranteedLooks int64 `json:"guaranteedLooks,omitempty,string"`
+
+	// MinimumDailyLooks: Count of minimum daily looks for a CPD deal. For
+	// CPD deals, buyer should negotiate on this field instead of
+	// guaranteed_looks.
+	MinimumDailyLooks int64 `json:"minimumDailyLooks,omitempty,string"`
 
 	// ForceSendFields is a list of field names (e.g. "BillingInfo") to
 	// unconditionally include in API requests. By default, fields with
@@ -1235,19 +1613,27 @@ type DealTermsGuaranteedFixedPriceTerms struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BillingInfo") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealTermsGuaranteedFixedPriceTerms) MarshalJSON() ([]byte, error) {
 	type noMethod DealTermsGuaranteedFixedPriceTerms
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealTermsGuaranteedFixedPriceTermsBillingInfo struct {
 	// CurrencyConversionTimeMs: The timestamp (in ms since epoch) when the
 	// original reservation price for the deal was first converted to DFP
-	// currency. This is used to convert the contracted price into
-	// advertiser's currency without discrepancy.
+	// currency. This is used to convert the contracted price into buyer's
+	// currency without discrepancy.
 	CurrencyConversionTimeMs int64 `json:"currencyConversionTimeMs,omitempty,string"`
 
 	// DfpLineItemId: The DFP line item id associated with this deal. For
@@ -1256,9 +1642,10 @@ type DealTermsGuaranteedFixedPriceTermsBillingInfo struct {
 	DfpLineItemId int64 `json:"dfpLineItemId,omitempty,string"`
 
 	// OriginalContractedQuantity: The original contracted quantity (#
-	// impressions) for this deal. To ensure delivery, sometimes publisher
-	// will book the deal with a impression buffer, however clients are
-	// billed using the original contracted quantity.
+	// impressions) for this deal. To ensure delivery, sometimes the
+	// publisher will book the deal with a impression buffer, such that
+	// guaranteed_looks is greater than the contracted quantity. However
+	// clients are billed using the original contracted quantity.
 	OriginalContractedQuantity int64 `json:"originalContractedQuantity,omitempty,string"`
 
 	// Price: The original reservation price for the deal, if the currency
@@ -1273,12 +1660,21 @@ type DealTermsGuaranteedFixedPriceTermsBillingInfo struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CurrencyConversionTimeMs")
+	// to include in API requests with the JSON null value. By default,
+	// fields with empty values are omitted from API requests. However, any
+	// field with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealTermsGuaranteedFixedPriceTermsBillingInfo) MarshalJSON() ([]byte, error) {
 	type noMethod DealTermsGuaranteedFixedPriceTermsBillingInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealTermsNonGuaranteedAuctionTerms struct {
@@ -1298,12 +1694,21 @@ type DealTermsNonGuaranteedAuctionTerms struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g.
+	// "AutoOptimizePrivateAuction") to include in API requests with the
+	// JSON null value. By default, fields with empty values are omitted
+	// from API requests. However, any field with an empty value appearing
+	// in NullFields will be sent to the server as null. It is an error if a
+	// field in this list has a non-empty value. This may be used to include
+	// null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealTermsNonGuaranteedAuctionTerms) MarshalJSON() ([]byte, error) {
 	type noMethod DealTermsNonGuaranteedAuctionTerms
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DealTermsNonGuaranteedFixedPriceTerms struct {
@@ -1317,12 +1722,52 @@ type DealTermsNonGuaranteedFixedPriceTerms struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FixedPrices") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DealTermsNonGuaranteedFixedPriceTerms) MarshalJSON() ([]byte, error) {
 	type noMethod DealTermsNonGuaranteedFixedPriceTerms
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type DealTermsRubiconNonGuaranteedTerms struct {
+	// PriorityPrice: Optional price for Rubicon priority access in the
+	// auction.
+	PriorityPrice *Price `json:"priorityPrice,omitempty"`
+
+	// StandardPrice: Optional price for Rubicon standard access in the
+	// auction.
+	StandardPrice *Price `json:"standardPrice,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "PriorityPrice") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "PriorityPrice") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *DealTermsRubiconNonGuaranteedTerms) MarshalJSON() ([]byte, error) {
+	type noMethod DealTermsRubiconNonGuaranteedTerms
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DeleteOrderDealsRequest struct {
@@ -1342,12 +1787,20 @@ type DeleteOrderDealsRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DealIds") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DeleteOrderDealsRequest) MarshalJSON() ([]byte, error) {
 	type noMethod DeleteOrderDealsRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DeleteOrderDealsResponse struct {
@@ -1369,12 +1822,20 @@ type DeleteOrderDealsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DeleteOrderDealsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod DeleteOrderDealsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DeliveryControl struct {
@@ -1392,12 +1853,21 @@ type DeliveryControl struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreativeBlockingLevel") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DeliveryControl) MarshalJSON() ([]byte, error) {
 	type noMethod DeliveryControl
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type DeliveryControlFrequencyCap struct {
@@ -1414,12 +1884,21 @@ type DeliveryControlFrequencyCap struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "MaxImpressions") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DeliveryControlFrequencyCap) MarshalJSON() ([]byte, error) {
 	type noMethod DeliveryControlFrequencyCap
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Dimension: This message carries publisher provided breakdown. E.g.
@@ -1437,12 +1916,20 @@ type Dimension struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DimensionType") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Dimension) MarshalJSON() ([]byte, error) {
 	type noMethod Dimension
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // DimensionDimensionValue: Value of the dimension.
@@ -1468,12 +1955,20 @@ type DimensionDimensionValue struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DimensionDimensionValue) MarshalJSON() ([]byte, error) {
 	type noMethod DimensionDimensionValue
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type EditAllOrderDealsRequest struct {
@@ -1510,12 +2005,20 @@ type EditAllOrderDealsRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *EditAllOrderDealsRequest) MarshalJSON() ([]byte, error) {
 	type noMethod EditAllOrderDealsRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type EditAllOrderDealsResponse struct {
@@ -1537,12 +2040,20 @@ type EditAllOrderDealsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *EditAllOrderDealsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod EditAllOrderDealsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type GetOffersResponse struct {
@@ -1560,12 +2071,20 @@ type GetOffersResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Products") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *GetOffersResponse) MarshalJSON() ([]byte, error) {
 	type noMethod GetOffersResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type GetOrderDealsResponse struct {
@@ -1583,16 +2102,27 @@ type GetOrderDealsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Deals") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *GetOrderDealsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod GetOrderDealsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type GetOrderNotesResponse struct {
-	// Notes: The list of matching notes.
+	// Notes: The list of matching notes. The notes for a proposal are
+	// ordered from oldest to newest. If the notes span multiple proposals,
+	// they will be grouped by proposal, with the notes for the most
+	// recently modified proposal appearing first.
 	Notes []*MarketplaceNote `json:"notes,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1606,12 +2136,20 @@ type GetOrderNotesResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Notes") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *GetOrderNotesResponse) MarshalJSON() ([]byte, error) {
 	type noMethod GetOrderNotesResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type GetOrdersResponse struct {
@@ -1629,12 +2167,20 @@ type GetOrdersResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Proposals") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *GetOrdersResponse) MarshalJSON() ([]byte, error) {
 	type noMethod GetOrdersResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type GetPublisherProfilesByAccountIdResponse struct {
@@ -1652,12 +2198,20 @@ type GetPublisherProfilesByAccountIdResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Profiles") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *GetPublisherProfilesByAccountIdResponse) MarshalJSON() ([]byte, error) {
 	type noMethod GetPublisherProfilesByAccountIdResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // MarketplaceDeal: A proposal can contain multiple deals. A deal
@@ -1679,7 +2233,7 @@ type MarketplaceDeal struct {
 	// safeFrame compatible (buyer-readonly)
 	CreativeSafeFrameCompatibility string `json:"creativeSafeFrameCompatibility,omitempty"`
 
-	// DealId: A unique deal=id for the deal (readonly).
+	// DealId: A unique deal-id for the deal (readonly).
 	DealId string `json:"dealId,omitempty"`
 
 	// DealServingMetadata: Metadata about the serving status of this deal
@@ -1707,8 +2261,18 @@ type MarketplaceDeal struct {
 	// (updatable)
 	FlightStartTimeMs int64 `json:"flightStartTimeMs,omitempty,string"`
 
-	// InventoryDescription: Description for the deal terms. (updatable)
+	// InventoryDescription: Description for the deal terms.
+	// (buyer-readonly)
 	InventoryDescription string `json:"inventoryDescription,omitempty"`
+
+	// IsRfpTemplate: Indicates whether the current deal is a RFP template.
+	// RFP template is created by buyer and not based on seller created
+	// products.
+	IsRfpTemplate bool `json:"isRfpTemplate,omitempty"`
+
+	// IsSetupComplete: True, if the buyside inventory setup is complete for
+	// this deal. (readonly, except via OrderSetupCompleted action)
+	IsSetupComplete bool `json:"isSetupComplete,omitempty"`
 
 	// Kind: Identifies what kind of resource this is. Value: the fixed
 	// string "adexchangebuyer#marketplaceDeal".
@@ -1760,12 +2324,21 @@ type MarketplaceDeal struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BuyerPrivateData") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MarketplaceDeal) MarshalJSON() ([]byte, error) {
 	type noMethod MarketplaceDeal
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type MarketplaceDealParty struct {
@@ -1784,12 +2357,20 @@ type MarketplaceDealParty struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Buyer") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MarketplaceDealParty) MarshalJSON() ([]byte, error) {
 	type noMethod MarketplaceDealParty
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type MarketplaceLabel struct {
@@ -1813,12 +2394,20 @@ type MarketplaceLabel struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MarketplaceLabel) MarshalJSON() ([]byte, error) {
 	type noMethod MarketplaceLabel
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // MarketplaceNote: A proposal is associated with a bunch of notes which
@@ -1860,12 +2449,20 @@ type MarketplaceNote struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreatorRole") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MarketplaceNote) MarshalJSON() ([]byte, error) {
 	type noMethod MarketplaceNote
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // PerformanceReport: The configuration data for an Ad Exchange
@@ -1961,12 +2558,62 @@ type PerformanceReport struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BidRate") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PerformanceReport) MarshalJSON() ([]byte, error) {
 	type noMethod PerformanceReport
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *PerformanceReport) UnmarshalJSON(data []byte) error {
+	type noMethod PerformanceReport
+	var s1 struct {
+		BidRate                 gensupport.JSONFloat64 `json:"bidRate"`
+		BidRequestRate          gensupport.JSONFloat64 `json:"bidRequestRate"`
+		FilteredBidRate         gensupport.JSONFloat64 `json:"filteredBidRate"`
+		InventoryMatchRate      gensupport.JSONFloat64 `json:"inventoryMatchRate"`
+		Latency50thPercentile   gensupport.JSONFloat64 `json:"latency50thPercentile"`
+		Latency85thPercentile   gensupport.JSONFloat64 `json:"latency85thPercentile"`
+		Latency95thPercentile   gensupport.JSONFloat64 `json:"latency95thPercentile"`
+		NoQuotaInRegion         gensupport.JSONFloat64 `json:"noQuotaInRegion"`
+		OutOfQuota              gensupport.JSONFloat64 `json:"outOfQuota"`
+		PixelMatchRequests      gensupport.JSONFloat64 `json:"pixelMatchRequests"`
+		PixelMatchResponses     gensupport.JSONFloat64 `json:"pixelMatchResponses"`
+		QuotaConfiguredLimit    gensupport.JSONFloat64 `json:"quotaConfiguredLimit"`
+		QuotaThrottledLimit     gensupport.JSONFloat64 `json:"quotaThrottledLimit"`
+		SuccessfulRequestRate   gensupport.JSONFloat64 `json:"successfulRequestRate"`
+		UnsuccessfulRequestRate gensupport.JSONFloat64 `json:"unsuccessfulRequestRate"`
+		*noMethod
+	}
+	s1.noMethod = (*noMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.BidRate = float64(s1.BidRate)
+	s.BidRequestRate = float64(s1.BidRequestRate)
+	s.FilteredBidRate = float64(s1.FilteredBidRate)
+	s.InventoryMatchRate = float64(s1.InventoryMatchRate)
+	s.Latency50thPercentile = float64(s1.Latency50thPercentile)
+	s.Latency85thPercentile = float64(s1.Latency85thPercentile)
+	s.Latency95thPercentile = float64(s1.Latency95thPercentile)
+	s.NoQuotaInRegion = float64(s1.NoQuotaInRegion)
+	s.OutOfQuota = float64(s1.OutOfQuota)
+	s.PixelMatchRequests = float64(s1.PixelMatchRequests)
+	s.PixelMatchResponses = float64(s1.PixelMatchResponses)
+	s.QuotaConfiguredLimit = float64(s1.QuotaConfiguredLimit)
+	s.QuotaThrottledLimit = float64(s1.QuotaThrottledLimit)
+	s.SuccessfulRequestRate = float64(s1.SuccessfulRequestRate)
+	s.UnsuccessfulRequestRate = float64(s1.UnsuccessfulRequestRate)
+	return nil
 }
 
 // PerformanceReportList: The configuration data for an Ad Exchange
@@ -1990,12 +2637,20 @@ type PerformanceReportList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Kind") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PerformanceReportList) MarshalJSON() ([]byte, error) {
 	type noMethod PerformanceReportList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfig struct {
@@ -2056,6 +2711,13 @@ type PretargetingConfig struct {
 	// Languages: Request containing any of these language codes will match.
 	Languages []string `json:"languages,omitempty"`
 
+	// MinimumViewabilityDecile: Requests where the predicted viewability is
+	// below the specified decile will not match. E.g. if the buyer sets
+	// this value to 5, requests from slots where the predicted viewability
+	// is below 50% will not match. If the predicted viewability is unknown
+	// this field will be ignored.
+	MinimumViewabilityDecile int64 `json:"minimumViewabilityDecile,omitempty"`
+
 	// MobileCarriers: Requests containing any of these mobile carrier ids
 	// will match. Values are from mobile-carriers.csv in the downloadable
 	// files section.
@@ -2086,6 +2748,13 @@ type PretargetingConfig struct {
 	// section.
 	SupportedCreativeAttributes googleapi.Int64s `json:"supportedCreativeAttributes,omitempty"`
 
+	// UserIdentifierDataRequired: Requests containing the specified type of
+	// user data will match. Possible values are HOSTED_MATCH_DATA, which
+	// means the request is cookie-targetable and has a match in the buyer's
+	// hosted match table, and COOKIE_OR_IDFA, which means the request has
+	// either a targetable cookie or an iOS IDFA.
+	UserIdentifierDataRequired []string `json:"userIdentifierDataRequired,omitempty"`
+
 	// UserLists: Requests containing any of these user list ids will match.
 	UserLists googleapi.Int64s `json:"userLists,omitempty"`
 
@@ -2111,12 +2780,20 @@ type PretargetingConfig struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BillingId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfig) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfig
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfigDimensions struct {
@@ -2133,12 +2810,20 @@ type PretargetingConfigDimensions struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Height") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigDimensions) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigDimensions
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfigExcludedPlacements struct {
@@ -2157,12 +2842,20 @@ type PretargetingConfigExcludedPlacements struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Token") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigExcludedPlacements) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigExcludedPlacements
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfigPlacements struct {
@@ -2181,12 +2874,20 @@ type PretargetingConfigPlacements struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Token") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigPlacements) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigPlacements
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfigVideoPlayerSizes struct {
@@ -2209,12 +2910,20 @@ type PretargetingConfigVideoPlayerSizes struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AspectRatio") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigVideoPlayerSizes) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigVideoPlayerSizes
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PretargetingConfigList struct {
@@ -2235,12 +2944,20 @@ type PretargetingConfigList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Items") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigList) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type Price struct {
@@ -2249,6 +2966,9 @@ type Price struct {
 
 	// CurrencyCode: The currency code for the price.
 	CurrencyCode string `json:"currencyCode,omitempty"`
+
+	// ExpectedCpmMicros: In case of CPD deals, the expected CPM in micros.
+	ExpectedCpmMicros float64 `json:"expectedCpmMicros,omitempty"`
 
 	// PricingType: The pricing type for the deal/product.
 	PricingType string `json:"pricingType,omitempty"`
@@ -2260,24 +2980,49 @@ type Price struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AmountMicros") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Price) MarshalJSON() ([]byte, error) {
 	type noMethod Price
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// PricePerBuyer: Used to specify pricing rules for buyers/advertisers.
-// Each PricePerBuyer in an product can become [0,1] deals. To check if
-// there is a PricePerBuyer for a particular buyer or buyer/advertiser
-// pair, we look for the most specific matching rule - we first look for
-// a rule matching the buyer and advertiser, next a rule with the buyer
-// but an empty advertiser list, and otherwise look for a matching rule
-// where no buyer is set.
+func (s *Price) UnmarshalJSON(data []byte) error {
+	type noMethod Price
+	var s1 struct {
+		AmountMicros      gensupport.JSONFloat64 `json:"amountMicros"`
+		ExpectedCpmMicros gensupport.JSONFloat64 `json:"expectedCpmMicros"`
+		*noMethod
+	}
+	s1.noMethod = (*noMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.AmountMicros = float64(s1.AmountMicros)
+	s.ExpectedCpmMicros = float64(s1.ExpectedCpmMicros)
+	return nil
+}
+
+// PricePerBuyer: Used to specify pricing rules for buyers. Each
+// PricePerBuyer in a product can become [0,1] deals. To check if there
+// is a PricePerBuyer for a particular buyer we look for the most
+// specific matching rule - we first look for a rule matching the buyer
+// and otherwise look for a matching rule where no buyer is set.
 type PricePerBuyer struct {
 	// AuctionTier: Optional access type for this buyer.
 	AuctionTier string `json:"auctionTier,omitempty"`
+
+	// BilledBuyer: Reference to the buyer that will get billed.
+	BilledBuyer *Buyer `json:"billedBuyer,omitempty"`
 
 	// Buyer: The buyer who will pay this price. If unset, all buyers can
 	// pay this price (if the advertisers match, and there's no more
@@ -2294,12 +3039,20 @@ type PricePerBuyer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AuctionTier") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PricePerBuyer) MarshalJSON() ([]byte, error) {
 	type noMethod PricePerBuyer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PrivateData struct {
@@ -2314,12 +3067,20 @@ type PrivateData struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ReferenceId") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PrivateData) MarshalJSON() ([]byte, error) {
 	type noMethod PrivateData
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Product: A product is segment of inventory that a seller wishes to
@@ -2332,12 +3093,24 @@ func (s *PrivateData) MarshalJSON() ([]byte, error) {
 // (seller-readonly) - Only the buyer can set this field. (updatable) -
 // The field is updatable at all times by either buyer or the seller.
 type Product struct {
+	// BilledBuyer: The billed buyer corresponding to the buyer that created
+	// the offer. (readonly, except on create)
+	BilledBuyer *Buyer `json:"billedBuyer,omitempty"`
+
+	// Buyer: The buyer that created the offer if this is a buyer initiated
+	// offer (readonly, except on create)
+	Buyer *Buyer `json:"buyer,omitempty"`
+
 	// CreationTimeMs: Creation time in ms. since epoch (readonly)
 	CreationTimeMs int64 `json:"creationTimeMs,omitempty,string"`
 
 	// CreatorContacts: Optional contact information for the creator of this
 	// product. (buyer-readonly)
 	CreatorContacts []*ContactInformation `json:"creatorContacts,omitempty"`
+
+	// CreatorRole: The role that created the offer. Set to BUYER for buyer
+	// initiated offers.
+	CreatorRole string `json:"creatorRole,omitempty"`
 
 	// DeliveryControl: The set of fields around delivery control that are
 	// interesting for a buyer to see but are non-negotiable. These are set
@@ -2378,6 +3151,12 @@ type Product struct {
 	// LegacyOfferId: Optional legacy offer id if this offer is a preferred
 	// deal offer.
 	LegacyOfferId string `json:"legacyOfferId,omitempty"`
+
+	// MarketplacePublisherProfileId: Marketplace publisher profile Id. This
+	// Id differs from the regular publisher_profile_id in that 1. This is a
+	// new id, the old Id will be deprecated in 2017. 2. This id uniquely
+	// identifies a publisher profile by itself.
+	MarketplacePublisherProfileId string `json:"marketplacePublisherProfileId,omitempty"`
 
 	// Name: The name for this product as set by the seller.
 	// (buyer-readonly)
@@ -2431,19 +3210,27 @@ type Product struct {
 	// server.
 	googleapi.ServerResponse `json:"-"`
 
-	// ForceSendFields is a list of field names (e.g. "CreationTimeMs") to
+	// ForceSendFields is a list of field names (e.g. "BilledBuyer") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BilledBuyer") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Product) MarshalJSON() ([]byte, error) {
 	type noMethod Product
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Proposal: Represents a proposal in the marketplace. A proposal is the
@@ -2464,15 +3251,18 @@ type Proposal struct {
 	// create)
 	Buyer *Buyer `json:"buyer,omitempty"`
 
-	// BuyerContacts: Optional contact information fort the buyer.
+	// BuyerContacts: Optional contact information of the buyer.
 	// (seller-readonly)
 	BuyerContacts []*ContactInformation `json:"buyerContacts,omitempty"`
 
 	// BuyerPrivateData: Private data for buyer. (hidden from seller).
 	BuyerPrivateData *PrivateData `json:"buyerPrivateData,omitempty"`
 
+	// DbmAdvertiserIds: IDs of DBM advertisers permission to this proposal.
+	DbmAdvertiserIds []string `json:"dbmAdvertiserIds,omitempty"`
+
 	// HasBuyerSignedOff: When an proposal is in an accepted state,
-	// indicates whether the buyer has signed off Once both sides have
+	// indicates whether the buyer has signed off. Once both sides have
 	// signed off on a deal, the proposal can be finalized by the seller.
 	// (seller-readonly)
 	HasBuyerSignedOff bool `json:"hasBuyerSignedOff,omitempty"`
@@ -2493,6 +3283,7 @@ type Proposal struct {
 
 	// IsSetupComplete: True, if the buyside inventory setup is complete for
 	// this proposal. (readonly, except via OrderSetupCompleted action)
+	// Deprecated in favor of deal level setup complete flag.
 	IsSetupComplete bool `json:"isSetupComplete,omitempty"`
 
 	// Kind: Identifies what kind of resource this is. Value: the fixed
@@ -2538,7 +3329,7 @@ type Proposal struct {
 	// create)
 	Seller *Seller `json:"seller,omitempty"`
 
-	// SellerContacts: Optional contact information for the seller
+	// SellerContacts: Optional contact information of the seller
 	// (buyer-readonly).
 	SellerContacts []*ContactInformation `json:"sellerContacts,omitempty"`
 
@@ -2553,12 +3344,20 @@ type Proposal struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BilledBuyer") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Proposal) MarshalJSON() ([]byte, error) {
 	type noMethod Proposal
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type PublisherProfileApiProto struct {
@@ -2644,12 +3443,20 @@ type PublisherProfileApiProto struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PublisherProfileApiProto) MarshalJSON() ([]byte, error) {
 	type noMethod PublisherProfileApiProto
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // PublisherProvidedForecast: This message carries publisher provided
@@ -2671,12 +3478,20 @@ type PublisherProvidedForecast struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Dimensions") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *PublisherProvidedForecast) MarshalJSON() ([]byte, error) {
 	type noMethod PublisherProvidedForecast
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type Seller struct {
@@ -2695,12 +3510,20 @@ type Seller struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AccountId") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Seller) MarshalJSON() ([]byte, error) {
 	type noMethod Seller
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type SharedTargeting struct {
@@ -2722,12 +3545,20 @@ type SharedTargeting struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Exclusions") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *SharedTargeting) MarshalJSON() ([]byte, error) {
 	type noMethod SharedTargeting
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type TargetingValue struct {
@@ -2751,12 +3582,21 @@ type TargetingValue struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreativeSizeValue") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TargetingValue) MarshalJSON() ([]byte, error) {
 	type noMethod TargetingValue
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type TargetingValueCreativeSize struct {
@@ -2765,6 +3605,9 @@ type TargetingValueCreativeSize struct {
 
 	// CreativeSizeType: The Creative size type.
 	CreativeSizeType string `json:"creativeSizeType,omitempty"`
+
+	// NativeTemplate: The native template for native ad.
+	NativeTemplate string `json:"nativeTemplate,omitempty"`
 
 	// Size: For regular or video creative size type, specifies the size of
 	// the creative.
@@ -2780,12 +3623,21 @@ type TargetingValueCreativeSize struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CompanionSizes") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TargetingValueCreativeSize) MarshalJSON() ([]byte, error) {
 	type noMethod TargetingValueCreativeSize
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type TargetingValueDayPartTargeting struct {
@@ -2800,12 +3652,20 @@ type TargetingValueDayPartTargeting struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DayParts") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TargetingValueDayPartTargeting) MarshalJSON() ([]byte, error) {
 	type noMethod TargetingValueDayPartTargeting
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type TargetingValueDayPartTargetingDayPart struct {
@@ -2826,12 +3686,20 @@ type TargetingValueDayPartTargetingDayPart struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DayOfWeek") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TargetingValueDayPartTargetingDayPart) MarshalJSON() ([]byte, error) {
 	type noMethod TargetingValueDayPartTargetingDayPart
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type TargetingValueSize struct {
@@ -2848,12 +3716,20 @@ type TargetingValueSize struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Height") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TargetingValueSize) MarshalJSON() ([]byte, error) {
 	type noMethod TargetingValueSize
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type UpdatePrivateAuctionProposalRequest struct {
@@ -2877,12 +3753,21 @@ type UpdatePrivateAuctionProposalRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ExternalDealId") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UpdatePrivateAuctionProposalRequest) MarshalJSON() ([]byte, error) {
 	type noMethod UpdatePrivateAuctionProposalRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "adexchangebuyer.accounts.get":
@@ -2893,6 +3778,7 @@ type AccountsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets one account by ID.
@@ -2928,8 +3814,20 @@ func (c *AccountsGetCall) Context(ctx context.Context) *AccountsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AccountsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AccountsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -2943,10 +3841,7 @@ func (c *AccountsGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.accounts.get" call.
@@ -3020,6 +3915,7 @@ type AccountsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves the authenticated user's list of accounts.
@@ -3054,8 +3950,20 @@ func (c *AccountsListCall) Context(ctx context.Context) *AccountsListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AccountsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AccountsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3066,11 +3974,7 @@ func (c *AccountsListCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.accounts.list" call.
@@ -3133,6 +4037,7 @@ type AccountsPatchCall struct {
 	account    *Account
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Updates an existing account. This method supports patch
@@ -3141,6 +4046,14 @@ func (r *AccountsService) Patch(id int64, account *Account) *AccountsPatchCall {
 	c := &AccountsPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.id = id
 	c.account = account
+	return c
+}
+
+// ConfirmUnsafeAccountChange sets the optional parameter
+// "confirmUnsafeAccountChange": Confirmation for erasing bidder and
+// cookie matching urls.
+func (c *AccountsPatchCall) ConfirmUnsafeAccountChange(confirmUnsafeAccountChange bool) *AccountsPatchCall {
+	c.urlParams_.Set("confirmUnsafeAccountChange", fmt.Sprint(confirmUnsafeAccountChange))
 	return c
 }
 
@@ -3160,8 +4073,20 @@ func (c *AccountsPatchCall) Context(ctx context.Context) *AccountsPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AccountsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AccountsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.account)
@@ -3177,10 +4102,7 @@ func (c *AccountsPatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.accounts.patch" call.
@@ -3228,6 +4150,11 @@ func (c *AccountsPatchCall) Do(opts ...googleapi.CallOption) (*Account, error) {
 	//     "id"
 	//   ],
 	//   "parameters": {
+	//     "confirmUnsafeAccountChange": {
+	//       "description": "Confirmation for erasing bidder and cookie matching urls.",
+	//       "location": "query",
+	//       "type": "boolean"
+	//     },
 	//     "id": {
 	//       "description": "The account id",
 	//       "format": "int32",
@@ -3258,6 +4185,7 @@ type AccountsUpdateCall struct {
 	account    *Account
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Updates an existing account.
@@ -3265,6 +4193,14 @@ func (r *AccountsService) Update(id int64, account *Account) *AccountsUpdateCall
 	c := &AccountsUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.id = id
 	c.account = account
+	return c
+}
+
+// ConfirmUnsafeAccountChange sets the optional parameter
+// "confirmUnsafeAccountChange": Confirmation for erasing bidder and
+// cookie matching urls.
+func (c *AccountsUpdateCall) ConfirmUnsafeAccountChange(confirmUnsafeAccountChange bool) *AccountsUpdateCall {
+	c.urlParams_.Set("confirmUnsafeAccountChange", fmt.Sprint(confirmUnsafeAccountChange))
 	return c
 }
 
@@ -3284,8 +4220,20 @@ func (c *AccountsUpdateCall) Context(ctx context.Context) *AccountsUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AccountsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AccountsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.account)
@@ -3301,10 +4249,7 @@ func (c *AccountsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.accounts.update" call.
@@ -3352,6 +4297,11 @@ func (c *AccountsUpdateCall) Do(opts ...googleapi.CallOption) (*Account, error) 
 	//     "id"
 	//   ],
 	//   "parameters": {
+	//     "confirmUnsafeAccountChange": {
+	//       "description": "Confirmation for erasing bidder and cookie matching urls.",
+	//       "location": "query",
+	//       "type": "boolean"
+	//     },
 	//     "id": {
 	//       "description": "The account id",
 	//       "format": "int32",
@@ -3382,6 +4332,7 @@ type BillingInfoGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Returns the billing information for one account specified by
@@ -3418,8 +4369,20 @@ func (c *BillingInfoGetCall) Context(ctx context.Context) *BillingInfoGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *BillingInfoGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *BillingInfoGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3433,10 +4396,7 @@ func (c *BillingInfoGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.billingInfo.get" call.
@@ -3510,6 +4470,7 @@ type BillingInfoListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a list of billing information for all accounts of the
@@ -3545,8 +4506,20 @@ func (c *BillingInfoListCall) Context(ctx context.Context) *BillingInfoListCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *BillingInfoListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *BillingInfoListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3557,11 +4530,7 @@ func (c *BillingInfoListCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.billingInfo.list" call.
@@ -3625,6 +4594,7 @@ type BudgetGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Returns the budget information for the adgroup specified by the
@@ -3662,8 +4632,20 @@ func (c *BudgetGetCall) Context(ctx context.Context) *BudgetGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *BudgetGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *BudgetGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3678,10 +4660,7 @@ func (c *BudgetGetCall) doRequest(alt string) (*http.Response, error) {
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.budget.get" call.
@@ -3765,6 +4744,7 @@ type BudgetPatchCall struct {
 	budget     *Budget
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Updates the budget amount for the budget of the adgroup
@@ -3794,8 +4774,20 @@ func (c *BudgetPatchCall) Context(ctx context.Context) *BudgetPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *BudgetPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *BudgetPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.budget)
@@ -3812,10 +4804,7 @@ func (c *BudgetPatchCall) doRequest(alt string) (*http.Response, error) {
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.budget.patch" call.
@@ -3902,6 +4891,7 @@ type BudgetUpdateCall struct {
 	budget     *Budget
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Updates the budget amount for the budget of the adgroup
@@ -3931,8 +4921,20 @@ func (c *BudgetUpdateCall) Context(ctx context.Context) *BudgetUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *BudgetUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *BudgetUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.budget)
@@ -3949,10 +4951,7 @@ func (c *BudgetUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.budget.update" call.
@@ -4039,6 +5038,7 @@ type CreativesAddDealCall struct {
 	dealId          int64
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
+	header_         http.Header
 }
 
 // AddDeal: Add a deal id association for the creative.
@@ -4066,8 +5066,20 @@ func (c *CreativesAddDealCall) Context(ctx context.Context) *CreativesAddDealCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesAddDealCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CreativesAddDealCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -4080,10 +5092,7 @@ func (c *CreativesAddDealCall) doRequest(alt string) (*http.Response, error) {
 		"buyerCreativeId": c.buyerCreativeId,
 		"dealId":          strconv.FormatInt(c.dealId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.creatives.addDeal" call.
@@ -4146,6 +5155,7 @@ type CreativesGetCall struct {
 	urlParams_      gensupport.URLParams
 	ifNoneMatch_    string
 	ctx_            context.Context
+	header_         http.Header
 }
 
 // Get: Gets the status for a single creative. A creative will be
@@ -4183,8 +5193,20 @@ func (c *CreativesGetCall) Context(ctx context.Context) *CreativesGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CreativesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -4199,10 +5221,7 @@ func (c *CreativesGetCall) doRequest(alt string) (*http.Response, error) {
 		"accountId":       strconv.FormatInt(c.accountId, 10),
 		"buyerCreativeId": c.buyerCreativeId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.creatives.get" call.
@@ -4283,6 +5302,7 @@ type CreativesInsertCall struct {
 	creative   *Creative
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Submit a new creative.
@@ -4308,8 +5328,20 @@ func (c *CreativesInsertCall) Context(ctx context.Context) *CreativesInsertCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CreativesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.creative)
@@ -4322,11 +5354,7 @@ func (c *CreativesInsertCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.creatives.insert" call.
@@ -4391,6 +5419,7 @@ type CreativesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a list of the authenticated user's active creatives.
@@ -4497,8 +5526,20 @@ func (c *CreativesListCall) Context(ctx context.Context) *CreativesListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CreativesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -4509,11 +5550,7 @@ func (c *CreativesListCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.creatives.list" call.
@@ -4651,6 +5688,154 @@ func (c *CreativesListCall) Pages(ctx context.Context, f func(*CreativesList) er
 	}
 }
 
+// method id "adexchangebuyer.creatives.listDeals":
+
+type CreativesListDealsCall struct {
+	s               *Service
+	accountId       int64
+	buyerCreativeId string
+	urlParams_      gensupport.URLParams
+	ifNoneMatch_    string
+	ctx_            context.Context
+	header_         http.Header
+}
+
+// ListDeals: Lists the external deal ids associated with the creative.
+func (r *CreativesService) ListDeals(accountId int64, buyerCreativeId string) *CreativesListDealsCall {
+	c := &CreativesListDealsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.accountId = accountId
+	c.buyerCreativeId = buyerCreativeId
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *CreativesListDealsCall) Fields(s ...googleapi.Field) *CreativesListDealsCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *CreativesListDealsCall) IfNoneMatch(entityTag string) *CreativesListDealsCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *CreativesListDealsCall) Context(ctx context.Context) *CreativesListDealsCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesListDealsCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CreativesListDealsCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "creatives/{accountId}/{buyerCreativeId}/listDeals")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"accountId":       strconv.FormatInt(c.accountId, 10),
+		"buyerCreativeId": c.buyerCreativeId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "adexchangebuyer.creatives.listDeals" call.
+// Exactly one of *CreativeDealIds or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *CreativeDealIds.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *CreativesListDealsCall) Do(opts ...googleapi.CallOption) (*CreativeDealIds, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &CreativeDealIds{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Lists the external deal ids associated with the creative.",
+	//   "httpMethod": "GET",
+	//   "id": "adexchangebuyer.creatives.listDeals",
+	//   "parameterOrder": [
+	//     "accountId",
+	//     "buyerCreativeId"
+	//   ],
+	//   "parameters": {
+	//     "accountId": {
+	//       "description": "The id for the account that will serve this creative.",
+	//       "format": "int32",
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "integer"
+	//     },
+	//     "buyerCreativeId": {
+	//       "description": "The buyer-specific id for this creative.",
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "creatives/{accountId}/{buyerCreativeId}/listDeals",
+	//   "response": {
+	//     "$ref": "CreativeDealIds"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/adexchange.buyer"
+	//   ]
+	// }
+
+}
+
 // method id "adexchangebuyer.creatives.removeDeal":
 
 type CreativesRemoveDealCall struct {
@@ -4660,6 +5845,7 @@ type CreativesRemoveDealCall struct {
 	dealId          int64
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
+	header_         http.Header
 }
 
 // RemoveDeal: Remove a deal id associated with the creative.
@@ -4687,8 +5873,20 @@ func (c *CreativesRemoveDealCall) Context(ctx context.Context) *CreativesRemoveD
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CreativesRemoveDealCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CreativesRemoveDealCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -4701,10 +5899,7 @@ func (c *CreativesRemoveDealCall) doRequest(alt string) (*http.Response, error) 
 		"buyerCreativeId": c.buyerCreativeId,
 		"dealId":          strconv.FormatInt(c.dealId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.creatives.removeDeal" call.
@@ -4766,6 +5961,7 @@ type MarketplacedealsDeleteCall struct {
 	deleteorderdealsrequest *DeleteOrderDealsRequest
 	urlParams_              gensupport.URLParams
 	ctx_                    context.Context
+	header_                 http.Header
 }
 
 // Delete: Delete the specified deals from the proposal
@@ -4792,8 +5988,20 @@ func (c *MarketplacedealsDeleteCall) Context(ctx context.Context) *Marketplacede
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacedealsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacedealsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.deleteorderdealsrequest)
@@ -4809,10 +6017,7 @@ func (c *MarketplacedealsDeleteCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacedeals.delete" call.
@@ -4889,6 +6094,7 @@ type MarketplacedealsInsertCall struct {
 	addorderdealsrequest *AddOrderDealsRequest
 	urlParams_           gensupport.URLParams
 	ctx_                 context.Context
+	header_              http.Header
 }
 
 // Insert: Add new deals for the specified proposal
@@ -4915,8 +6121,20 @@ func (c *MarketplacedealsInsertCall) Context(ctx context.Context) *Marketplacede
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacedealsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacedealsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.addorderdealsrequest)
@@ -4932,10 +6150,7 @@ func (c *MarketplacedealsInsertCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacedeals.insert" call.
@@ -5012,6 +6227,7 @@ type MarketplacedealsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List all the deals for a given proposal
@@ -5054,8 +6270,20 @@ func (c *MarketplacedealsListCall) Context(ctx context.Context) *Marketplacedeal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacedealsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacedealsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5069,10 +6297,7 @@ func (c *MarketplacedealsListCall) doRequest(alt string) (*http.Response, error)
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacedeals.list" call.
@@ -5126,7 +6351,7 @@ func (c *MarketplacedealsListCall) Do(opts ...googleapi.CallOption) (*GetOrderDe
 	//       "type": "string"
 	//     },
 	//     "proposalId": {
-	//       "description": "The proposalId to get deals for. To search across proposals specify order_id = '-' as part of the URL.",
+	//       "description": "The proposalId to get deals for. To search across all proposals specify order_id = '-' as part of the URL.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5151,6 +6376,7 @@ type MarketplacedealsUpdateCall struct {
 	editallorderdealsrequest *EditAllOrderDealsRequest
 	urlParams_               gensupport.URLParams
 	ctx_                     context.Context
+	header_                  http.Header
 }
 
 // Update: Replaces all the deals in the proposal with the passed in
@@ -5178,8 +6404,20 @@ func (c *MarketplacedealsUpdateCall) Context(ctx context.Context) *Marketplacede
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacedealsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacedealsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.editallorderdealsrequest)
@@ -5195,10 +6433,7 @@ func (c *MarketplacedealsUpdateCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacedeals.update" call.
@@ -5275,6 +6510,7 @@ type MarketplacenotesInsertCall struct {
 	addordernotesrequest *AddOrderNotesRequest
 	urlParams_           gensupport.URLParams
 	ctx_                 context.Context
+	header_              http.Header
 }
 
 // Insert: Add notes to the proposal
@@ -5301,8 +6537,20 @@ func (c *MarketplacenotesInsertCall) Context(ctx context.Context) *Marketplaceno
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacenotesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacenotesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.addordernotesrequest)
@@ -5318,10 +6566,7 @@ func (c *MarketplacenotesInsertCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacenotes.insert" call.
@@ -5398,12 +6643,22 @@ type MarketplacenotesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Get all the notes associated with a proposal
 func (r *MarketplacenotesService) List(proposalId string) *MarketplacenotesListCall {
 	c := &MarketplacenotesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.proposalId = proposalId
+	return c
+}
+
+// PqlQuery sets the optional parameter "pqlQuery": Query string to
+// retrieve specific notes. To search the text contents of notes, please
+// use syntax like "WHERE note.note = "foo" or "WHERE note.note LIKE
+// "%bar%"
+func (c *MarketplacenotesListCall) PqlQuery(pqlQuery string) *MarketplacenotesListCall {
+	c.urlParams_.Set("pqlQuery", pqlQuery)
 	return c
 }
 
@@ -5433,8 +6688,20 @@ func (c *MarketplacenotesListCall) Context(ctx context.Context) *Marketplacenote
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplacenotesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplacenotesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5448,10 +6715,7 @@ func (c *MarketplacenotesListCall) doRequest(alt string) (*http.Response, error)
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplacenotes.list" call.
@@ -5499,8 +6763,13 @@ func (c *MarketplacenotesListCall) Do(opts ...googleapi.CallOption) (*GetOrderNo
 	//     "proposalId"
 	//   ],
 	//   "parameters": {
+	//     "pqlQuery": {
+	//       "description": "Query string to retrieve specific notes. To search the text contents of notes, please use syntax like \"WHERE note.note = \"foo\" or \"WHERE note.note LIKE \"%bar%\"",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "proposalId": {
-	//       "description": "The proposalId to get notes for.",
+	//       "description": "The proposalId to get notes for. To search across all proposals specify order_id = '-' as part of the URL.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5525,6 +6794,7 @@ type MarketplaceprivateauctionUpdateproposalCall struct {
 	updateprivateauctionproposalrequest *UpdatePrivateAuctionProposalRequest
 	urlParams_                          gensupport.URLParams
 	ctx_                                context.Context
+	header_                             http.Header
 }
 
 // Updateproposal: Update a given private auction proposal
@@ -5551,8 +6821,20 @@ func (c *MarketplaceprivateauctionUpdateproposalCall) Context(ctx context.Contex
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MarketplaceprivateauctionUpdateproposalCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MarketplaceprivateauctionUpdateproposalCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.updateprivateauctionproposalrequest)
@@ -5568,10 +6850,7 @@ func (c *MarketplaceprivateauctionUpdateproposalCall) doRequest(alt string) (*ht
 	googleapi.Expand(req.URL, map[string]string{
 		"privateAuctionId": c.privateAuctionId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.marketplaceprivateauction.updateproposal" call.
@@ -5619,6 +6898,7 @@ type PerformanceReportListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves the authenticated user's list of performance metrics.
@@ -5673,8 +6953,20 @@ func (c *PerformanceReportListCall) Context(ctx context.Context) *PerformanceRep
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PerformanceReportListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PerformanceReportListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5685,11 +6977,7 @@ func (c *PerformanceReportListCall) doRequest(alt string) (*http.Response, error
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.performanceReport.list" call.
@@ -5791,6 +7079,7 @@ type PretargetingConfigDeleteCall struct {
 	configId   int64
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes an existing pretargeting config.
@@ -5817,8 +7106,20 @@ func (c *PretargetingConfigDeleteCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -5830,10 +7131,7 @@ func (c *PretargetingConfigDeleteCall) doRequest(alt string) (*http.Response, er
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.delete" call.
@@ -5889,6 +7187,7 @@ type PretargetingConfigGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets a specific pretargeting configuration
@@ -5925,8 +7224,20 @@ func (c *PretargetingConfigGetCall) Context(ctx context.Context) *PretargetingCo
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5941,10 +7252,7 @@ func (c *PretargetingConfigGetCall) doRequest(alt string) (*http.Response, error
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.get" call.
@@ -6027,6 +7335,7 @@ type PretargetingConfigInsertCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Insert: Inserts a new pretargeting configuration.
@@ -6053,8 +7362,20 @@ func (c *PretargetingConfigInsertCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
@@ -6070,10 +7391,7 @@ func (c *PretargetingConfigInsertCall) doRequest(alt string) (*http.Response, er
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.insert" call.
@@ -6151,6 +7469,7 @@ type PretargetingConfigListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a list of the authenticated user's pretargeting
@@ -6187,8 +7506,20 @@ func (c *PretargetingConfigListCall) Context(ctx context.Context) *PretargetingC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6202,10 +7533,7 @@ func (c *PretargetingConfigListCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.list" call.
@@ -6281,6 +7609,7 @@ type PretargetingConfigPatchCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Patch: Updates an existing pretargeting config. This method supports
@@ -6309,8 +7638,20 @@ func (c *PretargetingConfigPatchCall) Context(ctx context.Context) *Pretargeting
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
@@ -6327,10 +7668,7 @@ func (c *PretargetingConfigPatchCall) doRequest(alt string) (*http.Response, err
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.patch" call.
@@ -6417,6 +7755,7 @@ type PretargetingConfigUpdateCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Update: Updates an existing pretargeting config.
@@ -6444,8 +7783,20 @@ func (c *PretargetingConfigUpdateCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PretargetingConfigUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PretargetingConfigUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
@@ -6462,10 +7813,7 @@ func (c *PretargetingConfigUpdateCall) doRequest(alt string) (*http.Response, er
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.update" call.
@@ -6551,6 +7899,7 @@ type ProductsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Gets the requested product by id.
@@ -6586,8 +7935,20 @@ func (c *ProductsGetCall) Context(ctx context.Context) *ProductsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProductsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProductsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6601,10 +7962,7 @@ func (c *ProductsGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"productId": c.productId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.products.get" call.
@@ -6677,6 +8035,7 @@ type ProductsSearchCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Search: Gets the requested product.
@@ -6718,8 +8077,20 @@ func (c *ProductsSearchCall) Context(ctx context.Context) *ProductsSearchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProductsSearchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProductsSearchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6730,11 +8101,7 @@ func (c *ProductsSearchCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.products.search" call.
@@ -6804,6 +8171,7 @@ type ProposalsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get a proposal given its id
@@ -6839,8 +8207,20 @@ func (c *ProposalsGetCall) Context(ctx context.Context) *ProposalsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6854,10 +8234,7 @@ func (c *ProposalsGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.get" call.
@@ -6930,6 +8307,7 @@ type ProposalsInsertCall struct {
 	createordersrequest *CreateOrdersRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
+	header_             http.Header
 }
 
 // Insert: Create the given list of proposals
@@ -6955,8 +8333,20 @@ func (c *ProposalsInsertCall) Context(ctx context.Context) *ProposalsInsertCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.createordersrequest)
@@ -6969,11 +8359,7 @@ func (c *ProposalsInsertCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.insert" call.
@@ -7041,6 +8427,7 @@ type ProposalsPatchCall struct {
 	proposal       *Proposal
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Patch: Update the given proposal. This method supports patch
@@ -7070,8 +8457,20 @@ func (c *ProposalsPatchCall) Context(ctx context.Context) *ProposalsPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.proposal)
@@ -7089,10 +8488,7 @@ func (c *ProposalsPatchCall) doRequest(alt string) (*http.Response, error) {
 		"revisionNumber": strconv.FormatInt(c.revisionNumber, 10),
 		"updateAction":   c.updateAction,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.patch" call.
@@ -7156,15 +8552,17 @@ func (c *ProposalsPatchCall) Do(opts ...googleapi.CallOption) (*Proposal, error)
 	//       "type": "string"
 	//     },
 	//     "updateAction": {
-	//       "description": "The proposed action to take on the proposal.",
+	//       "description": "The proposed action to take on the proposal. This field is required and it must be set when updating a proposal.",
 	//       "enum": [
 	//         "accept",
 	//         "cancel",
 	//         "propose",
+	//         "proposeAndAccept",
 	//         "unknownAction",
-	//         "updateFinalized"
+	//         "updateNonTerms"
 	//       ],
 	//       "enumDescriptions": [
+	//         "",
 	//         "",
 	//         "",
 	//         "",
@@ -7197,6 +8595,7 @@ type ProposalsSearchCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Search: Search for proposals using pql query
@@ -7238,8 +8637,20 @@ func (c *ProposalsSearchCall) Context(ctx context.Context) *ProposalsSearchCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsSearchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsSearchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -7250,11 +8661,7 @@ func (c *ProposalsSearchCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.search" call.
@@ -7323,6 +8730,7 @@ type ProposalsSetupcompleteCall struct {
 	proposalId string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Setupcomplete: Update the given proposal to indicate that setup has
@@ -7349,8 +8757,20 @@ func (c *ProposalsSetupcompleteCall) Context(ctx context.Context) *ProposalsSetu
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsSetupcompleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsSetupcompleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -7361,10 +8781,7 @@ func (c *ProposalsSetupcompleteCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"proposalId": c.proposalId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.setupcomplete" call.
@@ -7412,6 +8829,7 @@ type ProposalsUpdateCall struct {
 	proposal       *Proposal
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Update: Update the given proposal
@@ -7440,8 +8858,20 @@ func (c *ProposalsUpdateCall) Context(ctx context.Context) *ProposalsUpdateCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProposalsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProposalsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.proposal)
@@ -7459,10 +8889,7 @@ func (c *ProposalsUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"revisionNumber": strconv.FormatInt(c.revisionNumber, 10),
 		"updateAction":   c.updateAction,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.proposals.update" call.
@@ -7526,15 +8953,17 @@ func (c *ProposalsUpdateCall) Do(opts ...googleapi.CallOption) (*Proposal, error
 	//       "type": "string"
 	//     },
 	//     "updateAction": {
-	//       "description": "The proposed action to take on the proposal.",
+	//       "description": "The proposed action to take on the proposal. This field is required and it must be set when updating a proposal.",
 	//       "enum": [
 	//         "accept",
 	//         "cancel",
 	//         "propose",
+	//         "proposeAndAccept",
 	//         "unknownAction",
-	//         "updateFinalized"
+	//         "updateNonTerms"
 	//       ],
 	//       "enumDescriptions": [
+	//         "",
 	//         "",
 	//         "",
 	//         "",
@@ -7568,6 +8997,7 @@ type PubprofilesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Gets the requested publisher profile(s) by publisher accountId.
@@ -7603,8 +9033,20 @@ func (c *PubprofilesListCall) Context(ctx context.Context) *PubprofilesListCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PubprofilesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PubprofilesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -7618,10 +9060,7 @@ func (c *PubprofilesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "adexchangebuyer.pubprofiles.list" call.

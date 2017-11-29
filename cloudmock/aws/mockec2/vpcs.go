@@ -18,11 +18,12 @@ package mockec2
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"strings"
 )
 
 type vpcInfo struct {
@@ -143,4 +144,16 @@ func (m *MockEC2) DescribeVpcAttribute(request *ec2.DescribeVpcAttributeInput) (
 	}
 
 	return response, nil
+}
+
+func (m *MockEC2) DescribeInternetGatewaysRequest(*ec2.DescribeInternetGatewaysInput) (*request.Request, *ec2.DescribeInternetGatewaysOutput) {
+	panic("Not implemented")
+	return nil, nil
+}
+func (m *MockEC2) DescribeInternetGateways(*ec2.DescribeInternetGatewaysInput) (*ec2.DescribeInternetGatewaysOutput, error) {
+	return &ec2.DescribeInternetGatewaysOutput{
+		InternetGateways: []*ec2.InternetGateway{{
+			InternetGatewayId: aws.String("fake-ig"),
+		}},
+	}, nil
 }

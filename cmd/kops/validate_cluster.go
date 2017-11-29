@@ -20,19 +20,29 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kops/cmd/kops/util"
 	api "k8s.io/kops/pkg/apis/kops"
+	apiutil "k8s.io/kops/pkg/apis/kops/util"
+	"k8s.io/kops/pkg/dns"
 	"k8s.io/kops/pkg/validation"
 	"k8s.io/kops/util/pkg/tables"
-	k8sapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/v1"
-	k8s_clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 )
+
+func init() {
+	if runtime.GOOS == "darwin" {
+		// In order for  net.LookupHost(apiAddr.Host) to lookup our placeholder address on darwin, we have to
+		os.Setenv("GODEBUG", "netdns=go")
+	}
+}
 
 type ValidateClusterOptions struct {
 	// No options yet
@@ -42,10 +52,10 @@ func NewCmdValidateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 	options := &ValidateClusterOptions{}
 
 	cmd := &cobra.Command{
-		Use: "cluster",
-		//Aliases: []string{"cluster"},
-		Short: "Validate cluster",
-		Long:  `Validate a kubernetes cluster`,
+		Use:     "cluster",
+		Short:   validate_short,
+		Long:    validate_long,
+		Example: validate_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := RunValidateCluster(f, cmd, args, os.Stdout, options)
 			if err != nil {
@@ -73,7 +83,7 @@ func RunValidateCluster(f *util.Factory, cmd *cobra.Command, args []string, out 
 		return err
 	}
 
-	list, err := clientSet.InstanceGroups(cluster.ObjectMeta.Name).List(k8sapi.ListOptions{})
+	list, err := clientSet.InstanceGroupsFor(cluster).List(metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot get InstanceGroups for %q: %v", cluster.ObjectMeta.Name, err)
 	}
@@ -99,9 +109,28 @@ func RunValidateCluster(f *util.Factory, cmd *cobra.Command, args []string, out 
 		return fmt.Errorf("Cannot load kubecfg settings for %q: %v\n", contextName, err)
 	}
 
-	k8sClient, err := k8s_clientset.NewForConfig(config)
+	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return fmt.Errorf("Cannot build kube api client for %q: %v\n", contextName, err)
+	}
+
+	// Do not use if we are running gossip
+	if !dns.IsGossipHostname(cluster.ObjectMeta.Name) {
+		hasPlaceHolderIPAddress, err := validation.HasPlaceHolderIP(contextName)
+		if err != nil {
+			return err
+		}
+
+		if hasPlaceHolderIPAddress {
+			fmt.Println(
+				"Validation Failed\n\n" +
+					"The dns-controller Kubernetes deployment has not updated the Kubernetes cluster's API DNS entry to the correct IP address." +
+					"  The API DNS IP address is the placeholder address that kops creates: 203.0.113.123." +
+					"  Please wait about 5-10 minutes for a master to start, dns-controller to launch, and DNS to propagate." +
+					"  The protokube container and dns-controller deployment logs may contain more diagnostic information." +
+					"  Etcd and the API DNS entries must be updated for a kops Kubernetes cluster to start.")
+			return fmt.Errorf("\nCannot reach cluster's API server: unable to Validate Cluster: %s", cluster.ObjectMeta.Name)
+		}
 	}
 
 	validationCluster, validationFailed := validation.ValidateCluster(cluster.ObjectMeta.Name, list, k8sClient)
@@ -151,9 +180,9 @@ func RunValidateCluster(f *util.Factory, cmd *cobra.Command, args []string, out 
 	nodeTable.AddColumn("ROLE", func(n v1.Node) string {
 		// TODO: Maybe print the instance group role instead?
 		// TODO: Maybe include the instance group name?
-		role := "node"
-		if val, ok := n.ObjectMeta.Labels[api.RoleLabelName]; ok {
-			role = val
+		role := apiutil.GetNodeRole(&n)
+		if role == "" {
+			role = "node"
 		}
 		return role
 	})

@@ -23,22 +23,40 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/kops/cmd/kops/util"
 	api "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/util/pkg/tables"
-	k8sapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
+)
+
+var (
+	get_federation_long = templates.LongDesc(i18n.T(`
+	Display one or many federation resources.`))
+
+	get_federation_example = templates.Examples(i18n.T(`
+	# Get a cluster
+	kops get federation --name k8s-cluster.example.com`))
+
+	get_federation_short = i18n.T(`Get federation.`)
 )
 
 type GetFederationOptions struct {
+	*GetOptions
 }
 
-func init() {
-	var options GetFederationOptions
-
+func NewCmdGetFederations(f *util.Factory, out io.Writer, getOptions *GetOptions) *cobra.Command {
+	options := GetFederationOptions{
+		GetOptions: getOptions,
+	}
 	cmd := &cobra.Command{
 		Use:     "federations",
 		Aliases: []string{"federation"},
-		Short:   "get federations",
-		Long:    `List or get federations.`,
+		Short:   get_federation_short,
+		Long:    get_federation_long,
+		Example: get_federation_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := RunGetFederations(&rootCommand, os.Stdout, &options)
 			if err != nil {
@@ -47,7 +65,7 @@ func init() {
 		},
 	}
 
-	getCmd.cobraCommand.AddCommand(cmd)
+	return cmd
 }
 
 func RunGetFederations(context Factory, out io.Writer, options *GetFederationOptions) error {
@@ -56,7 +74,7 @@ func RunGetFederations(context Factory, out io.Writer, options *GetFederationOpt
 		return err
 	}
 
-	list, err := client.Federations().List(k8sapi.ListOptions{})
+	list, err := client.ListFederations(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -66,13 +84,18 @@ func RunGetFederations(context Factory, out io.Writer, options *GetFederationOpt
 		federations = append(federations, &list.Items[i])
 	}
 	if len(federations) == 0 {
-		fmt.Fprintf(out, "No federations found\n")
-		return nil
+		return fmt.Errorf("No federations found")
 	}
-	switch getCmd.output {
 
+	var obj []runtime.Object
+	if options.output != OutputTable {
+		for _, c := range federations {
+			obj = append(obj, c)
+		}
+	}
+
+	switch options.output {
 	case OutputTable:
-
 		t := &tables.Table{}
 		t.AddColumn("NAME", func(f *api.Federation) string {
 			return f.ObjectMeta.Name
@@ -86,25 +109,10 @@ func RunGetFederations(context Factory, out io.Writer, options *GetFederationOpt
 		return t.Render(federations, out, "NAME", "CONTROLLERS", "MEMBERS")
 
 	case OutputYaml:
-		for i, f := range federations {
-			if i != 0 {
-				_, err = out.Write([]byte("\n\n---\n\n"))
-				if err != nil {
-					return fmt.Errorf("error writing to stdout: %v", err)
-				}
-			}
-			if err := marshalToWriter(f, marshalYaml, os.Stdout); err != nil {
-				return err
-			}
-		}
+		return fullOutputYAML(out, obj...)
 	case OutputJSON:
-		for _, f := range federations {
-			if err := marshalToWriter(f, marshalJSON, os.Stdout); err != nil {
-				return err
-			}
-		}
+		return fullOutputJSON(out, obj...)
 	default:
-		return fmt.Errorf("Unknown output format: %q", getCmd.output)
+		return fmt.Errorf("Unknown output format: %q", options.output)
 	}
-	return nil
 }

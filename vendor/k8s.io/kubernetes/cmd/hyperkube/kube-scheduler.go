@@ -27,9 +27,11 @@ func NewScheduler() *Server {
 	s := options.NewSchedulerServer()
 
 	hks := Server{
-		SimpleUsage: "scheduler",
-		Long:        "Implements a Kubernetes scheduler.  This will assign pods to kubelets based on capacity and constraints.",
-		Run: func(_ *Server, _ []string) error {
+		name:            "scheduler",
+		AlternativeName: "kube-scheduler",
+		SimpleUsage:     "scheduler",
+		Long:            "Implements a Kubernetes scheduler.  This will assign pods to kubelets based on capacity and constraints.",
+		Run: func(_ *Server, _ []string, stopCh <-chan struct{}) error {
 			return app.Run(s)
 		},
 	}

@@ -20,32 +20,46 @@ import (
 	"fmt"
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/apis/storage"
 )
 
 func TestValidateStorageClass(t *testing.T) {
+	deleteReclaimPolicy := api.PersistentVolumeReclaimPolicy("Delete")
+	retainReclaimPolicy := api.PersistentVolumeReclaimPolicy("Retain")
+	recycleReclaimPolicy := api.PersistentVolumeReclaimPolicy("Recycle")
 	successCases := []storage.StorageClass{
 		{
 			// empty parameters
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
-			Provisioner: "kubernetes.io/foo-provisioner",
-			Parameters:  map[string]string{},
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/foo-provisioner",
+			Parameters:    map[string]string{},
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		{
 			// nil parameters
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
-			Provisioner: "kubernetes.io/foo-provisioner",
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/foo-provisioner",
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		{
 			// some parameters
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
+			ObjectMeta:  metav1.ObjectMeta{Name: "foo"},
 			Provisioner: "kubernetes.io/foo-provisioner",
 			Parameters: map[string]string{
 				"kubernetes.io/foo-parameter": "free/form/string",
 				"foo-parameter":               "free-form-string",
 				"foo-parameter2":              "{\"embedded\": \"json\", \"with\": {\"structures\":\"inside\"}}",
 			},
+			ReclaimPolicy: &deleteReclaimPolicy,
+		},
+		{
+			// retain reclaimPolicy
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/foo-provisioner",
+			ReclaimPolicy: &retainReclaimPolicy,
 		},
 	}
 
@@ -68,28 +82,38 @@ func TestValidateStorageClass(t *testing.T) {
 
 	errorCases := map[string]storage.StorageClass{
 		"namespace is present": {
-			ObjectMeta:  api.ObjectMeta{Name: "foo", Namespace: "bar"},
-			Provisioner: "kubernetes.io/foo-provisioner",
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo", Namespace: "bar"},
+			Provisioner:   "kubernetes.io/foo-provisioner",
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		"invalid provisioner": {
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
-			Provisioner: "kubernetes.io/invalid/provisioner",
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/invalid/provisioner",
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		"invalid empty parameter name": {
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
+			ObjectMeta:  metav1.ObjectMeta{Name: "foo"},
 			Provisioner: "kubernetes.io/foo",
 			Parameters: map[string]string{
 				"": "value",
 			},
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		"provisioner: Required value": {
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
-			Provisioner: "",
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "",
+			ReclaimPolicy: &deleteReclaimPolicy,
 		},
 		"too long parameters": {
-			ObjectMeta:  api.ObjectMeta{Name: "foo"},
-			Provisioner: "kubernetes.io/foo",
-			Parameters:  longParameters,
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/foo",
+			Parameters:    longParameters,
+			ReclaimPolicy: &deleteReclaimPolicy,
+		},
+		"invalid reclaimpolicy": {
+			ObjectMeta:    metav1.ObjectMeta{Name: "foo"},
+			Provisioner:   "kubernetes.io/foo",
+			ReclaimPolicy: &recycleReclaimPolicy,
 		},
 	}
 
@@ -99,4 +123,37 @@ func TestValidateStorageClass(t *testing.T) {
 			t.Errorf("Expected failure for test: %s", testName)
 		}
 	}
+}
+
+func TestAlphaExpandPersistentVolumesFeatureValidation(t *testing.T) {
+	deleteReclaimPolicy := api.PersistentVolumeReclaimPolicy("Delete")
+	falseVar := false
+	testSC := &storage.StorageClass{
+		// empty parameters
+		ObjectMeta:           metav1.ObjectMeta{Name: "foo"},
+		Provisioner:          "kubernetes.io/foo-provisioner",
+		Parameters:           map[string]string{},
+		ReclaimPolicy:        &deleteReclaimPolicy,
+		AllowVolumeExpansion: &falseVar,
+	}
+
+	// Enable alpha feature ExpandPersistentVolumes
+	err := utilfeature.DefaultFeatureGate.Set("ExpandPersistentVolumes=true")
+	if err != nil {
+		t.Errorf("Failed to enable feature gate for ExpandPersistentVolumes: %v", err)
+		return
+	}
+	if errs := ValidateStorageClass(testSC); len(errs) != 0 {
+		t.Errorf("expected success: %v", errs)
+	}
+	// Disable alpha feature ExpandPersistentVolumes
+	err = utilfeature.DefaultFeatureGate.Set("ExpandPersistentVolumes=false")
+	if err != nil {
+		t.Errorf("Failed to disable feature gate for ExpandPersistentVolumes: %v", err)
+		return
+	}
+	if errs := ValidateStorageClass(testSC); len(errs) == 0 {
+		t.Errorf("expected failure, but got no error")
+	}
+
 }

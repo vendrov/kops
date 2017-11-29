@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
-	"google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v0.beta"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/gce"
 	"k8s.io/kops/upup/pkg/fi/cloudup/terraform"
@@ -28,7 +28,9 @@ import (
 
 //go:generate fitask -type=Subnet
 type Subnet struct {
-	Name    *string
+	Name      *string
+	Lifecycle *fi.Lifecycle
+
 	Network *Network
 	Region  *string
 	CIDR    *string
@@ -41,9 +43,9 @@ func (e *Subnet) CompareWithID() *string {
 }
 
 func (e *Subnet) Find(c *fi.Context) (*Subnet, error) {
-	cloud := c.Cloud.(*gce.GCECloud)
+	cloud := c.Cloud.(gce.GCECloud)
 
-	s, err := cloud.Compute.Subnetworks.Get(cloud.Project, cloud.Region, *e.Name).Do()
+	s, err := cloud.Compute().Subnetworks.Get(cloud.Project(), cloud.Region(), *e.Name).Do()
 	if err != nil {
 		if gce.IsNotFound(err) {
 			return nil, nil
@@ -77,7 +79,7 @@ func (_ *Subnet) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Subnet) error {
 			Name:        *e.Name,
 			Network:     *e.Network.Name,
 		}
-		_, err := t.Cloud.Compute.Subnetworks.Insert(t.Cloud.Project, t.Cloud.Region, subnet).Do()
+		_, err := t.Cloud.Compute().Subnetworks.Insert(t.Cloud.Project(), t.Cloud.Region(), subnet).Do()
 		if err != nil {
 			return fmt.Errorf("error creating Subnet: %v", err)
 		}

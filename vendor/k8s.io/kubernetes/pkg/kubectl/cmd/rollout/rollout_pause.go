@@ -22,15 +22,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/kubernetes/pkg/kubectl"
 	"k8s.io/kubernetes/pkg/kubectl/cmd/set"
 	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
 	cmdutil "k8s.io/kubernetes/pkg/kubectl/cmd/util"
 	"k8s.io/kubernetes/pkg/kubectl/resource"
-	"k8s.io/kubernetes/pkg/runtime"
-	utilerrors "k8s.io/kubernetes/pkg/util/errors"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
 )
 
 // PauseConfig is the start of the data required to perform the operation.  As new fields are added, add them here instead of
@@ -52,7 +53,7 @@ var (
 		Mark the provided resource as paused
 
 		Paused resources will not be reconciled by a controller.
-		Use \"kubectl rollout resume\" to resume a paused resource.
+		Use "kubectl rollout resume" to resume a paused resource.
 		Currently only deployments support being paused.`)
 
 	pause_example = templates.Examples(`
@@ -70,7 +71,7 @@ func NewCmdRolloutPause(f cmdutil.Factory, out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "pause RESOURCE",
-		Short:   "Mark the provided resource as paused",
+		Short:   i18n.T("Mark the provided resource as paused"),
 		Long:    pause_long,
 		Example: pause_example,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -95,8 +96,8 @@ func NewCmdRolloutPause(f cmdutil.Factory, out io.Writer) *cobra.Command {
 }
 
 func (o *PauseConfig) CompletePause(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, args []string) error {
-	if len(args) == 0 && cmdutil.IsFilenameEmpty(o.Filenames) {
-		return cmdutil.UsageError(cmd, cmd.Use)
+	if len(args) == 0 && cmdutil.IsFilenameSliceEmpty(o.Filenames) {
+		return cmdutil.UsageErrorf(cmd, "%s", cmd.Use)
 	}
 
 	o.Mapper, o.Typer = f.Object()
@@ -110,7 +111,7 @@ func (o *PauseConfig) CompletePause(f cmdutil.Factory, cmd *cobra.Command, out i
 		return err
 	}
 
-	r := resource.NewBuilder(o.Mapper, o.Typer, resource.ClientMapperFunc(f.ClientForMapping), f.Decoder(true)).
+	r := f.NewBuilder(true).
 		NamespaceParam(cmdNamespace).DefaultNamespace().
 		FilenameParam(enforceNamespace, &o.FilenameOptions).
 		ResourceTypeOrNameArgs(true, args...).
@@ -144,7 +145,7 @@ func (o PauseConfig) RunPause() error {
 			continue
 		}
 
-		obj, err := resource.NewHelper(info.Client, info.Mapping).Patch(info.Namespace, info.Name, api.StrategicMergePatchType, patch.Patch)
+		obj, err := resource.NewHelper(info.Client, info.Mapping).Patch(info.Namespace, info.Name, types.StrategicMergePatchType, patch.Patch)
 		if err != nil {
 			allErrs = append(allErrs, fmt.Errorf("failed to patch: %v", err))
 			continue

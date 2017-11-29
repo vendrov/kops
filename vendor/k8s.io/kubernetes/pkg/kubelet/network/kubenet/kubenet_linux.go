@@ -20,42 +20,39 @@ package kubenet
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
-
-	"io/ioutil"
 
 	"github.com/containernetworking/cni/libcni"
 	cnitypes "github.com/containernetworking/cni/pkg/types"
+	cnitypes020 "github.com/containernetworking/cni/pkg/types/020"
 	"github.com/golang/glog"
 	"github.com/vishvananda/netlink"
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/apis/componentconfig"
+	"golang.org/x/sys/unix"
+	"k8s.io/api/core/v1"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	utilnet "k8s.io/apimachinery/pkg/util/net"
+	utilsets "k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/kubernetes/pkg/kubelet/apis/kubeletconfig"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/network"
+	"k8s.io/kubernetes/pkg/kubelet/network/hostport"
 	"k8s.io/kubernetes/pkg/util/bandwidth"
 	utildbus "k8s.io/kubernetes/pkg/util/dbus"
 	utilebtables "k8s.io/kubernetes/pkg/util/ebtables"
-	utilerrors "k8s.io/kubernetes/pkg/util/errors"
-	utilexec "k8s.io/kubernetes/pkg/util/exec"
 	utiliptables "k8s.io/kubernetes/pkg/util/iptables"
-	utilnet "k8s.io/kubernetes/pkg/util/net"
-	utilsets "k8s.io/kubernetes/pkg/util/sets"
 	utilsysctl "k8s.io/kubernetes/pkg/util/sysctl"
-
-	"strconv"
-
-	"k8s.io/kubernetes/pkg/kubelet/network/hostport"
+	utilexec "k8s.io/utils/exec"
 )
 
 const (
-	KubenetPluginName = "kubenet"
-	BridgeName        = "cbr0"
-	DefaultCNIDir     = "/opt/cni/bin"
+	BridgeName    = "cbr0"
+	DefaultCNIDir = "/opt/cni/bin"
 
 	sysctlBridgeCallIPTables = "net/bridge/bridge-nf-call-iptables"
 
@@ -92,8 +89,12 @@ type kubenetNetworkPlugin struct {
 	mtu             int
 	execer          utilexec.Interface
 	nsenterPath     string
-	hairpinMode     componentconfig.HairpinMode
-	hostportHandler hostport.HostportHandler
+	hairpinMode     kubeletconfig.HairpinMode
+	// kubenet can use either hostportSyncer and hostportManager to implement hostports
+	// Currently, if network host supports legacy features, hostportSyncer will be used,
+	// otherwise, hostportManager will be used.
+	hostportSyncer  hostport.HostportSyncer
+	hostportManager hostport.HostPortManager
 	iptables        utiliptables.Interface
 	sysctl          utilsysctl.Interface
 	ebtables        utilebtables.Interface
@@ -117,12 +118,13 @@ func NewPlugin(networkPluginDir string) network.NetworkPlugin {
 		iptables:          iptInterface,
 		sysctl:            sysctl,
 		vendorDir:         networkPluginDir,
-		hostportHandler:   hostport.NewHostportHandler(),
+		hostportSyncer:    hostport.NewHostportSyncer(iptInterface),
+		hostportManager:   hostport.NewHostportManager(iptInterface),
 		nonMasqueradeCIDR: "10.0.0.0/8",
 	}
 }
 
-func (plugin *kubenetNetworkPlugin) Init(host network.Host, hairpinMode componentconfig.HairpinMode, nonMasqueradeCIDR string, mtu int) error {
+func (plugin *kubenetNetworkPlugin) Init(host network.Host, hairpinMode kubeletconfig.HairpinMode, nonMasqueradeCIDR string, mtu int) error {
 	plugin.host = host
 	plugin.hairpinMode = hairpinMode
 	plugin.nonMasqueradeCIDR = nonMasqueradeCIDR
@@ -177,12 +179,14 @@ func (plugin *kubenetNetworkPlugin) Init(host network.Host, hairpinMode componen
 
 // TODO: move thic logic into cni bridge plugin and remove this from kubenet
 func (plugin *kubenetNetworkPlugin) ensureMasqRule() error {
-	if _, err := plugin.iptables.EnsureRule(utiliptables.Append, utiliptables.TableNAT, utiliptables.ChainPostrouting,
-		"-m", "comment", "--comment", "kubenet: SNAT for outbound traffic from cluster",
-		"-m", "addrtype", "!", "--dst-type", "LOCAL",
-		"!", "-d", plugin.nonMasqueradeCIDR,
-		"-j", "MASQUERADE"); err != nil {
-		return fmt.Errorf("Failed to ensure that %s chain %s jumps to MASQUERADE: %v", utiliptables.TableNAT, utiliptables.ChainPostrouting, err)
+	if plugin.nonMasqueradeCIDR != "0.0.0.0/0" {
+		if _, err := plugin.iptables.EnsureRule(utiliptables.Append, utiliptables.TableNAT, utiliptables.ChainPostrouting,
+			"-m", "comment", "--comment", "kubenet: SNAT for outbound traffic from cluster",
+			"-m", "addrtype", "!", "--dst-type", "LOCAL",
+			"!", "-d", plugin.nonMasqueradeCIDR,
+			"-j", "MASQUERADE"); err != nil {
+			return fmt.Errorf("Failed to ensure that %s chain %s jumps to MASQUERADE: %v", utiliptables.TableNAT, utiliptables.ChainPostrouting, err)
+		}
 	}
 	return nil
 }
@@ -253,9 +257,9 @@ func (plugin *kubenetNetworkPlugin) Event(name string, details map[string]interf
 	glog.V(5).Infof("PodCIDR is set to %q", podCIDR)
 	_, cidr, err := net.ParseCIDR(podCIDR)
 	if err == nil {
-		setHairpin := plugin.hairpinMode == componentconfig.HairpinVeth
+		setHairpin := plugin.hairpinMode == kubeletconfig.HairpinVeth
 		// Set bridge address to first address in IPNet
-		cidr.IP.To4()[3] += 1
+		cidr.IP[len(cidr.IP)-1] += 1
 
 		json := fmt.Sprintf(NET_CONFIG_TEMPLATE, BridgeName, plugin.mtu, network.DefaultInterfaceName, setHairpin, podCIDR, cidr.IP.String())
 		glog.V(2).Infof("CNI network config set to %v", json)
@@ -282,7 +286,7 @@ func (plugin *kubenetNetworkPlugin) clearBridgeAddressesExcept(keep *net.IPNet) 
 		return
 	}
 
-	addrs, err := netlink.AddrList(bridge, syscall.AF_INET)
+	addrs, err := netlink.AddrList(bridge, unix.AF_INET)
 	if err != nil {
 		return
 	}
@@ -300,22 +304,27 @@ func (plugin *kubenetNetworkPlugin) Name() string {
 }
 
 func (plugin *kubenetNetworkPlugin) Capabilities() utilsets.Int {
-	return utilsets.NewInt(network.NET_PLUGIN_CAPABILITY_SHAPING)
+	return utilsets.NewInt()
 }
 
 // setup sets up networking through CNI using the given ns/name and sandbox ID.
 // TODO: Don't pass the pod to this method, it only needs it for bandwidth
 // shaping and hostport management.
-func (plugin *kubenetNetworkPlugin) setup(namespace string, name string, id kubecontainer.ContainerID, pod *v1.Pod) error {
+func (plugin *kubenetNetworkPlugin) setup(namespace string, name string, id kubecontainer.ContainerID, pod *v1.Pod, annotations map[string]string) error {
 	// Bring up container loopback interface
 	if _, err := plugin.addContainerToNetwork(plugin.loConfig, "lo", namespace, name, id); err != nil {
 		return err
 	}
 
 	// Hook container up with our bridge
-	res, err := plugin.addContainerToNetwork(plugin.netConfig, network.DefaultInterfaceName, namespace, name, id)
+	resT, err := plugin.addContainerToNetwork(plugin.netConfig, network.DefaultInterfaceName, namespace, name, id)
 	if err != nil {
 		return err
+	}
+	// Coerce the CNI result version
+	res, err := cnitypes020.GetResult(resT)
+	if err != nil {
+		return fmt.Errorf("unable to understand network config: %v", err)
 	}
 	if res.IP4 == nil {
 		return fmt.Errorf("CNI plugin reported no IPv4 address for container %v.", id)
@@ -344,7 +353,7 @@ func (plugin *kubenetNetworkPlugin) setup(namespace string, name string, id kube
 	// Put the container bridge into promiscuous mode to force it to accept hairpin packets.
 	// TODO: Remove this once the kernel bug (#20096) is fixed.
 	// TODO: check and set promiscuous mode with netlink once vishvananda/netlink supports it
-	if plugin.hairpinMode == componentconfig.PromiscuousBridge {
+	if plugin.hairpinMode == kubeletconfig.PromiscuousBridge {
 		output, err := plugin.execer.Command("ip", "link", "show", "dev", BridgeName).CombinedOutput()
 		if err != nil || strings.Index(string(output), "PROMISC") < 0 {
 			_, err := plugin.execer.Command("ip", "link", "set", BridgeName, "promisc", "on").CombinedOutput()
@@ -358,17 +367,10 @@ func (plugin *kubenetNetworkPlugin) setup(namespace string, name string, id kube
 
 	plugin.podIPs[id] = ip4.String()
 
-	// The host can choose to not support "legacy" features. The remote
-	// shim doesn't support it (#35457), but the kubelet does.
-	if !plugin.host.SupportsLegacyFeatures() {
-		return nil
-	}
-
-	// The first SetUpPod call creates the bridge; get a shaper for the sake of
-	// initialization
+	// The first SetUpPod call creates the bridge; get a shaper for the sake of initialization
+	// TODO: replace with CNI traffic shaper plugin
 	shaper := plugin.shaper()
-
-	ingress, egress, err := bandwidth.ExtractPodBandwidthResources(pod.Annotations)
+	ingress, egress, err := bandwidth.ExtractPodBandwidthResources(annotations)
 	if err != nil {
 		return fmt.Errorf("Error reading pod bandwidth annotations: %v", err)
 	}
@@ -378,21 +380,41 @@ func (plugin *kubenetNetworkPlugin) setup(namespace string, name string, id kube
 		}
 	}
 
-	// Open any hostports the pod's containers want
-	activePods, err := plugin.getActivePods()
-	if err != nil {
-		return err
-	}
+	// The host can choose to not support "legacy" features. The remote
+	// shim doesn't support it (#35457), but the kubelet does.
+	if plugin.host.SupportsLegacyFeatures() {
+		// Open any hostport the pod's containers want
+		activePodPortMappings, err := plugin.getPodPortMappings()
+		if err != nil {
+			return err
+		}
 
-	newPod := &hostport.ActivePod{Pod: pod, IP: ip4}
-	if err := plugin.hostportHandler.OpenPodHostportsAndSync(newPod, BridgeName, activePods); err != nil {
-		return err
+		newPodPortMapping := hostport.ConstructPodPortMapping(pod, ip4)
+		if err := plugin.hostportSyncer.OpenPodHostportsAndSync(newPodPortMapping, BridgeName, activePodPortMappings); err != nil {
+			return err
+		}
+	} else {
+		// TODO: replace with CNI port-forwarding plugin
+		portMappings, err := plugin.host.GetPodPortMappings(id.ID)
+		if err != nil {
+			return err
+		}
+		if portMappings != nil && len(portMappings) > 0 {
+			if err := plugin.hostportManager.Add(id.ID, &hostport.PodPortMapping{
+				Namespace:    namespace,
+				Name:         name,
+				PortMappings: portMappings,
+				IP:           ip4,
+				HostNetwork:  false,
+			}, BridgeName); err != nil {
+				return err
+			}
+		}
 	}
-
 	return nil
 }
 
-func (plugin *kubenetNetworkPlugin) SetUpPod(namespace string, name string, id kubecontainer.ContainerID) error {
+func (plugin *kubenetNetworkPlugin) SetUpPod(namespace string, name string, id kubecontainer.ContainerID, annotations map[string]string) error {
 	plugin.mu.Lock()
 	defer plugin.mu.Unlock()
 
@@ -411,7 +433,7 @@ func (plugin *kubenetNetworkPlugin) SetUpPod(namespace string, name string, id k
 		return fmt.Errorf("Kubenet cannot SetUpPod: %v", err)
 	}
 
-	if err := plugin.setup(namespace, name, id, pod); err != nil {
+	if err := plugin.setup(namespace, name, id, pod, annotations); err != nil {
 		// Make sure everything gets cleaned up on errors
 		podIP, _ := plugin.podIPs[id]
 		if err := plugin.teardown(namespace, name, id, podIP); err != nil {
@@ -471,18 +493,29 @@ func (plugin *kubenetNetworkPlugin) teardown(namespace string, name string, id k
 
 	// The host can choose to not support "legacy" features. The remote
 	// shim doesn't support it (#35457), but the kubelet does.
-	if !plugin.host.SupportsLegacyFeatures() {
-		return utilerrors.NewAggregate(errList)
+	if plugin.host.SupportsLegacyFeatures() {
+		activePodPortMapping, err := plugin.getPodPortMappings()
+		if err == nil {
+			err = plugin.hostportSyncer.SyncHostports(BridgeName, activePodPortMapping)
+		}
+		if err != nil {
+			errList = append(errList, err)
+		}
+	} else {
+		portMappings, err := plugin.host.GetPodPortMappings(id.ID)
+		if err != nil {
+			errList = append(errList, err)
+		} else if portMappings != nil && len(portMappings) > 0 {
+			if err = plugin.hostportManager.Remove(id.ID, &hostport.PodPortMapping{
+				Namespace:    namespace,
+				Name:         name,
+				PortMappings: portMappings,
+				HostNetwork:  false,
+			}); err != nil {
+				errList = append(errList, err)
+			}
+		}
 	}
-
-	activePods, err := plugin.getActivePods()
-	if err == nil {
-		err = plugin.hostportHandler.SyncHostports(BridgeName, activePods)
-	}
-	if err != nil {
-		errList = append(errList, err)
-	}
-
 	return utilerrors.NewAggregate(errList)
 }
 
@@ -526,6 +559,9 @@ func (plugin *kubenetNetworkPlugin) GetPodNetworkStatus(namespace string, name s
 	netnsPath, err := plugin.host.GetNetNS(id.ID)
 	if err != nil {
 		return nil, fmt.Errorf("Kubenet failed to retrieve network namespace path: %v", err)
+	}
+	if netnsPath == "" {
+		return nil, fmt.Errorf("Cannot find the network namespace, skipping pod network status for container %q", id)
 	}
 	ip, err := network.GetPodIP(plugin.execer, plugin.nsenterPath, netnsPath, network.DefaultInterfaceName)
 	if err != nil {
@@ -593,15 +629,12 @@ func (plugin *kubenetNetworkPlugin) getNonExitedPods() ([]*kubecontainer.Pod, er
 	return ret, nil
 }
 
-// Returns a list of pods running or ready to run on this node and each pod's IP address.
-// Assumes PodSpecs retrieved from the runtime include the name and ID of containers in
-// each pod.
-func (plugin *kubenetNetworkPlugin) getActivePods() ([]*hostport.ActivePod, error) {
+func (plugin *kubenetNetworkPlugin) getPodPortMappings() ([]*hostport.PodPortMapping, error) {
 	pods, err := plugin.getNonExitedPods()
 	if err != nil {
 		return nil, err
 	}
-	activePods := make([]*hostport.ActivePod, 0)
+	activePodPortMappings := make([]*hostport.PodPortMapping, 0)
 	for _, p := range pods {
 		containerID, err := plugin.host.GetRuntime().GetPodContainerID(p)
 		if err != nil {
@@ -616,13 +649,10 @@ func (plugin *kubenetNetworkPlugin) getActivePods() ([]*hostport.ActivePod, erro
 			continue
 		}
 		if pod, ok := plugin.host.GetPodByName(p.Namespace, p.Name); ok {
-			activePods = append(activePods, &hostport.ActivePod{
-				Pod: pod,
-				IP:  podIP,
-			})
+			activePodPortMappings = append(activePodPortMappings, hostport.ConstructPodPortMapping(pod, podIP))
 		}
 	}
-	return activePods, nil
+	return activePodPortMappings, nil
 }
 
 // ipamGarbageCollection will release unused IP.
@@ -711,10 +741,10 @@ func podIsExited(p *kubecontainer.Pod) bool {
 	return true
 }
 
-func (plugin *kubenetNetworkPlugin) buildCNIRuntimeConf(ifName string, id kubecontainer.ContainerID) (*libcni.RuntimeConf, error) {
+func (plugin *kubenetNetworkPlugin) buildCNIRuntimeConf(ifName string, id kubecontainer.ContainerID, needNetNs bool) (*libcni.RuntimeConf, error) {
 	netnsPath, err := plugin.host.GetNetNS(id.ID)
-	if err != nil {
-		return nil, fmt.Errorf("Kubenet failed to retrieve network namespace path: %v", err)
+	if needNetNs && err != nil {
+		glog.Errorf("Kubenet failed to retrieve network namespace path: %v", err)
 	}
 
 	return &libcni.RuntimeConf{
@@ -724,8 +754,8 @@ func (plugin *kubenetNetworkPlugin) buildCNIRuntimeConf(ifName string, id kubeco
 	}, nil
 }
 
-func (plugin *kubenetNetworkPlugin) addContainerToNetwork(config *libcni.NetworkConfig, ifName, namespace, name string, id kubecontainer.ContainerID) (*cnitypes.Result, error) {
-	rt, err := plugin.buildCNIRuntimeConf(ifName, id)
+func (plugin *kubenetNetworkPlugin) addContainerToNetwork(config *libcni.NetworkConfig, ifName, namespace, name string, id kubecontainer.ContainerID) (cnitypes.Result, error) {
+	rt, err := plugin.buildCNIRuntimeConf(ifName, id, true)
 	if err != nil {
 		return nil, fmt.Errorf("Error building CNI config: %v", err)
 	}
@@ -739,7 +769,7 @@ func (plugin *kubenetNetworkPlugin) addContainerToNetwork(config *libcni.Network
 }
 
 func (plugin *kubenetNetworkPlugin) delContainerFromNetwork(config *libcni.NetworkConfig, ifName, namespace, name string, id kubecontainer.ContainerID) error {
-	rt, err := plugin.buildCNIRuntimeConf(ifName, id)
+	rt, err := plugin.buildCNIRuntimeConf(ifName, id, false)
 	if err != nil {
 		return fmt.Errorf("Error building CNI config: %v", err)
 	}

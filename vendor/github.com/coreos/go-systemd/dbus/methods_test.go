@@ -18,10 +18,13 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
+	"syscall"
 	"testing"
+	"time"
 
 	"github.com/godbus/dbus"
 )
@@ -110,6 +113,9 @@ func TestStartStopUnit(t *testing.T) {
 	}
 
 	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	unit := getUnitStatus(units, target)
 
@@ -129,11 +135,260 @@ func TestStartStopUnit(t *testing.T) {
 	<-reschan
 
 	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	unit = getUnitStatus(units, target)
 
 	if unit != nil {
 		t.Fatalf("Test unit found in list, should be stopped")
+	}
+}
+
+// Ensure that basic unit restarting works.
+func TestRestartUnit(t *testing.T) {
+	target := "start-stop.service"
+	conn := setupConn(t)
+
+	setupUnit(target, conn, t)
+	linkUnit(target, conn, t)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err := conn.StartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit := getUnitStatus(units, target)
+	if unit == nil {
+		t.Fatalf("Test unit not found in list")
+	} else if unit.ActiveState != "active" {
+		t.Fatalf("Test unit not active")
+	}
+
+	// Restart the unit
+	reschan = make(chan string)
+	_, err = conn.RestartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job = <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	// Stop the unit
+	_, err = conn.StopUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait for StopUnit job to complete
+	<-reschan
+
+	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit = getUnitStatus(units, target)
+	if unit != nil {
+		t.Fatalf("Test unit found in list, should be stopped")
+	}
+
+	// Try to restart the unit.
+	// It should still succeed, even if the unit is inactive.
+	reschan = make(chan string)
+	_, err = conn.TryRestartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait for StopUnit job to complete
+	<-reschan
+
+	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit = getUnitStatus(units, target)
+	if unit != nil {
+		t.Fatalf("Test unit found in list, should be stopped")
+	}
+}
+
+// Ensure that basic unit reloading works.
+func TestReloadUnit(t *testing.T) {
+	target := "reload.service"
+	conn := setupConn(t)
+
+	err := conn.Subscribe()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	subSet := conn.NewSubscriptionSet()
+	evChan, errChan := subSet.Subscribe()
+
+	subSet.Add(target)
+
+	setupUnit(target, conn, t)
+	linkUnit(target, conn, t)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err = conn.StartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit := getUnitStatus(units, target)
+	if unit == nil {
+		t.Fatalf("Test unit not found in list")
+	} else if unit.ActiveState != "active" {
+		t.Fatalf("Test unit not active")
+	}
+
+	// Reload the unit
+	reschan = make(chan string)
+
+	_, err = conn.ReloadUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job = <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	timeout := make(chan bool, 1)
+	go func() {
+		time.Sleep(3 * time.Second)
+		close(timeout)
+	}()
+
+	// Wait for the event, expecting the target UnitStatus meets all of the
+	// following conditions:
+	//  * target is non-nil
+	//  * target's ActiveState is active.
+waitevent:
+	for {
+		select {
+		case changes := <-evChan:
+			tch, ok := changes[target]
+			if !ok {
+				continue waitevent
+			}
+			if tch != nil && tch.Name == target && tch.ActiveState == "active" {
+				break waitevent
+			}
+		case err = <-errChan:
+			t.Fatal(err)
+		case <-timeout:
+			t.Fatal("Reached timeout")
+		}
+	}
+}
+
+// Ensure that basic unit reload-or-restarting works.
+func TestReloadOrRestartUnit(t *testing.T) {
+	target := "reload.service"
+	conn := setupConn(t)
+
+	setupUnit(target, conn, t)
+	linkUnit(target, conn, t)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err := conn.StartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit := getUnitStatus(units, target)
+	if unit == nil {
+		t.Fatalf("Test unit not found in list")
+	} else if unit.ActiveState != "active" {
+		t.Fatalf("Test unit not active")
+	}
+
+	// Reload or restart the unit
+	reschan = make(chan string)
+	_, err = conn.ReloadOrRestartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job = <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	// Stop the unit
+	_, err = conn.StopUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait for StopUnit job to complete
+	<-reschan
+
+	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit = getUnitStatus(units, target)
+	if unit != nil && unit.ActiveState == "active" {
+		t.Fatalf("Test unit still active, should be inactive.")
+	}
+
+	// Reload or try to restart the unit
+	// It should still succeed, even if the unit is inactive.
+	reschan = make(chan string)
+	_, err = conn.ReloadOrTryRestartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job = <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
 	}
 }
 
@@ -451,6 +706,9 @@ func TestStartStopTransientUnit(t *testing.T) {
 	}
 
 	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	unit := getUnitStatus(units, target)
 
@@ -470,11 +728,177 @@ func TestStartStopTransientUnit(t *testing.T) {
 	<-reschan
 
 	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	unit = getUnitStatus(units, target)
 
 	if unit != nil {
 		t.Fatalf("Test unit found in list, should be stopped")
+	}
+}
+
+// Ensure that putting running programs into scopes works
+func TestStartStopTransientScope(t *testing.T) {
+	conn := setupConn(t)
+
+	cmd := exec.Command("/bin/sleep", "400")
+	err := cmd.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cmd.Process.Kill()
+
+	props := []Property{
+		PropPids(uint32(cmd.Process.Pid)),
+	}
+	target := fmt.Sprintf("testing-transient-%d.scope", cmd.Process.Pid)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err = conn.StartTransientUnit(target, "replace", props, reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit := getUnitStatus(units, target)
+
+	if unit == nil {
+		t.Fatalf("Test unit not found in list")
+	} else if unit.ActiveState != "active" {
+		t.Fatalf("Test unit not active")
+	}
+
+	// maybe check if pid is really a member of the just created scope
+	//   systemd uses the following api which does not use dbus, but directly
+	//   accesses procfs for cgroup information.
+	//     int sd_pid_get_unit(pid_t pid, char **session)
+}
+
+// Ensure that basic unit gets killed by SIGTERM
+func TestKillUnit(t *testing.T) {
+	target := "start-stop.service"
+	conn := setupConn(t)
+
+	err := conn.Subscribe()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	subSet := conn.NewSubscriptionSet()
+	evChan, errChan := subSet.Subscribe()
+
+	subSet.Add(target)
+
+	setupUnit(target, conn, t)
+	linkUnit(target, conn, t)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err = conn.StartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "done" {
+		t.Fatal("Job is not done:", job)
+	}
+
+	// send SIGTERM
+	conn.KillUnit(target, int32(syscall.SIGTERM))
+
+	timeout := make(chan bool, 1)
+	go func() {
+		time.Sleep(3 * time.Second)
+		close(timeout)
+	}()
+
+	// Wait for the event, expecting the target UnitStatus meets one of the
+	// following conditions:
+	//  * target is nil, meaning the unit has completely gone.
+	//  * target is non-nil, and its ActiveState is not active.
+waitevent:
+	for {
+		select {
+		case changes := <-evChan:
+			tch, ok := changes[target]
+			if !ok {
+				continue waitevent
+			}
+			if tch == nil || (tch != nil && tch.Name == target && tch.ActiveState != "active") {
+				break waitevent
+			}
+		case err = <-errChan:
+			t.Fatal(err)
+		case <-timeout:
+			t.Fatal("Reached timeout")
+		}
+	}
+}
+
+// Ensure that a failed unit gets reset
+func TestResetFailedUnit(t *testing.T) {
+	target := "start-failed.service"
+	conn := setupConn(t)
+
+	setupUnit(target, conn, t)
+	linkUnit(target, conn, t)
+
+	// Start the unit
+	reschan := make(chan string)
+	_, err := conn.StartUnit(target, "replace", reschan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job := <-reschan
+	if job != "failed" {
+		t.Fatal("Job is not failed:", job)
+	}
+
+	units, err := conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	unit := getUnitStatus(units, target)
+	if unit == nil {
+		t.Fatalf("Test unit not found in list")
+	}
+
+	// reset the failed unit
+	err = conn.ResetFailedUnit(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Ensure that the target unit is actually gone
+	units, err = conn.ListUnits()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+	for _, u := range units {
+		if u.Name == target {
+			found = true
+			break
+		}
+	}
+	if found {
+		t.Fatalf("Test unit still found in list. units = %v", units)
 	}
 }
 
@@ -505,5 +929,68 @@ func TestConnJobListener(t *testing.T) {
 	currentJobSize := len(conn.jobListener.jobs)
 	if jobSize != currentJobSize {
 		t.Fatal("JobListener jobs leaked")
+	}
+}
+
+// Enables a unit and then masks/unmasks it
+func TestMaskUnmask(t *testing.T) {
+	target := "mask-unmask.service"
+	conn := setupConn(t)
+
+	setupUnit(target, conn, t)
+	abs := findFixture(target, t)
+	runPath := filepath.Join("/run/systemd/system/", target)
+
+	// 1. Enable the unit
+	install, changes, err := conn.EnableUnitFiles([]string{abs}, true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if install != false {
+		t.Log("Install was true")
+	}
+
+	if len(changes) < 1 {
+		t.Fatalf("Expected one change, got %v", changes)
+	}
+
+	if changes[0].Filename != runPath {
+		t.Fatal("Unexpected target filename")
+	}
+
+	// 2. Mask the unit
+	mChanges, err := conn.MaskUnitFiles([]string{target}, true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mChanges[0].Filename != runPath {
+		t.Fatalf("Change should include correct filename, %+v", mChanges[0])
+	}
+	if mChanges[0].Destination != "" {
+		t.Fatalf("Change destination should be empty, %+v", mChanges[0])
+	}
+
+	// 3. Unmask the unit
+	uChanges, err := conn.UnmaskUnitFiles([]string{target}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if uChanges[0].Filename != runPath {
+		t.Fatalf("Change should include correct filename, %+v", uChanges[0])
+	}
+	if uChanges[0].Destination != "" {
+		t.Fatalf("Change destination should be empty, %+v", uChanges[0])
+	}
+
+}
+
+// Test a global Reload
+func TestReload(t *testing.T) {
+	conn := setupConn(t)
+
+	err := conn.Reload()
+	if err != nil {
+		t.Fatal(err)
 	}
 }

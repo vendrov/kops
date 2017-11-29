@@ -19,12 +19,12 @@ func reformatJSON(j string) string {
 func compareJSON(a, b string) bool {
 	// return Equal([]byte(a), []byte(b))
 
-	var obj_a, obj_b map[string]interface{}
-	json.Unmarshal([]byte(a), &obj_a)
-	json.Unmarshal([]byte(b), &obj_b)
+	var objA, objB map[string]interface{}
+	json.Unmarshal([]byte(a), &objA)
+	json.Unmarshal([]byte(b), &objB)
 
-	// fmt.Printf("Comparing %#v\nagainst %#v\n", obj_a, obj_b)
-	return reflect.DeepEqual(obj_a, obj_b)
+	// fmt.Printf("Comparing %#v\nagainst %#v\n", objA, objB)
+	return reflect.DeepEqual(objA, objB)
 }
 
 func applyPatch(doc, patch string) (string, error) {
@@ -64,6 +64,13 @@ var Cases = []Case{
      { "op": "add", "path": "/foo/1", "value": "qux" }
     ]`,
 		`{ "foo": [ "bar", "qux", "baz" ] }`,
+	},
+	{
+		`{ "foo": [ "bar", "baz" ] }`,
+		`[
+     { "op": "add", "path": "/foo/-1", "value": "qux" }
+    ]`,
+		`{ "foo": [ "bar", "baz", "qux" ] }`,
 	},
 	{
 		`{ "baz": "qux", "foo": "bar" }`,
@@ -141,6 +148,26 @@ var Cases = []Case{
 		`[ { "op": "replace", "path": "/foo/1", "value": "bum"}]`,
 		`{ "foo": ["bar", "bum","baz"]}`,
 	},
+	{
+		`[ {"foo": ["bar","qux","baz"]}]`,
+		`[ { "op": "replace", "path": "/0/foo/0", "value": "bum"}]`,
+		`[ {"foo": ["bum","qux","baz"]}]`,
+	},
+	{
+		`[ {"foo": ["bar","qux","baz"], "bar": ["qux","baz"]}]`,
+		`[ { "op": "copy", "from": "/0/foo/0", "path": "/0/bar/0"}]`,
+		`[ {"foo": ["bar","qux","baz"], "bar": ["bar", "baz"]}]`,
+	},
+	{
+		`[ {"foo": ["bar","qux","baz"], "bar": ["qux","baz"]}]`,
+		`[ { "op": "copy", "from": "/0/foo/0", "path": "/0/bar"}]`,
+		`[ {"foo": ["bar","qux","baz"], "bar": ["bar", "qux", "baz"]}]`,
+	},
+	{
+		`[ { "foo": {"bar": ["qux","baz"]}, "baz": {"qux": "bum"}}]`,
+		`[ { "op": "copy", "from": "/0/foo/bar", "path": "/0/baz/bar"}]`,
+		`[ { "baz": {"bar": ["qux","baz"], "qux":"bum"}, "foo": {"bar": ["qux","baz"]}}]`,
+	},
 }
 
 type BadCase struct {
@@ -178,6 +205,27 @@ var BadCases = []BadCase{
 	{
 		`{ "a": { "b": [1] } }`,
 		`[ { "op": "move", "from": "/a/b/1", "path": "/a/b/2" } ]`,
+	},
+	{
+		`{ "foo": "bar" }`,
+		`[ { "op": "add", "pathz": "/baz", "value": "qux" } ]`,
+	},
+	{
+		`{ "foo": "bar" }`,
+		`[ { "op": "add", "path": "", "value": "qux" } ]`,
+	},
+	{
+		`{ "foo": ["bar","baz"]}`,
+		`[ { "op": "replace", "path": "/foo/2", "value": "bum"}]`,
+	},
+	{
+		`{ "foo": ["bar","baz"]}`,
+		`[ { "op": "add", "path": "/foo/-4", "value": "bum"}]`,
+	},
+
+	{
+		`{ "name":{ "foo": "bat", "qux": "bum"}}`,
+		`[ { "op": "replace", "path": "/foo/bar", "value":"baz"}]`,
 	},
 }
 
@@ -226,13 +274,13 @@ type TestCase struct {
 var TestCases = []TestCase{
 	{
 		`{
-			"baz": "qux",
-			"foo": [ "a", 2, "c" ]
-		}`,
+      "baz": "qux",
+      "foo": [ "a", 2, "c" ]
+    }`,
 		`[
-			{ "op": "test", "path": "/baz", "value": "qux" },
-			{ "op": "test", "path": "/foo/1", "value": 2 }
-		]`,
+      { "op": "test", "path": "/baz", "value": "qux" },
+      { "op": "test", "path": "/foo/1", "value": 2 }
+    ]`,
 		true,
 		"",
 	},
@@ -244,13 +292,13 @@ var TestCases = []TestCase{
 	},
 	{
 		`{
-			"baz": "qux",
-			"foo": ["a", 2, "c"]
-		}`,
+      "baz": "qux",
+      "foo": ["a", 2, "c"]
+    }`,
 		`[
-			{ "op": "test", "path": "/baz", "value": "qux" },
-			{ "op": "test", "path": "/foo/1", "value": "c" }
-		]`,
+      { "op": "test", "path": "/baz", "value": "qux" },
+      { "op": "test", "path": "/foo/1", "value": "c" }
+    ]`,
 		false,
 		"/foo/1",
 	},

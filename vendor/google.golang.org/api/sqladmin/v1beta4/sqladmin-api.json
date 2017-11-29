@@ -1,19 +1,19 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"jQLIOHBVnDZie4rQHGH1WJF-INE/o_-sS2PEVGnMkQqyJ497hboiLWw\"",
+ "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/XsY4JGYlYgyTyxbJioMS7bSip2s\"",
  "discoveryVersion": "v1",
  "id": "sqladmin:v1beta4",
  "name": "sqladmin",
  "canonicalName": "SQL Admin",
  "version": "v1beta4",
- "revision": "20160509",
+ "revision": "20170606",
  "title": "Cloud SQL Administration API",
  "description": "Creates and configures Cloud SQL instances, which provide fully-managed MySQL databases.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "http://www.google.com/images/icons/product/search-16.gif",
-  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
+  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
  },
  "documentationLink": "https://cloud.google.com/sql/docs/reference/latest",
  "protocol": "rest",
@@ -134,6 +134,10 @@
    "type": "object",
    "description": "A database instance backup run resource.",
    "properties": {
+    "description": {
+     "type": "string",
+     "description": "The description of this run, only applicable to on-demand backups."
+    },
     "endTime": {
      "type": "string",
      "description": "The time the backup operation completed in UTC timezone in RFC 3339 format, for example 2012-11-15T16:19:00.094Z.",
@@ -174,6 +178,10 @@
     "status": {
      "type": "string",
      "description": "The status of this run."
+    },
+    "type": {
+     "type": "string",
+     "description": "The type of this run; can be either \"AUTOMATED\" or \"ON_DEMAND\"."
     },
     "windowStartTime": {
      "type": "string",
@@ -325,6 +333,10 @@
      "type": "string",
      "description": "FIRST_GEN: Basic Cloud SQL instance that runs in a Google-managed container.\nSECOND_GEN: A newer Cloud SQL backend that runs in a Compute Engine VM.\nEXTERNAL: A MySQL server that is not managed by Google."
     },
+    "connectionName": {
+     "type": "string",
+     "description": "Connection name of the Cloud SQL instance used in connection strings."
+    },
     "currentDiskSize": {
      "type": "string",
      "description": "The current disk usage of the instance in bytes. This property has been deprecated. Users should use the \"cloudsql.googleapis.com/database/disk/bytes_used\" metric in Cloud Monitoring API instead. Please see https://groups.google.com/d/msg/google-cloud-sql-announce/I_7-F9EBhT0/BtvFtdFeAgAJ for details.",
@@ -348,7 +360,7 @@
       },
       "name": {
        "type": "string",
-       "description": "The name of the failover replica."
+       "description": "The name of the failover replica. If specified at instance creation, a failover replica is created for the instance. The name doesn't include the project ID. This property is applicable only to Second Generation instances."
       }
      }
     },
@@ -635,6 +647,10 @@
      "type": "string",
      "description": "The file type for the specified uri.\nSQL: The file contains SQL statements.\nCSV: The file contains CSV data."
     },
+    "importUser": {
+     "type": "string",
+     "description": "The PostgreSQL user to use for this import operation. Defaults to cloudsqlsuperuser. Does not apply to MySQL instances."
+    },
     "kind": {
      "type": "string",
      "description": "This is always sql#importContext.",
@@ -724,6 +740,17 @@
     }
    }
   },
+  "InstancesTruncateLogRequest": {
+   "id": "InstancesTruncateLogRequest",
+   "type": "object",
+   "description": "Instance truncate log request.",
+   "properties": {
+    "truncateLogContext": {
+     "$ref": "TruncateLogContext",
+     "description": "Contains details about the truncate log operation."
+    }
+   }
+  },
   "IpConfiguration": {
    "id": "IpConfiguration",
    "type": "object",
@@ -759,6 +786,10 @@
      "type": "string",
      "description": "The due time for this IP to be retired in RFC 3339 format, for example 2012-11-15T16:19:00.094Z. This field is only available when the IP is scheduled to be retired.",
      "format": "date-time"
+    },
+    "type": {
+     "type": "string",
+     "description": "The type of this IP address. A PRIMARY address is an address that can accept incoming connections. An OUTGOING address is the source address of connections originating from the instance, if supported."
     }
    }
   },
@@ -935,8 +966,7 @@
      "description": "Name of the database instance related to this operation."
     },
     "targetLink": {
-     "type": "string",
-     "description": "The URI of the instance related to the operation."
+     "type": "string"
     },
     "targetProject": {
      "type": "string",
@@ -1063,7 +1093,7 @@
    "properties": {
     "activationPolicy": {
      "type": "string",
-     "description": "The activation policy for this instance. This specifies when the instance should be activated and is applicable only when the instance state is RUNNABLE. This can be one of the following.\nALWAYS: The instance should always be active.\nNEVER: The instance should never be activated.\nON_DEMAND: The instance is activated upon receiving requests; only applicable to First Generation instances."
+     "description": "The activation policy specifies when the instance is activated; it is applicable only when the instance state is RUNNABLE. The activation policy cannot be updated together with other settings for Second Generation instances. Valid values:\nALWAYS: The instance is on; it is not deactivated by inactivity.\nNEVER: The instance is off; it is not activated, even if a connection request arrives.\nON_DEMAND: The instance responds to incoming requests, and turns itself off when not in use. Instances with PER_USE pricing turn off after 15 minutes of inactivity. Instances with PER_PACKAGE pricing turn off after 12 hours of inactivity."
     },
     "authorizedGaeApplications": {
      "type": "array",
@@ -1071,6 +1101,10 @@
      "items": {
       "type": "string"
      }
+    },
+    "availabilityType": {
+     "type": "string",
+     "description": "Reserved for future use."
     },
     "backupConfiguration": {
      "$ref": "BackupConfiguration",
@@ -1137,7 +1171,12 @@
     },
     "storageAutoResize": {
      "type": "boolean",
-     "description": "Configuration to increase storage size automatically. The default value is false. Applies only to Second Generation instances."
+     "description": "Configuration to increase storage size automatically. The default value is true. Applies only to Second Generation instances."
+    },
+    "storageAutoResizeLimit": {
+     "type": "string",
+     "description": "The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit. Applies only to Second Generation instances.",
+     "format": "int64"
     },
     "tier": {
      "type": "string",
@@ -1147,6 +1186,14 @@
        "sql.instances.insert",
        "sql.instances.update"
       ]
+     }
+    },
+    "userLabels": {
+     "type": "object",
+     "description": "User-provided labels, represented as a dictionary where each label is a single key value pair.",
+     "additionalProperties": {
+      "type": "string",
+      "description": "An individual label entry, composed of a key and a value."
      }
     }
    }
@@ -1299,7 +1346,7 @@
     },
     "region": {
      "type": "array",
-     "description": "The applicable regions for this tier. Can be us-east1, europe-west1 or asia-east1.",
+     "description": "The applicable regions for this tier.",
      "items": {
       "type": "string"
      }
@@ -1326,6 +1373,22 @@
      "type": "string",
      "description": "This is always sql#tiersList.",
      "default": "sql#tiersList"
+    }
+   }
+  },
+  "TruncateLogContext": {
+   "id": "TruncateLogContext",
+   "type": "object",
+   "description": "Database Instance truncate log context.",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "This is always sql#truncateLogContext.",
+     "default": "sql#truncateLogContext"
+    },
+    "logType": {
+     "type": "string",
+     "description": "The type of log to truncate. Valid values are MYSQL_GENERAL_TABLE and MYSQL_SLOW_TABLE."
     }
    }
   },
@@ -1464,6 +1527,40 @@
      ],
      "response": {
       "$ref": "BackupRun"
+     },
+     "scopes": [
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/sqlservice.admin"
+     ]
+    },
+    "insert": {
+     "id": "sql.backupRuns.insert",
+     "path": "projects/{project}/instances/{instance}/backupRuns",
+     "httpMethod": "POST",
+     "description": "Creates a new backup run on demand. This method is applicable only to Second Generation instances.",
+     "parameters": {
+      "instance": {
+       "type": "string",
+       "description": "Cloud SQL instance ID. This does not include the project ID.",
+       "required": true,
+       "location": "path"
+      },
+      "project": {
+       "type": "string",
+       "description": "Project ID of the project that contains the instance.",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "project",
+      "instance"
+     ],
+     "request": {
+      "$ref": "BackupRun"
+     },
+     "response": {
+      "$ref": "Operation"
      },
      "scopes": [
       "https://www.googleapis.com/auth/cloud-platform",
@@ -1748,6 +1845,13 @@
      "path": "flags",
      "httpMethod": "GET",
      "description": "List all available database flags for Google Cloud SQL instances.",
+     "parameters": {
+      "databaseVersion": {
+       "type": "string",
+       "description": "Database version for flag retrieval. Flags are specific to the database version.",
+       "location": "query"
+      }
+     },
      "response": {
       "$ref": "FlagsListResponse"
      },
@@ -1989,6 +2093,11 @@
      "httpMethod": "GET",
      "description": "Lists instances under a given project in the alphabetical order of the instance name.",
      "parameters": {
+      "filter": {
+       "type": "string",
+       "description": "An expression for filtering the results of the request, such as by name or label.",
+       "location": "query"
+      },
       "maxResults": {
        "type": "integer",
        "description": "The maximum number of results to return per response.",
@@ -2233,6 +2342,40 @@
       "project",
       "instance"
      ],
+     "response": {
+      "$ref": "Operation"
+     },
+     "scopes": [
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/sqlservice.admin"
+     ]
+    },
+    "truncateLog": {
+     "id": "sql.instances.truncateLog",
+     "path": "projects/{project}/instances/{instance}/truncateLog",
+     "httpMethod": "POST",
+     "description": "Truncate MySQL general and slow query log tables",
+     "parameters": {
+      "instance": {
+       "type": "string",
+       "description": "Cloud SQL instance ID. This does not include the project ID.",
+       "required": true,
+       "location": "path"
+      },
+      "project": {
+       "type": "string",
+       "description": "Project ID of the Cloud SQL project.",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "project",
+      "instance"
+     ],
+     "request": {
+      "$ref": "InstancesTruncateLogRequest"
+     },
      "response": {
       "$ref": "Operation"
      },

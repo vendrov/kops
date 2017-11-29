@@ -79,35 +79,39 @@ type EntitiesService struct {
 }
 
 // SearchResponse: Response message includes the context and a list of
-// matching results which contain the detail of associated entities.
+// matching results
+// which contain the detail of associated entities.
 type SearchResponse struct {
-	// Context: The local context applicable for the response. See more
-	// details at http://www.w3.org/TR/json-ld/#context-definitions.
-	Context interface{} `json:"context,omitempty"`
 
 	// ItemListElement: The item list of search results.
 	ItemListElement []interface{} `json:"itemListElement,omitempty"`
-
-	// Type: The schema type of top-level JSON-LD object, e.g. ItemList.
-	Type interface{} `json:"type,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
 	googleapi.ServerResponse `json:"-"`
 
-	// ForceSendFields is a list of field names (e.g. "Context") to
+	// ForceSendFields is a list of field names (e.g. "ItemListElement") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ItemListElement") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *SearchResponse) MarshalJSON() ([]byte, error) {
 	type noMethod SearchResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "kgsearch.entities.search":
@@ -117,11 +121,14 @@ type EntitiesSearchCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Search: Searches Knowledge Graph for entities that match the
-// constraints. A list of matched entities will be returned in response,
-// which will be in JSON-LD format and compatible with http://schema.org
+// constraints.
+// A list of matched entities will be returned in response, which will
+// be in
+// JSON-LD format and compatible with http://schema.org
 func (r *EntitiesService) Search() *EntitiesSearchCall {
 	c := &EntitiesSearchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	return c
@@ -129,6 +136,9 @@ func (r *EntitiesService) Search() *EntitiesSearchCall {
 
 // Ids sets the optional parameter "ids": The list of entity id to be
 // used for search instead of query string.
+// To specify multiple ids in the HTTP request, repeat the parameter in
+// the
+// URL as in ...?ids=A&ids=B
 func (c *EntitiesSearchCall) Ids(ids ...string) *EntitiesSearchCall {
 	c.urlParams_.SetMulti("ids", append([]string{}, ids...))
 	return c
@@ -142,7 +152,8 @@ func (c *EntitiesSearchCall) Indent(indent bool) *EntitiesSearchCall {
 }
 
 // Languages sets the optional parameter "languages": The list of
-// language codes (defined in ISO 693) to run the query with, e.g. 'en'.
+// language codes (defined in ISO 693) to run the query with,
+// e.g. 'en'.
 func (c *EntitiesSearchCall) Languages(languages ...string) *EntitiesSearchCall {
 	c.urlParams_.SetMulti("languages", append([]string{}, languages...))
 	return c
@@ -170,8 +181,10 @@ func (c *EntitiesSearchCall) Query(query string) *EntitiesSearchCall {
 }
 
 // Types sets the optional parameter "types": Restricts returned
-// entities with these types, e.g. Person (as defined in
-// http://schema.org/Person).
+// entities with these types, e.g. Person
+// (as defined in http://schema.org/Person). If multiple types are
+// specified,
+// returned entities will contain one or more of these types.
 func (c *EntitiesSearchCall) Types(types ...string) *EntitiesSearchCall {
 	c.urlParams_.SetMulti("types", append([]string{}, types...))
 	return c
@@ -203,8 +216,20 @@ func (c *EntitiesSearchCall) Context(ctx context.Context) *EntitiesSearchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *EntitiesSearchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *EntitiesSearchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -215,11 +240,7 @@ func (c *EntitiesSearchCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "kgsearch.entities.search" call.
@@ -260,12 +281,14 @@ func (c *EntitiesSearchCall) Do(opts ...googleapi.CallOption) (*SearchResponse, 
 	}
 	return ret, nil
 	// {
-	//   "description": "Searches Knowledge Graph for entities that match the constraints. A list of matched entities will be returned in response, which will be in JSON-LD format and compatible with http://schema.org",
+	//   "description": "Searches Knowledge Graph for entities that match the constraints.\nA list of matched entities will be returned in response, which will be in\nJSON-LD format and compatible with http://schema.org",
+	//   "flatPath": "v1/entities:search",
 	//   "httpMethod": "GET",
 	//   "id": "kgsearch.entities.search",
+	//   "parameterOrder": [],
 	//   "parameters": {
 	//     "ids": {
-	//       "description": "The list of entity id to be used for search instead of query string.",
+	//       "description": "The list of entity id to be used for search instead of query string.\nTo specify multiple ids in the HTTP request, repeat the parameter in the\nURL as in ...?ids=A\u0026ids=B",
 	//       "location": "query",
 	//       "repeated": true,
 	//       "type": "string"
@@ -276,7 +299,7 @@ func (c *EntitiesSearchCall) Do(opts ...googleapi.CallOption) (*SearchResponse, 
 	//       "type": "boolean"
 	//     },
 	//     "languages": {
-	//       "description": "The list of language codes (defined in ISO 693) to run the query with, e.g. 'en'.",
+	//       "description": "The list of language codes (defined in ISO 693) to run the query with,\ne.g. 'en'.",
 	//       "location": "query",
 	//       "repeated": true,
 	//       "type": "string"
@@ -298,7 +321,7 @@ func (c *EntitiesSearchCall) Do(opts ...googleapi.CallOption) (*SearchResponse, 
 	//       "type": "string"
 	//     },
 	//     "types": {
-	//       "description": "Restricts returned entities with these types, e.g. Person (as defined in http://schema.org/Person).",
+	//       "description": "Restricts returned entities with these types, e.g. Person\n(as defined in http://schema.org/Person). If multiple types are specified,\nreturned entities will contain one or more of these types.",
 	//       "location": "query",
 	//       "repeated": true,
 	//       "type": "string"

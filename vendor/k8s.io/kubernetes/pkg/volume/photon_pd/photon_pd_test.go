@@ -22,10 +22,10 @@ import (
 	"path"
 	"testing"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/types"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	utiltesting "k8s.io/client-go/util/testing"
 	"k8s.io/kubernetes/pkg/util/mount"
-	utiltesting "k8s.io/kubernetes/pkg/util/testing"
 	"k8s.io/kubernetes/pkg/volume"
 	volumetest "k8s.io/kubernetes/pkg/volume/testing"
 )
@@ -37,7 +37,7 @@ func TestCanSupport(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPluginByName("kubernetes.io/photon-pd")
 	if err != nil {
@@ -61,7 +61,7 @@ func TestGetAccessModes(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPersistentPluginByName("kubernetes.io/photon-pd")
 	if err != nil {
@@ -88,8 +88,8 @@ func contains(modes []v1.PersistentVolumeAccessMode, mode v1.PersistentVolumeAcc
 type fakePDManager struct {
 }
 
-func (fake *fakePDManager) CreateVolume(c *photonPersistentDiskProvisioner) (pdID string, volumeSizeGB int, err error) {
-	return "test-photon-pd-id", 10, nil
+func (fake *fakePDManager) CreateVolume(c *photonPersistentDiskProvisioner) (pdID string, volumeSizeGB int, fstype string, err error) {
+	return "test-photon-pd-id", 10, "ext4", nil
 }
 
 func (fake *fakePDManager) DeleteVolume(cd *photonPersistentDiskDeleter) error {
@@ -106,7 +106,7 @@ func TestPlugin(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPluginByName("kubernetes.io/photon-pd")
 	if err != nil {
@@ -179,6 +179,9 @@ func TestPlugin(t *testing.T) {
 		PersistentVolumeReclaimPolicy: v1.PersistentVolumeReclaimDelete,
 	}
 	provisioner, err := plug.(*photonPersistentDiskPlugin).newProvisionerInternal(options, &fakePDManager{})
+	if err != nil {
+		t.Fatalf("Error creating new provisioner:%v", err)
+	}
 	persistentSpec, err := provisioner.Provision()
 	if err != nil {
 		t.Errorf("Provision() failed: %v", err)
@@ -198,6 +201,9 @@ func TestPlugin(t *testing.T) {
 		PersistentVolume: persistentSpec,
 	}
 	deleter, err := plug.(*photonPersistentDiskPlugin).newDeleterInternal(volSpec, &fakePDManager{})
+	if err != nil {
+		t.Fatalf("Error creating new deleter:%v", err)
+	}
 	err = deleter.Delete()
 	if err != nil {
 		t.Errorf("Deleter() failed: %v", err)
@@ -211,7 +217,7 @@ func TestMounterAndUnmounterTypeAssert(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPluginByName("kubernetes.io/photon-pd")
 	if err != nil {
@@ -228,11 +234,17 @@ func TestMounterAndUnmounterTypeAssert(t *testing.T) {
 	}
 
 	mounter, err := plug.(*photonPersistentDiskPlugin).newMounterInternal(volume.NewSpecFromVolume(spec), types.UID("poduid"), &fakePDManager{}, &mount.FakeMounter{})
+	if err != nil {
+		t.Fatalf("Error creating new mounter:%v", err)
+	}
 	if _, ok := mounter.(volume.Unmounter); ok {
 		t.Errorf("Volume Mounter can be type-assert to Unmounter")
 	}
 
 	unmounter, err := plug.(*photonPersistentDiskPlugin).newUnmounterInternal("vol1", types.UID("poduid"), &fakePDManager{}, &mount.FakeMounter{})
+	if err != nil {
+		t.Fatalf("Error creating new unmounter:%v", err)
+	}
 	if _, ok := unmounter.(volume.Mounter); ok {
 		t.Errorf("Volume Unmounter can be type-assert to Mounter")
 	}

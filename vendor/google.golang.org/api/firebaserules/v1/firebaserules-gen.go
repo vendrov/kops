@@ -1,6 +1,6 @@
 // Package firebaserules provides access to the Firebase Rules API.
 //
-// See https://firebase.google.com/docs/storage/security/start
+// See https://firebase.google.com/docs/storage/security
 //
 // Usage example:
 //
@@ -114,6 +114,37 @@ type ProjectsRulesetsService struct {
 	s *Service
 }
 
+// Arg: Arg matchers for the mock function.
+type Arg struct {
+	// AnyValue: Argument matches any value provided.
+	AnyValue *Empty `json:"anyValue,omitempty"`
+
+	// ExactValue: Argument exactly matches value provided.
+	ExactValue interface{} `json:"exactValue,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "AnyValue") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AnyValue") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Arg) MarshalJSON() ([]byte, error) {
+	type noMethod Arg
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // Empty: A generic empty message that you can re-use to avoid defining
 // duplicated
 // empty messages in your APIs. A typical example is to use it as the
@@ -151,12 +182,107 @@ type File struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Content") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *File) MarshalJSON() ([]byte, error) {
 	type noMethod File
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// FunctionCall: Represents a service-defined function call that was
+// invoked during test
+// execution.
+type FunctionCall struct {
+	// Args: The arguments that were provided to the function.
+	Args []interface{} `json:"args,omitempty"`
+
+	// Function: Name of the function invoked.
+	Function string `json:"function,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Args") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Args") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *FunctionCall) MarshalJSON() ([]byte, error) {
+	type noMethod FunctionCall
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// FunctionMock: Mock function definition.
+//
+// Mocks must refer to a function declared by the target service. The
+// type of
+// the function args and result will be inferred at test time. If either
+// the
+// arg or result values are not compatible with function type
+// declaration, the
+// request will be considered invalid.
+//
+// More than one `FunctionMock` may be provided for a given function
+// name so
+// long as the `Arg` matchers are distinct. There may be only one
+// function
+// for a given overload where all `Arg` values are `Arg.any_value`.
+type FunctionMock struct {
+	// Args: The list of `Arg` values to match. The order in which the
+	// arguments are
+	// provided is the order in which they must appear in the
+	// function
+	// invocation.
+	Args []*Arg `json:"args,omitempty"`
+
+	// Function: The name of the function.
+	//
+	// The function name must match one provided by a service declaration.
+	Function string `json:"function,omitempty"`
+
+	// Result: The mock result of the function call.
+	Result *Result `json:"result,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Args") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Args") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *FunctionMock) MarshalJSON() ([]byte, error) {
+	type noMethod FunctionMock
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Issue: Issues include warnings, errors, and deprecation notices.
@@ -186,12 +312,20 @@ type Issue struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Description") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Issue) MarshalJSON() ([]byte, error) {
 	type noMethod Issue
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListReleasesResponse: The response for
@@ -216,16 +350,24 @@ type ListReleasesResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NextPageToken") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ListReleasesResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListReleasesResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListRulesetsResponse: The response for
-// FirebaseRulesService.ListRulesets
+// FirebaseRulesService.ListRulesets.
 type ListRulesetsResponse struct {
 	// NextPageToken: The pagination token to retrieve the next page of
 	// results. If the value is
@@ -246,12 +388,20 @@ type ListRulesetsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NextPageToken") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ListRulesetsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListRulesetsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Release: `Release` is a named reference to a `Ruleset`. Once a
@@ -260,7 +410,7 @@ func (s *ListRulesetsResponse) MarshalJSON() ([]byte, error) {
 // `Ruleset`.
 type Release struct {
 	// CreateTime: Time the release was created.
-	// @OutputOnly
+	// Output only.
 	CreateTime string `json:"createTime,omitempty"`
 
 	// Name: Resource name for the `Release`.
@@ -298,7 +448,6 @@ type Release struct {
 	// relationship between `Release` instances.
 	//
 	// Format: `projects/{project_id}/releases/{release_id}`
-	//
 	Name string `json:"name,omitempty"`
 
 	// RulesetName: Name of the `Ruleset` referred to by this `Release`. The
@@ -307,7 +456,7 @@ type Release struct {
 	RulesetName string `json:"rulesetName,omitempty"`
 
 	// UpdateTime: Time the release was updated.
-	// @OutputOnly
+	// Output only.
 	UpdateTime string `json:"updateTime,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -321,12 +470,54 @@ type Release struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreateTime") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Release) MarshalJSON() ([]byte, error) {
 	type noMethod Release
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// Result: Possible result values from the function mock invocation.
+type Result struct {
+	// Undefined: The result is undefined, meaning the result could not be
+	// computed.
+	Undefined *Empty `json:"undefined,omitempty"`
+
+	// Value: The result is an actual value. The type of the value must
+	// match that
+	// of the type declared by the service.
+	Value interface{} `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Undefined") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Undefined") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Result) MarshalJSON() ([]byte, error) {
+	type noMethod Result
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Ruleset: `Ruleset` is an immutable copy of `Source` with a globally
@@ -334,13 +525,13 @@ func (s *Release) MarshalJSON() ([]byte, error) {
 // and a creation time.
 type Ruleset struct {
 	// CreateTime: Time the `Ruleset` was created.
-	// @OutputOnly
+	// Output only.
 	CreateTime string `json:"createTime,omitempty"`
 
 	// Name: Name of the `Ruleset`. The ruleset_id is auto generated by the
 	// service.
 	// Format: `projects/{project_id}/rulesets/{ruleset_id}`
-	// @OutputOnly
+	// Output only.
 	Name string `json:"name,omitempty"`
 
 	// Source: `Source` for the `Ruleset`.
@@ -357,12 +548,20 @@ type Ruleset struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreateTime") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Ruleset) MarshalJSON() ([]byte, error) {
 	type noMethod Ruleset
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Source: `Source` is one or more `File` messages comprising a logical
@@ -378,12 +577,20 @@ type Source struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Files") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Source) MarshalJSON() ([]byte, error) {
 	type noMethod Source
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // SourcePosition: Position in the `Source` content including its line,
@@ -407,18 +614,187 @@ type SourcePosition struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Column") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *SourcePosition) MarshalJSON() ([]byte, error) {
 	type noMethod SourcePosition
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TestCase: `TestCase` messages provide the request context and an
+// expectation as to
+// whether the given context will be allowed or denied. Test cases may
+// specify
+// the `request`, `resource`, and `function_mocks` to mock a function
+// call to
+// a service-provided function.
+//
+// The `request` object represents context present at request-time.
+//
+// The `resource` is the value of the target resource as it appears
+// in
+// persistent storage before the request is executed.
+type TestCase struct {
+	// Expectation: Test expectation.
+	//
+	// Possible values:
+	//   "EXPECTATION_UNSPECIFIED" - Unspecified expectation.
+	//   "ALLOW" - Expect an allowed result.
+	//   "DENY" - Expect a denied result.
+	Expectation string `json:"expectation,omitempty"`
+
+	// FunctionMocks: Optional function mocks for service-defined functions.
+	// If not set, any
+	// service defined function is expected to return an error, which may or
+	// may
+	// not influence the test outcome.
+	FunctionMocks []*FunctionMock `json:"functionMocks,omitempty"`
+
+	// Request: Request context.
+	//
+	// The exact format of the request context is service-dependent. See
+	// the
+	// appropriate service documentation for information about the
+	// supported
+	// fields and types on the request. Minimally, all services support
+	// the
+	// following fields and types:
+	//
+	// Request field  | Type
+	// ---------------|-----------------
+	// auth.uid       | `string`
+	// auth.token     | `map<string, string>`
+	// headers        | `map<string, string>`
+	// method         | `string`
+	// params         | `map<string, string>`
+	// path           | `string`
+	// time           | `google.protobuf.Timestamp`
+	//
+	// If the request value is not well-formed for the service, the request
+	// will
+	// be rejected as an invalid argument.
+	Request interface{} `json:"request,omitempty"`
+
+	// Resource: Optional resource value as it appears in persistent storage
+	// before the
+	// request is fulfilled.
+	//
+	// The resource type depends on the `request.path` value.
+	Resource interface{} `json:"resource,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Expectation") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Expectation") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TestCase) MarshalJSON() ([]byte, error) {
+	type noMethod TestCase
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TestResult: Test result message containing the state of the test as
+// well as a
+// description and source position for test failures.
+type TestResult struct {
+	// DebugMessages: Debug messages related to test execution issues
+	// encountered during
+	// evaluation.
+	//
+	// Debug messages may be related to too many or too few invocations
+	// of
+	// function mocks or to runtime errors that occur during
+	// evaluation.
+	//
+	// For example: ```Unable to read variable [name: "resource"]```
+	DebugMessages []string `json:"debugMessages,omitempty"`
+
+	// ErrorPosition: Position in the `Source` or `Ruleset` where the
+	// principle runtime error
+	// occurs.
+	//
+	// Evaluation of an expression may result in an error. Rules are deny
+	// by
+	// default, so a `DENY` expectation when an error is generated is
+	// valid.
+	// When there is a `DENY` with an error, the `SourcePosition` is
+	// returned.
+	//
+	// E.g. `error_position { line: 19 column: 37 }`
+	ErrorPosition *SourcePosition `json:"errorPosition,omitempty"`
+
+	// FunctionCalls: The set of function calls made to service-defined
+	// methods.
+	//
+	// Function calls are included in the order in which they are
+	// encountered
+	// during evaluation, are provided for both mocked and unmocked
+	// functions,
+	// and included on the response regardless of the test `state`.
+	FunctionCalls []*FunctionCall `json:"functionCalls,omitempty"`
+
+	// State: State of the test.
+	//
+	// Possible values:
+	//   "STATE_UNSPECIFIED" - Test state is not set.
+	//   "SUCCESS" - Test is a success.
+	//   "FAILURE" - Test is a failure.
+	State string `json:"state,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "DebugMessages") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DebugMessages") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TestResult) MarshalJSON() ([]byte, error) {
+	type noMethod TestResult
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // TestRulesetRequest: The request for FirebaseRulesService.TestRuleset.
 type TestRulesetRequest struct {
-	// Source: `Source` to be checked for correctness.
+	// Source: Optional `Source` to be checked for correctness.
+	//
+	// This field must not be set when the resource name refers to a
+	// `Ruleset`.
 	Source *Source `json:"source,omitempty"`
+
+	// TestSuite: Inline `TestSuite` to run.
+	TestSuite *TestSuite `json:"testSuite,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Source") to
 	// unconditionally include in API requests. By default, fields with
@@ -427,12 +803,20 @@ type TestRulesetRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Source") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TestRulesetRequest) MarshalJSON() ([]byte, error) {
 	type noMethod TestRulesetRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // TestRulesetResponse: The response for
@@ -442,6 +826,13 @@ type TestRulesetResponse struct {
 	// Issues of
 	// `ERROR` severity will prevent tests from executing.
 	Issues []*Issue `json:"issues,omitempty"`
+
+	// TestResults: The set of test results given the test cases in the
+	// `TestSuite`.
+	// The results will appear in the same order as the test cases appear in
+	// the
+	// `TestSuite`.
+	TestResults []*TestResult `json:"testResults,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -454,12 +845,54 @@ type TestRulesetResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Issues") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *TestRulesetResponse) MarshalJSON() ([]byte, error) {
 	type noMethod TestRulesetResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TestSuite: `TestSuite` is a collection of `TestCase` instances that
+// validate the logical
+// correctness of a `Ruleset`. The `TestSuite` may be referenced in-line
+// within
+// a `TestRuleset` invocation or as part of a `Release` object as a
+// pre-release
+// check.
+type TestSuite struct {
+	// TestCases: Collection of test cases associated with the `TestSuite`.
+	TestCases []*TestCase `json:"testCases,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "TestCases") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "TestCases") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TestSuite) MarshalJSON() ([]byte, error) {
+	type noMethod TestSuite
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "firebaserules.projects.test":
@@ -470,21 +903,20 @@ type ProjectsTestCall struct {
 	testrulesetrequest *TestRulesetRequest
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Test: Test `Source` for syntactic and semantic correctness. Issues
-// present in the
-// rules, if any, will be returned to the caller with a description,
-// severity,
-// and source location.
+// present, if
+// any, will be returned to the caller with a description, severity,
+// and
+// source location.
 //
-// The test method will typically be executed with a developer
-// provided
-// `Source`, but if regression testing is desired, this method may
-// be
-// executed against a `Ruleset` resource name and the `Source` will
-// be
-// retrieved from the persisted `Ruleset`.
+// The test method may be executed with `Source` or a `Ruleset`
+// name.
+// Passing `Source` is useful for unit testing new rules. Passing a
+// `Ruleset`
+// name is useful for regression testing an existing rule.
 //
 // The following is an example of `Source` that permits users to upload
 // images
@@ -496,10 +928,10 @@ type ProjectsTestCall struct {
 //     // Users are allowed to subscribe and unsubscribe to the blog.
 //     service firebase.storage {
 //       match /users/{userId}/images/{imageName} {
-//           allow write: if userId == request.userId
-//               && (imageName.endsWith('.png') ||
-// imageName.endsWith('.jpg'))
-//               && resource.mimeType.startsWith('image/')
+//           allow write: if userId == request.auth.uid
+//               && (imageName.matches('*.png$')
+//               || imageName.matches('*.jpg$'))
+//               && resource.mimeType.matches('^image/')
 //       }
 //     }
 func (r *ProjectsService) Test(name string, testrulesetrequest *TestRulesetRequest) *ProjectsTestCall {
@@ -525,8 +957,20 @@ func (c *ProjectsTestCall) Context(ctx context.Context) *ProjectsTestCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsTestCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsTestCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testrulesetrequest)
@@ -542,10 +986,7 @@ func (c *ProjectsTestCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.test" call.
@@ -586,7 +1027,7 @@ func (c *ProjectsTestCall) Do(opts ...googleapi.CallOption) (*TestRulesetRespons
 	}
 	return ret, nil
 	// {
-	//   "description": "Test `Source` for syntactic and semantic correctness. Issues present in the\nrules, if any, will be returned to the caller with a description, severity,\nand source location.\n\nThe test method will typically be executed with a developer provided\n`Source`, but if regression testing is desired, this method may be\nexecuted against a `Ruleset` resource name and the `Source` will be\nretrieved from the persisted `Ruleset`.\n\nThe following is an example of `Source` that permits users to upload images\nto a bucket bearing their user id and matching the correct metadata:\n\n_*Example*_\n\n    // Users are allowed to subscribe and unsubscribe to the blog.\n    service firebase.storage {\n      match /users/{userId}/images/{imageName} {\n          allow write: if userId == request.userId\n              \u0026\u0026 (imageName.endsWith('.png') || imageName.endsWith('.jpg'))\n              \u0026\u0026 resource.mimeType.startsWith('image/')\n      }\n    }",
+	//   "description": "Test `Source` for syntactic and semantic correctness. Issues present, if\nany, will be returned to the caller with a description, severity, and\nsource location.\n\nThe test method may be executed with `Source` or a `Ruleset` name.\nPassing `Source` is useful for unit testing new rules. Passing a `Ruleset`\nname is useful for regression testing an existing rule.\n\nThe following is an example of `Source` that permits users to upload images\nto a bucket bearing their user id and matching the correct metadata:\n\n_*Example*_\n\n    // Users are allowed to subscribe and unsubscribe to the blog.\n    service firebase.storage {\n      match /users/{userId}/images/{imageName} {\n          allow write: if userId == request.auth.uid\n              \u0026\u0026 (imageName.matches('*.png$')\n              || imageName.matches('*.jpg$'))\n              \u0026\u0026 resource.mimeType.matches('^image/')\n      }\n    }",
 	//   "flatPath": "v1/projects/{projectsId}:test",
 	//   "httpMethod": "POST",
 	//   "id": "firebaserules.projects.test",
@@ -595,9 +1036,9 @@ func (c *ProjectsTestCall) Do(opts ...googleapi.CallOption) (*TestRulesetRespons
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "Name of the project.\n\nFormat: `projects/{project_id}`",
+	//       "description": "Tests may either provide `source` or a `Ruleset` resource name.\n\nFor tests against `source`, the resource name must refer to the project:\nFormat: `projects/{project_id}`\n\nFor tests against a `Ruleset`, this must be the `Ruleset` resource name:\nFormat: `projects/{project_id}/rulesets/{ruleset_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/.*$",
+	//       "pattern": "^projects/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -626,6 +1067,7 @@ type ProjectsReleasesCreateCall struct {
 	release    *Release
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Create: Create a `Release`.
@@ -662,10 +1104,7 @@ type ProjectsReleasesCreateCall struct {
 // `prod/v23`
 // refers to a new `Ruleset`. The `Ruleset` reference for a `Release`
 // may be
-// updated using the UpdateRelease method, and the custom `Release`
-// name
-// may be referenced by specifying the `X-Firebase-Rules-Release-Name`
-// header.
+// updated using the UpdateRelease method.
 func (r *ProjectsReleasesService) Create(name string, release *Release) *ProjectsReleasesCreateCall {
 	c := &ProjectsReleasesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -689,8 +1128,20 @@ func (c *ProjectsReleasesCreateCall) Context(ctx context.Context) *ProjectsRelea
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsReleasesCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsReleasesCreateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.release)
@@ -706,10 +1157,7 @@ func (c *ProjectsReleasesCreateCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.releases.create" call.
@@ -750,7 +1198,7 @@ func (c *ProjectsReleasesCreateCall) Do(opts ...googleapi.CallOption) (*Release,
 	}
 	return ret, nil
 	// {
-	//   "description": "Create a `Release`.\n\nRelease names should reflect the developer's deployment practices. For\nexample, the release name may include the environment name, application\nname, application version, or any other name meaningful to the developer.\nOnce a `Release` refers to a `Ruleset`, the rules can be enforced by\nFirebase Rules-enabled services.\n\nMore than one `Release` may be 'live' concurrently. Consider the following\nthree `Release` names for `projects/foo` and the `Ruleset` to which they\nrefer.\n\nRelease Name                    | Ruleset Name\n--------------------------------|-------------\nprojects/foo/releases/prod      | projects/foo/rulesets/uuid123\nprojects/foo/releases/prod/beta | projects/foo/rulesets/uuid123\nprojects/foo/releases/prod/v23  | projects/foo/rulesets/uuid456\n\nThe table reflects the `Ruleset` rollout in progress. The `prod` and\n`prod/beta` releases refer to the same `Ruleset`. However, `prod/v23`\nrefers to a new `Ruleset`. The `Ruleset` reference for a `Release` may be\nupdated using the UpdateRelease method, and the custom `Release` name\nmay be referenced by specifying the `X-Firebase-Rules-Release-Name` header.",
+	//   "description": "Create a `Release`.\n\nRelease names should reflect the developer's deployment practices. For\nexample, the release name may include the environment name, application\nname, application version, or any other name meaningful to the developer.\nOnce a `Release` refers to a `Ruleset`, the rules can be enforced by\nFirebase Rules-enabled services.\n\nMore than one `Release` may be 'live' concurrently. Consider the following\nthree `Release` names for `projects/foo` and the `Ruleset` to which they\nrefer.\n\nRelease Name                    | Ruleset Name\n--------------------------------|-------------\nprojects/foo/releases/prod      | projects/foo/rulesets/uuid123\nprojects/foo/releases/prod/beta | projects/foo/rulesets/uuid123\nprojects/foo/releases/prod/v23  | projects/foo/rulesets/uuid456\n\nThe table reflects the `Ruleset` rollout in progress. The `prod` and\n`prod/beta` releases refer to the same `Ruleset`. However, `prod/v23`\nrefers to a new `Ruleset`. The `Ruleset` reference for a `Release` may be\nupdated using the UpdateRelease method.",
 	//   "flatPath": "v1/projects/{projectsId}/releases",
 	//   "httpMethod": "POST",
 	//   "id": "firebaserules.projects.releases.create",
@@ -761,7 +1209,7 @@ func (c *ProjectsReleasesCreateCall) Do(opts ...googleapi.CallOption) (*Release,
 	//     "name": {
 	//       "description": "Resource name for the project which owns this `Release`.\n\nFormat: `projects/{project_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -788,6 +1236,7 @@ type ProjectsReleasesDeleteCall struct {
 	name       string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete a `Release` by resource name.
@@ -813,8 +1262,20 @@ func (c *ProjectsReleasesDeleteCall) Context(ctx context.Context) *ProjectsRelea
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsReleasesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsReleasesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -825,10 +1286,7 @@ func (c *ProjectsReleasesDeleteCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.releases.delete" call.
@@ -880,7 +1338,7 @@ func (c *ProjectsReleasesDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, e
 	//     "name": {
 	//       "description": "Resource name for the `Release` to delete.\n\nFormat: `projects/{project_id}/releases/{release_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/releases/.*$",
+	//       "pattern": "^projects/[^/]+/releases/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -905,10 +1363,10 @@ type ProjectsReleasesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get a `Release` by name.
-//
 func (r *ProjectsReleasesService) Get(name string) *ProjectsReleasesGetCall {
 	c := &ProjectsReleasesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -941,8 +1399,20 @@ func (c *ProjectsReleasesGetCall) Context(ctx context.Context) *ProjectsReleases
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsReleasesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsReleasesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -956,10 +1426,7 @@ func (c *ProjectsReleasesGetCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.releases.get" call.
@@ -1000,7 +1467,7 @@ func (c *ProjectsReleasesGetCall) Do(opts ...googleapi.CallOption) (*Release, er
 	}
 	return ret, nil
 	// {
-	//   "description": "Get a `Release` by name.\n",
+	//   "description": "Get a `Release` by name.",
 	//   "flatPath": "v1/projects/{projectsId}/releases/{releasesId}",
 	//   "httpMethod": "GET",
 	//   "id": "firebaserules.projects.releases.get",
@@ -1009,9 +1476,9 @@ func (c *ProjectsReleasesGetCall) Do(opts ...googleapi.CallOption) (*Release, er
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "Resource name of the `Release`.\n\n\nFormat: `projects/{project_id}/releases/{release_id}`",
+	//       "description": "Resource name of the `Release`.\n\nFormat: `projects/{project_id}/releases/{release_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/releases/.*$",
+	//       "pattern": "^projects/[^/]+/releases/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1037,11 +1504,14 @@ type ProjectsReleasesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List the `Release` values for a project. This list may
 // optionally be
-// filtered by `Release` name or `Ruleset` id or both.
+// filtered by `Release` name, `Ruleset` name, `TestSuite` name, or
+// any
+// combination thereof.
 func (r *ProjectsReleasesService) List(name string) *ProjectsReleasesListCall {
 	c := &ProjectsReleasesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -1050,9 +1520,10 @@ func (r *ProjectsReleasesService) List(name string) *ProjectsReleasesListCall {
 
 // Filter sets the optional parameter "filter": `Release` filter. The
 // list method supports filters with restrictions on the
-// `Release` `name` and also on the `Ruleset` `ruleset_name`.
+// `Release.name`, `Release.ruleset_name`, and
+// `Release.test_suite_name`.
 //
-// Example 1) A filter of 'name=prod*' might return `Release`s with
+// Example 1: A filter of 'name=prod*' might return `Release`s with
 // names
 // within 'projects/foo' prefixed with 'prod':
 //
@@ -1067,7 +1538,7 @@ func (r *ProjectsReleasesService) List(name string) *ProjectsReleasesListCall {
 // projects/foo/releases/prod/v2 |
 // projects/foo/rulesets/uuid8888
 //
-// Example 2) A filter of `name=prod* ruleset_name=uuid1234` would
+// Example 2: A filter of `name=prod* ruleset_name=uuid1234` would
 // return only
 // `Release` instances for 'projects/foo' with names prefixed with
 // 'prod'
@@ -1081,13 +1552,10 @@ func (r *ProjectsReleasesService) List(name string) *ProjectsReleasesListCall {
 // projects/foo/releases/prod/v1 | projects/foo/rulesets/1234
 //
 // In the examples, the filter parameters refer to the search filters
-// for
-// release and ruleset names are relative to the project releases and
-// rulesets
-// collections. Fully qualified prefixed may also be used.
+// are
+// relative to the project. Fully qualified prefixed may also be used.
 // e.g.
-// `name=projects/foo/releases/prod*
-// ruleset_name=projects/foo/rulesets/uuid1`
+// `test_suite_name=projects/foo/testsuites/uuid1`
 func (c *ProjectsReleasesListCall) Filter(filter string) *ProjectsReleasesListCall {
 	c.urlParams_.Set("filter", filter)
 	return c
@@ -1096,10 +1564,12 @@ func (c *ProjectsReleasesListCall) Filter(filter string) *ProjectsReleasesListCa
 // PageSize sets the optional parameter "pageSize": Page size to load.
 // Maximum of 100. Defaults to 10.
 // Note: `page_size` is just a hint and the service may choose to load
-// less
-// than `page_size` due to the size of the output. To traverse all of
+// fewer
+// than `page_size` results due to the size of the output. To traverse
+// all of
+// the releases, the caller should iterate until the `page_token` on
 // the
-// releases, caller should iterate until the `page_token` is empty.
+// response is empty.
 func (c *ProjectsReleasesListCall) PageSize(pageSize int64) *ProjectsReleasesListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -1138,8 +1608,20 @@ func (c *ProjectsReleasesListCall) Context(ctx context.Context) *ProjectsRelease
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsReleasesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsReleasesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1153,10 +1635,7 @@ func (c *ProjectsReleasesListCall) doRequest(alt string) (*http.Response, error)
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.releases.list" call.
@@ -1197,7 +1676,7 @@ func (c *ProjectsReleasesListCall) Do(opts ...googleapi.CallOption) (*ListReleas
 	}
 	return ret, nil
 	// {
-	//   "description": "List the `Release` values for a project. This list may optionally be\nfiltered by `Release` name or `Ruleset` id or both.",
+	//   "description": "List the `Release` values for a project. This list may optionally be\nfiltered by `Release` name, `Ruleset` name, `TestSuite` name, or any\ncombination thereof.",
 	//   "flatPath": "v1/projects/{projectsId}/releases",
 	//   "httpMethod": "GET",
 	//   "id": "firebaserules.projects.releases.list",
@@ -1206,19 +1685,19 @@ func (c *ProjectsReleasesListCall) Do(opts ...googleapi.CallOption) (*ListReleas
 	//   ],
 	//   "parameters": {
 	//     "filter": {
-	//       "description": "`Release` filter. The list method supports filters with restrictions on the\n`Release` `name` and also on the `Ruleset` `ruleset_name`.\n\nExample 1) A filter of 'name=prod*' might return `Release`s with names\nwithin 'projects/foo' prefixed with 'prod':\n\nName                          | Ruleset Name\n------------------------------|-------------\nprojects/foo/releases/prod    | projects/foo/rulesets/uuid1234\nprojects/foo/releases/prod/v1 | projects/foo/rulesets/uuid1234\nprojects/foo/releases/prod/v2 | projects/foo/rulesets/uuid8888\n\nExample 2) A filter of `name=prod* ruleset_name=uuid1234` would return only\n`Release` instances for 'projects/foo' with names prefixed with 'prod'\nreferring to the same `Ruleset` name of 'uuid1234':\n\nName                          | Ruleset Name\n------------------------------|-------------\nprojects/foo/releases/prod    | projects/foo/rulesets/1234\nprojects/foo/releases/prod/v1 | projects/foo/rulesets/1234\n\nIn the examples, the filter parameters refer to the search filters for\nrelease and ruleset names are relative to the project releases and rulesets\ncollections. Fully qualified prefixed may also be used. e.g.\n`name=projects/foo/releases/prod* ruleset_name=projects/foo/rulesets/uuid1`",
+	//       "description": "`Release` filter. The list method supports filters with restrictions on the\n`Release.name`, `Release.ruleset_name`, and `Release.test_suite_name`.\n\nExample 1: A filter of 'name=prod*' might return `Release`s with names\nwithin 'projects/foo' prefixed with 'prod':\n\nName                          | Ruleset Name\n------------------------------|-------------\nprojects/foo/releases/prod    | projects/foo/rulesets/uuid1234\nprojects/foo/releases/prod/v1 | projects/foo/rulesets/uuid1234\nprojects/foo/releases/prod/v2 | projects/foo/rulesets/uuid8888\n\nExample 2: A filter of `name=prod* ruleset_name=uuid1234` would return only\n`Release` instances for 'projects/foo' with names prefixed with 'prod'\nreferring to the same `Ruleset` name of 'uuid1234':\n\nName                          | Ruleset Name\n------------------------------|-------------\nprojects/foo/releases/prod    | projects/foo/rulesets/1234\nprojects/foo/releases/prod/v1 | projects/foo/rulesets/1234\n\nIn the examples, the filter parameters refer to the search filters are\nrelative to the project. Fully qualified prefixed may also be used. e.g.\n`test_suite_name=projects/foo/testsuites/uuid1`",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "name": {
 	//       "description": "Resource name for the project.\n\nFormat: `projects/{project_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "Page size to load. Maximum of 100. Defaults to 10.\nNote: `page_size` is just a hint and the service may choose to load less\nthan `page_size` due to the size of the output. To traverse all of the\nreleases, caller should iterate until the `page_token` is empty.",
+	//       "description": "Page size to load. Maximum of 100. Defaults to 10.\nNote: `page_size` is just a hint and the service may choose to load fewer\nthan `page_size` results due to the size of the output. To traverse all of\nthe releases, the caller should iterate until the `page_token` on the\nresponse is empty.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
@@ -1271,15 +1750,16 @@ type ProjectsReleasesUpdateCall struct {
 	release    *Release
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Update a `Release`.
 //
-// Only updates to the `ruleset_name` field will be honored. `Release`
-// rename
-// is not supported. To create a `Release` use the CreateRelease
-// method
-// instead.
+// Only updates to the `ruleset_name` and `test_suite_name` fields will
+// be
+// honored. `Release` rename is not supported. To create a `Release` use
+// the
+// CreateRelease method.
 func (r *ProjectsReleasesService) Update(name string, release *Release) *ProjectsReleasesUpdateCall {
 	c := &ProjectsReleasesUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -1303,8 +1783,20 @@ func (c *ProjectsReleasesUpdateCall) Context(ctx context.Context) *ProjectsRelea
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsReleasesUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsReleasesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.release)
@@ -1320,10 +1812,7 @@ func (c *ProjectsReleasesUpdateCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.releases.update" call.
@@ -1364,7 +1853,7 @@ func (c *ProjectsReleasesUpdateCall) Do(opts ...googleapi.CallOption) (*Release,
 	}
 	return ret, nil
 	// {
-	//   "description": "Update a `Release`.\n\nOnly updates to the `ruleset_name` field will be honored. `Release` rename\nis not supported. To create a `Release` use the CreateRelease method\ninstead.",
+	//   "description": "Update a `Release`.\n\nOnly updates to the `ruleset_name` and `test_suite_name` fields will be\nhonored. `Release` rename is not supported. To create a `Release` use the\nCreateRelease method.",
 	//   "flatPath": "v1/projects/{projectsId}/releases/{releasesId}",
 	//   "httpMethod": "PUT",
 	//   "id": "firebaserules.projects.releases.update",
@@ -1373,9 +1862,9 @@ func (c *ProjectsReleasesUpdateCall) Do(opts ...googleapi.CallOption) (*Release,
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "Resource name for the `Release`.\n\n`Release` names may be structured `app1/prod/v2` or flat `app1_prod_v2`\nwhich affords developers a great deal of flexibility in mapping the name\nto the style that best fits their existing development practices. For\nexample, a name could refer to an environment, an app, a version, or some\ncombination of three.\n\nIn the table below, for the project name `projects/foo`, the following\nrelative release paths show how flat and structured names might be chosen\nto match a desired development / deployment strategy.\n\nUse Case     | Flat Name           | Structured Name\n-------------|---------------------|----------------\nEnvironments | releases/qa         | releases/qa\nApps         | releases/app1_qa    | releases/app1/qa\nVersions     | releases/app1_v2_qa | releases/app1/v2/qa\n\nThe delimiter between the release name path elements can be almost anything\nand it should work equally well with the release name list filter, but in\nmany ways the structured paths provide a clearer picture of the\nrelationship between `Release` instances.\n\nFormat: `projects/{project_id}/releases/{release_id}`\n",
+	//       "description": "Resource name for the `Release`.\n\n`Release` names may be structured `app1/prod/v2` or flat `app1_prod_v2`\nwhich affords developers a great deal of flexibility in mapping the name\nto the style that best fits their existing development practices. For\nexample, a name could refer to an environment, an app, a version, or some\ncombination of three.\n\nIn the table below, for the project name `projects/foo`, the following\nrelative release paths show how flat and structured names might be chosen\nto match a desired development / deployment strategy.\n\nUse Case     | Flat Name           | Structured Name\n-------------|---------------------|----------------\nEnvironments | releases/qa         | releases/qa\nApps         | releases/app1_qa    | releases/app1/qa\nVersions     | releases/app1_v2_qa | releases/app1/v2/qa\n\nThe delimiter between the release name path elements can be almost anything\nand it should work equally well with the release name list filter, but in\nmany ways the structured paths provide a clearer picture of the\nrelationship between `Release` instances.\n\nFormat: `projects/{project_id}/releases/{release_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/releases/.*$",
+	//       "pattern": "^projects/[^/]+/releases/.+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1403,6 +1892,7 @@ type ProjectsRulesetsCreateCall struct {
 	ruleset    *Ruleset
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Create: Create a `Ruleset` from `Source`.
@@ -1437,8 +1927,20 @@ func (c *ProjectsRulesetsCreateCall) Context(ctx context.Context) *ProjectsRules
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsRulesetsCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsRulesetsCreateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.ruleset)
@@ -1454,10 +1956,7 @@ func (c *ProjectsRulesetsCreateCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.rulesets.create" call.
@@ -1509,7 +2008,7 @@ func (c *ProjectsRulesetsCreateCall) Do(opts ...googleapi.CallOption) (*Ruleset,
 	//     "name": {
 	//       "description": "Resource name for Project which owns this `Ruleset`.\n\nFormat: `projects/{project_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1536,6 +2035,7 @@ type ProjectsRulesetsDeleteCall struct {
 	name       string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete a `Ruleset` by resource name.
@@ -1564,8 +2064,20 @@ func (c *ProjectsRulesetsDeleteCall) Context(ctx context.Context) *ProjectsRules
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsRulesetsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsRulesetsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -1576,10 +2088,7 @@ func (c *ProjectsRulesetsDeleteCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.rulesets.delete" call.
@@ -1631,7 +2140,7 @@ func (c *ProjectsRulesetsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, e
 	//     "name": {
 	//       "description": "Resource name for the ruleset to delete.\n\nFormat: `projects/{project_id}/rulesets/{ruleset_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/rulesets/[^/]*$",
+	//       "pattern": "^projects/[^/]+/rulesets/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1656,6 +2165,7 @@ type ProjectsRulesetsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get a `Ruleset` by name including the full `Source` contents.
@@ -1691,8 +2201,20 @@ func (c *ProjectsRulesetsGetCall) Context(ctx context.Context) *ProjectsRulesets
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsRulesetsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsRulesetsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1706,10 +2228,7 @@ func (c *ProjectsRulesetsGetCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.rulesets.get" call.
@@ -1761,7 +2280,7 @@ func (c *ProjectsRulesetsGetCall) Do(opts ...googleapi.CallOption) (*Ruleset, er
 	//     "name": {
 	//       "description": "Resource name for the ruleset to get.\n\nFormat: `projects/{project_id}/rulesets/{ruleset_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*/rulesets/[^/]*$",
+	//       "pattern": "^projects/[^/]+/rulesets/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -1787,10 +2306,11 @@ type ProjectsRulesetsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List `Ruleset` metadata only and optionally filter the results
-// by Ruleset
+// by `Ruleset`
 // name.
 //
 // The full `Source` contents of a `Ruleset` may be retrieved
@@ -1799,6 +2319,22 @@ type ProjectsRulesetsListCall struct {
 func (r *ProjectsRulesetsService) List(name string) *ProjectsRulesetsListCall {
 	c := &ProjectsRulesetsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
+	return c
+}
+
+// Filter sets the optional parameter "filter": `Ruleset` filter. The
+// list method supports filters with restrictions
+// on
+// `Ruleset.name`.
+//
+// Filters on `Ruleset.create_time` should use the `date` function
+// which
+// parses strings that conform to the RFC 3339 date/time
+// specifications.
+//
+// Example: `create_time > date("2017-01-01") AND name=UUID-*`
+func (c *ProjectsRulesetsListCall) Filter(filter string) *ProjectsRulesetsListCall {
+	c.urlParams_.Set("filter", filter)
 	return c
 }
 
@@ -1847,8 +2383,20 @@ func (c *ProjectsRulesetsListCall) Context(ctx context.Context) *ProjectsRuleset
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsRulesetsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ProjectsRulesetsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -1862,10 +2410,7 @@ func (c *ProjectsRulesetsListCall) doRequest(alt string) (*http.Response, error)
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "firebaserules.projects.rulesets.list" call.
@@ -1906,7 +2451,7 @@ func (c *ProjectsRulesetsListCall) Do(opts ...googleapi.CallOption) (*ListRulese
 	}
 	return ret, nil
 	// {
-	//   "description": "List `Ruleset` metadata only and optionally filter the results by Ruleset\nname.\n\nThe full `Source` contents of a `Ruleset` may be retrieved with\nGetRuleset.",
+	//   "description": "List `Ruleset` metadata only and optionally filter the results by `Ruleset`\nname.\n\nThe full `Source` contents of a `Ruleset` may be retrieved with\nGetRuleset.",
 	//   "flatPath": "v1/projects/{projectsId}/rulesets",
 	//   "httpMethod": "GET",
 	//   "id": "firebaserules.projects.rulesets.list",
@@ -1914,10 +2459,15 @@ func (c *ProjectsRulesetsListCall) Do(opts ...googleapi.CallOption) (*ListRulese
 	//     "name"
 	//   ],
 	//   "parameters": {
+	//     "filter": {
+	//       "description": "`Ruleset` filter. The list method supports filters with restrictions on\n`Ruleset.name`.\n\nFilters on `Ruleset.create_time` should use the `date` function which\nparses strings that conform to the RFC 3339 date/time specifications.\n\nExample: `create_time \u003e date(\"2017-01-01\") AND name=UUID-*`",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "name": {
 	//       "description": "Resource name for the project.\n\nFormat: `projects/{project_id}`",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]*$",
+	//       "pattern": "^projects/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     },

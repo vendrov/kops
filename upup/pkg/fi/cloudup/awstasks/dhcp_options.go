@@ -19,6 +19,8 @@ package awstasks
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
@@ -26,12 +28,12 @@ import (
 	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
 	"k8s.io/kops/upup/pkg/fi/cloudup/cloudformation"
 	"k8s.io/kops/upup/pkg/fi/cloudup/terraform"
-	"strings"
 )
 
 //go:generate fitask -type=DHCPOptions
 type DHCPOptions struct {
-	Name *string
+	Name      *string
+	Lifecycle *fi.Lifecycle
 
 	ID                *string
 	DomainName        *string
@@ -93,6 +95,9 @@ func (e *DHCPOptions) Find(c *fi.Context) (*DHCPOptions, error) {
 	}
 
 	e.ID = actual.ID
+
+	// Avoid spurious changes
+	actual.Lifecycle = e.Lifecycle
 
 	return actual, nil
 }

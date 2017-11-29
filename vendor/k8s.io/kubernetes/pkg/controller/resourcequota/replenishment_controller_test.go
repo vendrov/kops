@@ -18,13 +18,16 @@ package resourcequota
 
 import (
 	"testing"
+	"time"
 
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/clock"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/controller"
-	"k8s.io/kubernetes/pkg/runtime"
-	"k8s.io/kubernetes/pkg/runtime/schema"
-	"k8s.io/kubernetes/pkg/util/intstr"
 )
 
 // testReplenishment lets us test replenishment functions are invoked
@@ -47,14 +50,15 @@ func TestPodReplenishmentUpdateFunc(t *testing.T) {
 		ResyncPeriod:      controller.NoResyncPeriodFunc,
 	}
 	oldPod := &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "pod"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "pod"},
 		Status:     v1.PodStatus{Phase: v1.PodRunning},
 	}
 	newPod := &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "pod"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "pod"},
 		Status:     v1.PodStatus{Phase: v1.PodFailed},
 	}
-	updateFunc := PodReplenishmentUpdateFunc(&options)
+	fakeClock := clock.NewFakeClock(time.Now())
+	updateFunc := PodReplenishmentUpdateFunc(&options, fakeClock)
 	updateFunc(oldPod, newPod)
 	if mockReplenish.groupKind != api.Kind("Pod") {
 		t.Errorf("Unexpected group kind %v", mockReplenish.groupKind)
@@ -72,7 +76,7 @@ func TestObjectReplenishmentDeleteFunc(t *testing.T) {
 		ResyncPeriod:      controller.NoResyncPeriodFunc,
 	}
 	oldPod := &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "pod"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "pod"},
 		Status:     v1.PodStatus{Phase: v1.PodRunning},
 	}
 	deleteFunc := ObjectReplenishmentDeleteFunc(&options)
@@ -93,7 +97,7 @@ func TestServiceReplenishmentUpdateFunc(t *testing.T) {
 		ResyncPeriod:      controller.NoResyncPeriodFunc,
 	}
 	oldService := &v1.Service{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "mysvc"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "mysvc"},
 		Spec: v1.ServiceSpec{
 			Type: v1.ServiceTypeNodePort,
 			Ports: []v1.ServicePort{{
@@ -103,7 +107,7 @@ func TestServiceReplenishmentUpdateFunc(t *testing.T) {
 		},
 	}
 	newService := &v1.Service{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "mysvc"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "mysvc"},
 		Spec: v1.ServiceSpec{
 			Type: v1.ServiceTypeClusterIP,
 			Ports: []v1.ServicePort{{
@@ -127,7 +131,7 @@ func TestServiceReplenishmentUpdateFunc(t *testing.T) {
 		ResyncPeriod:      controller.NoResyncPeriodFunc,
 	}
 	oldService = &v1.Service{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "mysvc"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "mysvc"},
 		Spec: v1.ServiceSpec{
 			Type: v1.ServiceTypeNodePort,
 			Ports: []v1.ServicePort{{
@@ -137,7 +141,7 @@ func TestServiceReplenishmentUpdateFunc(t *testing.T) {
 		},
 	}
 	newService = &v1.Service{
-		ObjectMeta: v1.ObjectMeta{Namespace: "test", Name: "mysvc"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "mysvc"},
 		Spec: v1.ServiceSpec{
 			Type: v1.ServiceTypeNodePort,
 			Ports: []v1.ServicePort{{

@@ -19,11 +19,12 @@ package eventsink
 import (
 	"testing"
 
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	core "k8s.io/client-go/testing"
 	fakefedclientset "k8s.io/kubernetes/federation/client/clientset_generated/federation_clientset/fake"
 	. "k8s.io/kubernetes/federation/pkg/federation-controller/util/test"
-	apiv1 "k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/client/testing/core"
-	"k8s.io/kubernetes/pkg/runtime"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -45,8 +46,8 @@ func TestEventSink(t *testing.T) {
 		return true, obj, nil
 	})
 
-	event := apiv1.Event{
-		ObjectMeta: apiv1.ObjectMeta{
+	event := v1.Event{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "bzium",
 			Namespace: "ns",
 		},
@@ -54,7 +55,7 @@ func TestEventSink(t *testing.T) {
 	sink := NewFederatedEventSink(fakeFederationClient)
 	eventUpdated, err := sink.Create(&event)
 	assert.NoError(t, err)
-	eventV1 := GetObjectFromChan(createdChan).(*apiv1.Event)
+	eventV1 := GetObjectFromChan(createdChan).(*v1.Event)
 	assert.NotNil(t, eventV1)
 	// Just some simple sanity checks.
 	assert.Equal(t, event.Name, eventV1.Name)
@@ -62,7 +63,7 @@ func TestEventSink(t *testing.T) {
 
 	eventUpdated, err = sink.Update(&event)
 	assert.NoError(t, err)
-	eventV1 = GetObjectFromChan(updateChan).(*apiv1.Event)
+	eventV1 = GetObjectFromChan(updateChan).(*v1.Event)
 	assert.NotNil(t, eventV1)
 	// Just some simple sanity checks.
 	assert.Equal(t, event.Name, eventV1.Name)

@@ -18,8 +18,9 @@ package main
 
 import (
 	"io"
-	"k8s.io/kops/upup/tools/generators/pkg/codegen"
 	"text/template"
+
+	"k8s.io/kops/upup/tools/generators/pkg/codegen"
 )
 
 type FitaskGenerator struct {
@@ -76,6 +77,13 @@ func (o *{{.Name}}) UnmarshalJSON(data []byte) error {
 	}
 	*o = {{.Name}}(r)
 	return nil
+}
+
+var _ fi.HasLifecycle = &{{.Name}}{}
+
+// GetLifecycle returns the Lifecycle of the object, implementing fi.HasLifecycle
+func (o *{{.Name}}) GetLifecycle() *fi.Lifecycle {
+	return o.Lifecycle
 }
 
 var _ fi.HasName = &{{.Name}}{}

@@ -20,24 +20,23 @@ import (
 	"encoding/base64"
 	"fmt"
 	"runtime"
-	"strings"
 	"text/template"
 
 	"github.com/golang/glog"
-	"k8s.io/kops"
+	"k8s.io/apimachinery/pkg/util/sets"
 	api "k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/apis/nodeup"
 	"k8s.io/kops/pkg/flagbuilder"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/secrets"
 	"k8s.io/kops/util/pkg/vfs"
-	"k8s.io/kubernetes/pkg/util/sets"
 )
 
 const TagMaster = "_kubernetes_master"
 
 // templateFunctions is a simple helper-class for the functions accessible to templates
 type templateFunctions struct {
-	nodeupConfig *NodeUpConfig
+	nodeupConfig *nodeup.Config
 
 	// cluster is populated with the current cluster
 	cluster *api.Cluster
@@ -53,7 +52,7 @@ type templateFunctions struct {
 }
 
 // newTemplateFunctions is the constructor for templateFunctions
-func newTemplateFunctions(nodeupConfig *NodeUpConfig, cluster *api.Cluster, instanceGroup *api.InstanceGroup, tags sets.String) (*templateFunctions, error) {
+func newTemplateFunctions(nodeupConfig *nodeup.Config, cluster *api.Cluster, instanceGroup *api.InstanceGroup, tags sets.String) (*templateFunctions, error) {
 	t := &templateFunctions{
 		nodeupConfig:  nodeupConfig,
 		cluster:       cluster,
@@ -68,7 +67,7 @@ func newTemplateFunctions(nodeupConfig *NodeUpConfig, cluster *api.Cluster, inst
 			return nil, fmt.Errorf("error building secret store path: %v", err)
 		}
 
-		t.secretStore = secrets.NewVFSSecretStore(p)
+		t.secretStore = secrets.NewVFSSecretStore(cluster, p)
 	} else {
 		return nil, fmt.Errorf("SecretStore not set")
 	}
@@ -80,7 +79,7 @@ func newTemplateFunctions(nodeupConfig *NodeUpConfig, cluster *api.Cluster, inst
 			return nil, fmt.Errorf("error building key store path: %v", err)
 		}
 
-		t.keyStore = fi.NewVFSCAStore(p)
+		t.keyStore = fi.NewVFSCAStore(cluster, p)
 	} else {
 		return nil, fmt.Errorf("KeyStore not set")
 	}
@@ -93,11 +92,6 @@ func (t *templateFunctions) populate(dest template.FuncMap) {
 		return runtime.GOARCH
 	}
 
-	dest["CACertificatePool"] = t.CACertificatePool
-	dest["CACertificate"] = t.CACertificate
-	dest["PrivateKey"] = t.PrivateKey
-	dest["Certificate"] = t.Certificate
-	dest["AllTokens"] = t.AllTokens
 	dest["GetToken"] = t.GetToken
 
 	dest["BuildFlags"] = flagbuilder.BuildFlags
@@ -118,68 +112,10 @@ func (t *templateFunctions) populate(dest template.FuncMap) {
 	dest["KubeControllerManager"] = func() *api.KubeControllerManagerConfig {
 		return t.cluster.Spec.KubeControllerManager
 	}
-	dest["KubeProxy"] = t.KubeProxyConfig
 
 	dest["ClusterName"] = func() string {
 		return t.cluster.ObjectMeta.Name
 	}
-
-	dest["ProtokubeImageName"] = t.ProtokubeImageName
-	dest["ProtokubeImagePullCommand"] = t.ProtokubeImagePullCommand
-
-	dest["ProtokubeFlags"] = t.ProtokubeFlags
-}
-
-// CACertificatePool returns the set of valid CA certificates for the cluster
-func (t *templateFunctions) CACertificatePool() (*fi.CertificatePool, error) {
-	if t.keyStore != nil {
-		return t.keyStore.CertificatePool(fi.CertificateId_CA)
-	}
-
-	// Fallback to direct properties
-	glog.Infof("Falling back to direct configuration for keystore")
-	cert, err := t.CACertificate()
-	if err != nil {
-		return nil, err
-	}
-	if cert == nil {
-		return nil, fmt.Errorf("CA certificate not found (with fallback)")
-	}
-	pool := &fi.CertificatePool{}
-	pool.Primary = cert
-	return pool, nil
-}
-
-// CACertificate returns the primary CA certificate for the cluster
-func (t *templateFunctions) CACertificate() (*fi.Certificate, error) {
-	return t.keyStore.Cert(fi.CertificateId_CA)
-}
-
-// PrivateKey returns the specified private key
-func (t *templateFunctions) PrivateKey(id string) (*fi.PrivateKey, error) {
-	return t.keyStore.PrivateKey(id)
-}
-
-// Certificate returns the specified private key
-func (t *templateFunctions) Certificate(id string) (*fi.Certificate, error) {
-	return t.keyStore.Cert(id)
-}
-
-// AllTokens returns a map of all tokens
-func (t *templateFunctions) AllTokens() (map[string]string, error) {
-	tokens := make(map[string]string)
-	ids, err := t.secretStore.ListSecrets()
-	if err != nil {
-		return nil, err
-	}
-	for _, id := range ids {
-		token, err := t.secretStore.FindSecret(id)
-		if err != nil {
-			return nil, err
-		}
-		tokens[id] = string(token.Data)
-	}
-	return tokens, nil
 }
 
 // GetToken returns the specified token
@@ -194,36 +130,6 @@ func (t *templateFunctions) GetToken(key string) (string, error) {
 	return string(token.Data), nil
 }
 
-// ProtokubeImageName returns the docker image for protokube
-func (t *templateFunctions) ProtokubeImageName() string {
-	name := ""
-	if t.nodeupConfig.ProtokubeImage != nil && t.nodeupConfig.ProtokubeImage.Name != "" {
-		name = t.nodeupConfig.ProtokubeImage.Name
-	}
-	if name == "" {
-		// use current default corresponding to this version of nodeup
-		name = kops.DefaultProtokubeImageName()
-	}
-	return name
-}
-
-// ProtokubeImagePullCommand returns the command to pull the image
-func (t *templateFunctions) ProtokubeImagePullCommand() string {
-	source := ""
-	if t.nodeupConfig.ProtokubeImage != nil {
-		source = t.nodeupConfig.ProtokubeImage.Source
-	}
-	if source == "" {
-		// Nothing to pull; return dummy value
-		return "/bin/true"
-	}
-	if strings.HasPrefix(source, "http:") || strings.HasPrefix(source, "https:") || strings.HasPrefix(source, "s3:") {
-		// We preloaded the image; return a dummy value
-		return "/bin/true"
-	}
-	return "/usr/bin/docker pull " + t.nodeupConfig.ProtokubeImage.Source
-}
-
 // IsMaster returns true if we are tagged as a master
 func (t *templateFunctions) isMaster() bool {
 	return t.hasTag(TagMaster)
@@ -233,52 +139,4 @@ func (t *templateFunctions) isMaster() bool {
 func (t *templateFunctions) hasTag(tag string) bool {
 	_, found := t.tags[tag]
 	return found
-}
-
-// ProtokubeFlags returns the flags object for protokube
-func (t *templateFunctions) ProtokubeFlags() *ProtokubeFlags {
-	f := &ProtokubeFlags{}
-
-	master := t.isMaster()
-
-	f.Master = fi.Bool(master)
-	if master {
-		f.Channels = t.nodeupConfig.Channels
-	}
-
-	f.LogLevel = fi.Int32(4)
-	f.Containerized = fi.Bool(true)
-
-	zone := t.cluster.Spec.DNSZone
-	if zone != "" {
-		if strings.Contains(zone, ".") {
-			// match by name
-			f.Zone = append(f.Zone, zone)
-		} else {
-			// match by id
-			f.Zone = append(f.Zone, "*/"+zone)
-		}
-	} else {
-		glog.Warningf("DNSZone not specified; protokube won't be able to update DNS")
-		// TODO: Should we permit wildcard updates if zone is not specified?
-		//argv = append(argv, "--zone=*/*")
-	}
-
-	return f
-}
-
-// KubeProxyConfig builds the KubeProxyConfig configuration object
-func (t *templateFunctions) KubeProxyConfig() *api.KubeProxyConfig {
-	config := &api.KubeProxyConfig{}
-	*config = *t.cluster.Spec.KubeProxy
-
-	// As a special case, if this is the master, we point kube-proxy to the local IP
-	// This prevents a circular dependency where kube-proxy can't come up until DNS comes up,
-	// which would mean that DNS can't rely on API to come up
-	if t.isMaster() {
-		glog.Infof("kube-proxy running on the master; setting API endpoint to localhost")
-		config.Master = "http://127.0.0.1:8080"
-	}
-
-	return config
 }

@@ -22,14 +22,15 @@ import (
 	"path"
 
 	"github.com/golang/glog"
-	"k8s.io/kubernetes/pkg/api/resource"
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/types"
-	"k8s.io/kubernetes/pkg/util/exec"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/util/mount"
 	utilstrings "k8s.io/kubernetes/pkg/util/strings"
 	"k8s.io/kubernetes/pkg/volume"
 	"k8s.io/kubernetes/pkg/volume/util"
+	"k8s.io/kubernetes/pkg/volume/util/volumehelper"
 )
 
 // This is the primary entrypoint for volume plugins.
@@ -78,12 +79,20 @@ func (plugin *photonPersistentDiskPlugin) RequiresRemount() bool {
 	return false
 }
 
+func (plugin *photonPersistentDiskPlugin) SupportsMountOption() bool {
+	return true
+}
+
+func (plugin *photonPersistentDiskPlugin) SupportsBulkVolumeVerification() bool {
+	return false
+}
+
 func (plugin *photonPersistentDiskPlugin) NewMounter(spec *volume.Spec, pod *v1.Pod, _ volume.VolumeOptions) (volume.Mounter, error) {
-	return plugin.newMounterInternal(spec, pod.UID, &PhotonDiskUtil{}, plugin.host.GetMounter())
+	return plugin.newMounterInternal(spec, pod.UID, &PhotonDiskUtil{}, plugin.host.GetMounter(plugin.GetPluginName()))
 }
 
 func (plugin *photonPersistentDiskPlugin) NewUnmounter(volName string, podUID types.UID) (volume.Unmounter, error) {
-	return plugin.newUnmounterInternal(volName, podUID, &PhotonDiskUtil{}, plugin.host.GetMounter())
+	return plugin.newUnmounterInternal(volName, podUID, &PhotonDiskUtil{}, plugin.host.GetMounter(plugin.GetPluginName()))
 }
 
 func (plugin *photonPersistentDiskPlugin) newMounterInternal(spec *volume.Spec, podUID types.UID, manager pdManager, mounter mount.Interface) (volume.Mounter, error) {
@@ -106,7 +115,7 @@ func (plugin *photonPersistentDiskPlugin) newMounterInternal(spec *volume.Spec, 
 			plugin:  plugin,
 		},
 		fsType:      fsType,
-		diskMounter: &mount.SafeFormatAndMount{Interface: mounter, Runner: exec.New()}}, nil
+		diskMounter: volumehelper.NewSafeFormatAndMountFromHost(plugin.GetPluginName(), plugin.host)}, nil
 }
 
 func (plugin *photonPersistentDiskPlugin) newUnmounterInternal(volName string, podUID types.UID, manager pdManager, mounter mount.Interface) (volume.Unmounter, error) {
@@ -121,7 +130,7 @@ func (plugin *photonPersistentDiskPlugin) newUnmounterInternal(volName string, p
 }
 
 func (plugin *photonPersistentDiskPlugin) ConstructVolumeSpec(volumeSpecName, mountPath string) (*volume.Spec, error) {
-	mounter := plugin.host.GetMounter()
+	mounter := plugin.host.GetMounter(plugin.GetPluginName())
 	pluginDir := plugin.host.GetPluginDir(plugin.GetPluginName())
 	pdID, err := mounter.GetDeviceNameFromMount(mountPath, pluginDir)
 	if err != nil {
@@ -142,7 +151,7 @@ func (plugin *photonPersistentDiskPlugin) ConstructVolumeSpec(volumeSpecName, mo
 // Abstract interface to disk operations.
 type pdManager interface {
 	// Creates a volume
-	CreateVolume(provisioner *photonPersistentDiskProvisioner) (pdID string, volumeSizeGB int, err error)
+	CreateVolume(provisioner *photonPersistentDiskProvisioner) (pdID string, volumeSizeGB int, fstype string, err error)
 	// Deletes a volume
 	DeleteVolume(deleter *photonPersistentDiskDeleter) error
 }
@@ -333,17 +342,25 @@ func (plugin *photonPersistentDiskPlugin) newProvisionerInternal(options volume.
 }
 
 func (p *photonPersistentDiskProvisioner) Provision() (*v1.PersistentVolume, error) {
-	pdID, sizeGB, err := p.manager.CreateVolume(p)
+	if !volume.AccessModesContainedInAll(p.plugin.GetAccessModes(), p.options.PVC.Spec.AccessModes) {
+		return nil, fmt.Errorf("invalid AccessModes %v: only AccessModes %v are supported", p.options.PVC.Spec.AccessModes, p.plugin.GetAccessModes())
+	}
+
+	pdID, sizeGB, fstype, err := p.manager.CreateVolume(p)
 	if err != nil {
 		return nil, err
 	}
 
+	if fstype == "" {
+		fstype = "ext4"
+	}
+
 	pv := &v1.PersistentVolume{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:   p.options.PVName,
 			Labels: map[string]string{},
 			Annotations: map[string]string{
-				"kubernetes.io/createdby": "photon-volume-dynamic-provisioner",
+				volumehelper.VolumeDynamicallyCreatedByKey: "photon-volume-dynamic-provisioner",
 			},
 		},
 		Spec: v1.PersistentVolumeSpec{
@@ -355,9 +372,10 @@ func (p *photonPersistentDiskProvisioner) Provision() (*v1.PersistentVolume, err
 			PersistentVolumeSource: v1.PersistentVolumeSource{
 				PhotonPersistentDisk: &v1.PhotonPersistentDiskVolumeSource{
 					PdID:   pdID,
-					FSType: "ext4",
+					FSType: fstype,
 				},
 			},
+			MountOptions: p.options.MountOptions,
 		},
 	}
 	if len(p.options.PVC.Spec.AccessModes) == 0 {

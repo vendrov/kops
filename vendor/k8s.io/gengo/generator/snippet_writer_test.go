@@ -29,7 +29,7 @@ import (
 func construct(t *testing.T, files map[string]string) *generator.Context {
 	b := parser.New()
 	for name, src := range files {
-		if err := b.AddFile("/tmp/"+name, name, []byte(src)); err != nil {
+		if err := b.AddFileForTest("/tmp/"+name, name, []byte(src)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -81,7 +81,7 @@ type Blah struct {
 	} else {
 		// Dear reader, I apologize for making the worst change
 		// detection test in the history of ever.
-		if e, a := "snippet_writer_test.go:78", err.Error(); !strings.Contains(a, e) {
+		if e, a := "snippet_writer_test.go", err.Error(); !strings.Contains(a, e) {
 			t.Errorf("Expected %q but didn't find it in %q", e, a)
 		}
 	}

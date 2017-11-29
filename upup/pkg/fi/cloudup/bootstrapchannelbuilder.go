@@ -21,19 +21,32 @@ import (
 
 	channelsapi "k8s.io/kops/channels/pkg/api"
 	"k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/assets"
+	"k8s.io/kops/pkg/featureflag"
+	"k8s.io/kops/pkg/templates"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/fitasks"
 	"k8s.io/kops/upup/pkg/fi/utils"
 )
 
+// BootstrapChannelBuilder is responsible for handling the addons in channels
 type BootstrapChannelBuilder struct {
-	cluster *kops.Cluster
+	cluster      *kops.Cluster
+	Lifecycle    *fi.Lifecycle
+	templates    *templates.Templates
+	assetBuilder *assets.AssetBuilder
 }
 
 var _ fi.ModelBuilder = &BootstrapChannelBuilder{}
 
+// Build is responsible for adding the addons to the channel
 func (b *BootstrapChannelBuilder) Build(c *fi.ModelBuilderContext) error {
-	addons, manifests := b.buildManifest()
+
+	addons, manifests, err := b.buildManifest()
+	if err != nil {
+		return err
+	}
+
 	addonsYAML, err := utils.YamlMarshal(addons)
 	if err != nil {
 		return fmt.Errorf("error serializing addons yaml: %v", err)
@@ -44,24 +57,44 @@ func (b *BootstrapChannelBuilder) Build(c *fi.ModelBuilderContext) error {
 	tasks := c.Tasks
 
 	tasks[name] = &fitasks.ManagedFile{
-		Name:     fi.String(name),
+		Name:      fi.String(name),
+		Lifecycle: b.Lifecycle,
+
 		Location: fi.String("addons/bootstrap-channel.yaml"),
 		Contents: fi.WrapResource(fi.NewBytesResource(addonsYAML)),
 	}
 
-	for key, resource := range manifests {
+	for key, manifest := range manifests {
 		name := b.cluster.ObjectMeta.Name + "-addons-" + key
+
+		manifestResource := b.templates.Find(manifest)
+		if manifestResource == nil {
+			return fmt.Errorf("unable to find manifest %s", manifest)
+		}
+
+		manifestBytes, err := fi.ResourceAsBytes(manifestResource)
+		if err != nil {
+			return fmt.Errorf("error reading manifest %s: %v", manifest, err)
+		}
+
+		manifestBytes, err = b.assetBuilder.RemapManifest(manifestBytes)
+		if err != nil {
+			return fmt.Errorf("error remapping manifest %s: %v", manifest, err)
+		}
+
 		tasks[name] = &fitasks.ManagedFile{
-			Name:     fi.String(name),
-			Location: fi.String(resource),
-			Contents: &fi.ResourceHolder{Name: resource},
+			Name:      fi.String(name),
+			Lifecycle: b.Lifecycle,
+
+			Location: fi.String(manifest),
+			Contents: fi.WrapResource(fi.NewBytesResource(manifestBytes)),
 		}
 	}
 
 	return nil
 }
 
-func (b *BootstrapChannelBuilder) buildManifest() (*channelsapi.Addons, map[string]string) {
+func (b *BootstrapChannelBuilder) buildManifest() (*channelsapi.Addons, map[string]string, error) {
 	manifests := make(map[string]string)
 
 	addons := &channelsapi.Addons{}
@@ -85,17 +118,57 @@ func (b *BootstrapChannelBuilder) buildManifest() (*channelsapi.Addons, map[stri
 
 	{
 		key := "kube-dns.addons.k8s.io"
-		version := "1.5.1"
+		version := "1.14.5"
 
-		location := key + "/v" + version + ".yaml"
+		{
+			location := key + "/pre-k8s-1.6.yaml"
+			id := "pre-k8s-1.6"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"k8s-addon": key},
-			Manifest: fi.String(location),
-		})
-		manifests[key] = "addons/" + location
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			location := key + "/k8s-1.6.yaml"
+			id := "k8s-1.6"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	{
+		key := "rbac.addons.k8s.io"
+		version := "1.8.0"
+
+		{
+			location := key + "/k8s-1.8.yaml"
+			id := "k8s-1.8"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.8.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	{
@@ -113,34 +186,150 @@ func (b *BootstrapChannelBuilder) buildManifest() (*channelsapi.Addons, map[stri
 		manifests[key] = "addons/" + location
 	}
 
-	{
-		key := "dns-controller.addons.k8s.io"
-		version := "1.5.2"
+	// @check the dns-controller has not been disabled
+	externalDNS := b.cluster.Spec.ExternalDNS
+	if externalDNS == nil || !externalDNS.Disable {
+		{
+			key := "dns-controller.addons.k8s.io"
+			version := "1.8.0-beta.2"
 
-		location := key + "/v" + version + ".yaml"
+			{
+				location := key + "/pre-k8s-1.6.yaml"
+				id := "pre-k8s-1.6"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"k8s-addon": key},
-			Manifest: fi.String(location),
-		})
-		manifests[key] = "addons/" + location
+				addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+					Name:              fi.String(key),
+					Version:           fi.String(version),
+					Selector:          map[string]string{"k8s-addon": key},
+					Manifest:          fi.String(location),
+					KubernetesVersion: "<1.6.0",
+					Id:                id,
+				})
+				manifests[key+"-"+id] = "addons/" + location
+			}
+
+			{
+				location := key + "/k8s-1.6.yaml"
+				id := "k8s-1.6"
+
+				addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+					Name:              fi.String(key),
+					Version:           fi.String(version),
+					Selector:          map[string]string{"k8s-addon": key},
+					Manifest:          fi.String(location),
+					KubernetesVersion: ">=1.6.0",
+					Id:                id,
+				})
+				manifests[key+"-"+id] = "addons/" + location
+			}
+		}
 	}
 
-	{
+	if featureflag.EnableExternalDNS.Enabled() {
+		{
+			key := "external-dns.addons.k8s.io"
+			version := "0.4.4"
+
+			{
+				location := key + "/pre-k8s-1.6.yaml"
+				id := "pre-k8s-1.6"
+
+				addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+					Name:              fi.String(key),
+					Version:           fi.String(version),
+					Selector:          map[string]string{"k8s-addon": key},
+					Manifest:          fi.String(location),
+					KubernetesVersion: "<1.6.0",
+					Id:                id,
+				})
+				manifests[key+"-"+id] = "addons/" + location
+			}
+
+			{
+				location := key + "/k8s-1.6.yaml"
+				id := "k8s-1.6"
+
+				addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+					Name:              fi.String(key),
+					Version:           fi.String(version),
+					Selector:          map[string]string{"k8s-addon": key},
+					Manifest:          fi.String(location),
+					KubernetesVersion: ">=1.6.0",
+					Id:                id,
+				})
+				manifests[key+"-"+id] = "addons/" + location
+			}
+		}
+	}
+
+	if kops.CloudProviderID(b.cluster.Spec.CloudProvider) == kops.CloudProviderAWS {
 		key := "storage-aws.addons.k8s.io"
-		version := "1.5.0"
+		version := "1.7.0"
 
-		location := key + "/v" + version + ".yaml"
+		{
+			id := "v1.7.0"
+			location := key + "/" + id + ".yaml"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"k8s-addon": key},
-			Manifest: fi.String(location),
-		})
-		manifests[key] = "addons/" + location
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			id := "v1.6.0"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	if kops.CloudProviderID(b.cluster.Spec.CloudProvider) == kops.CloudProviderGCE {
+		key := "storage-gce.addons.k8s.io"
+		version := "1.7.0"
+
+		{
+			id := "v1.6.0"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			id := "v1.7.0"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	// The role.kubernetes.io/networking is used to label anything related to a networking addin,
@@ -156,90 +345,338 @@ func (b *BootstrapChannelBuilder) buildManifest() (*channelsapi.Addons, map[stri
 	// TODO: Create "empty" configurations for others, so we can delete e.g. the kopeio configuration
 	// if we switch to kubenet?
 
+	// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
+
+	// NOTE: we try to suffix with -kops.1, so that we can increment versions even if the upstream version
+	// hasn't changed.  The problem with semver is that there is nothing > 1.0.0 other than 1.0.1-pre.1
+	networkingSelector := map[string]string{"role.kubernetes.io/networking": "1"}
+
 	if b.cluster.Spec.Networking.Kopeio != nil {
 		key := "networking.kope.io"
-		version := "1.0.20161116"
+		version := "1.0.20171015"
 
-		// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
-		location := key + "/v" + version + ".yaml"
+		{
+			location := key + "/pre-k8s-1.6.yaml"
+			id := "pre-k8s-1.6"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"role.kubernetes.io/networking": "1"},
-			Manifest: fi.String(location),
-		})
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 
-		manifests[key] = "addons/" + location
+		{
+			location := key + "/k8s-1.6.yaml"
+			id := "k8s-1.6"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	if b.cluster.Spec.Networking.Weave != nil {
 		key := "networking.weave"
-		version := "1.9.0"
+		// 2.0.6-kops.1 = 2.0.5 with kops manifest tweaks.  This should go away with the next version bump.
+		version := "2.0.6-kops.1"
 
-		// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
-		location := key + "/v" + version + ".yaml"
+		{
+			location := key + "/pre-k8s-1.6.yaml"
+			id := "pre-k8s-1.6"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"role.kubernetes.io/networking": "1"},
-			Manifest: fi.String(location),
-		})
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 
-		manifests[key] = "addons/" + location
+		{
+			location := key + "/k8s-1.6.yaml"
+			id := "k8s-1.6"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0 <1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			location := key + "/k8s-1.7.yaml"
+			id := "k8s-1.7"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	if b.cluster.Spec.Networking.Flannel != nil {
 		key := "networking.flannel"
-		version := "0.7.0"
+		version := "0.9.1-kops.1"
 
-		// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
-		location := key + "/v" + version + ".yaml"
+		{
+			location := key + "/pre-k8s-1.6.yaml"
+			id := "pre-k8s-1.6"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"role.kubernetes.io/networking": "1"},
-			Manifest: fi.String(location),
-		})
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 
-		manifests[key] = "addons/" + location
+		{
+			location := key + "/k8s-1.6.yaml"
+			id := "k8s-1.6"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	if b.cluster.Spec.Networking.Calico != nil {
 		key := "networking.projectcalico.org"
-		version := "2.0.2"
+		versions := map[string]string{
+			"pre-k8s-1.6": "2.4.1",
+			"k8s-1.6":     "2.6.2",
+			"k8s-1.7":     "2.6.2",
+		}
 
-		// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
-		location := key + "/v" + version + ".yaml"
+		{
+			id := "pre-k8s-1.6"
+			location := key + "/" + id + ".yaml"
 
-		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
-			Name:     fi.String(key),
-			Version:  fi.String(version),
-			Selector: map[string]string{"role.kubernetes.io/networking": "1"},
-			Manifest: fi.String(location),
-		})
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 
-		manifests[key] = "addons/" + location
+		{
+			id := "k8s-1.6"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0 <1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			id := "k8s-1.7"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
 	}
 
 	if b.cluster.Spec.Networking.Canal != nil {
 		key := "networking.projectcalico.org.canal"
-		version := "1.0"
+		// 2.6.3-kops.1 = 2.6.2 with kops manifest tweaks.  This should go away with the next version bump.
+		versions := map[string]string{
+			"pre-k8s-1.6": "2.4.2-kops.1",
+			"k8s-1.6":     "2.4.2-kops.1",
+			"k8s-1.8":     "2.6.3-kops.1",
+		}
 
-		// TODO: Create configuration object for cni providers (maybe create it but orphan it)?
+		{
+			id := "pre-k8s-1.6"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: "<1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			id := "k8s-1.6"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0 <1.8.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+
+		{
+			id := "k8s-1.8"
+			location := key + "/" + id + ".yaml"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(versions[id]),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.8.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	if b.cluster.Spec.Networking.Kuberouter != nil {
+		key := "networking.kuberouter"
+		version := "0.1.1-kops.1"
+
+		{
+			location := key + "/k8s-1.6.yaml"
+			id := "k8s-1.6"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.6.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	if b.cluster.Spec.Networking.Romana != nil {
+		key := "networking.romana"
+		version := "v2.0.0"
+
+		{
+			location := key + "/k8s-1.7.yaml"
+			id := "k8s-1.7"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          networkingSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	authenticationSelector := map[string]string{"role.kubernetes.io/authentication": "1"}
+
+	if b.cluster.Spec.Authentication != nil && b.cluster.Spec.Authentication.Kopeio != nil {
+		key := "authentication.kope.io"
+		version := "1.0.20171125"
+
+		{
+			location := key + "/k8s-1.8.yaml"
+			id := "k8s-1.8"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          authenticationSelector,
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.8.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	if featureflag.EnableExternalCloudController.Enabled() && b.cluster.Spec.ExternalCloudControllerManager != nil {
+		{
+			key := "core.addons.k8s.io"
+			version := "1.7.0"
+
+			location := key + "/k8s-1.7.yaml"
+			id := "k8s-1.7-ccm"
+
+			addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
+				Name:              fi.String(key),
+				Version:           fi.String(version),
+				Selector:          map[string]string{"k8s-addon": key},
+				Manifest:          fi.String(location),
+				KubernetesVersion: ">=1.7.0",
+				Id:                id,
+			})
+			manifests[key+"-"+id] = "addons/" + location
+		}
+	}
+
+	if b.cluster.Spec.KubeScheduler.UsePolicyConfigMap != nil {
+		key := "scheduler.addons.k8s.io"
+		version := "1.7.0"
+
 		location := key + "/v" + version + ".yaml"
 
 		addons.Spec.Addons = append(addons.Spec.Addons, &channelsapi.AddonSpec{
 			Name:     fi.String(key),
 			Version:  fi.String(version),
-			Selector: map[string]string{"role.kubernetes.io/networking": "1"},
+			Selector: map[string]string{"k8s-addon": key},
 			Manifest: fi.String(location),
 		})
-
 		manifests[key] = "addons/" + location
 	}
 
-	return addons, manifests
+	return addons, manifests, nil
 }

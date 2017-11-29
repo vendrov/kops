@@ -18,14 +18,19 @@ package rbd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"reflect"
 	"testing"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/clientset/fake"
-	"k8s.io/kubernetes/pkg/types"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/fake"
+	utiltesting "k8s.io/client-go/util/testing"
 	"k8s.io/kubernetes/pkg/util/mount"
-	utiltesting "k8s.io/kubernetes/pkg/util/testing"
 	"k8s.io/kubernetes/pkg/volume"
 	volumetest "k8s.io/kubernetes/pkg/volume/testing"
 )
@@ -38,7 +43,7 @@ func TestCanSupport(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPluginByName("kubernetes.io/rbd")
 	if err != nil {
@@ -103,7 +108,7 @@ func doTestPlugin(t *testing.T, spec *volume.Spec) {
 	defer os.RemoveAll(tmpDir)
 
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, nil, nil))
 
 	plug, err := plugMgr.FindPluginByName("kubernetes.io/rbd")
 	if err != nil {
@@ -111,7 +116,8 @@ func doTestPlugin(t *testing.T, spec *volume.Spec) {
 	}
 	fdm := NewFakeDiskManager()
 	defer fdm.Cleanup()
-	mounter, err := plug.(*rbdPlugin).newMounterInternal(spec, types.UID("poduid"), fdm, &mount.FakeMounter{}, "secrets")
+	exec := mount.NewFakeExec(nil)
+	mounter, err := plug.(*rbdPlugin).newMounterInternal(spec, types.UID("poduid"), fdm, &mount.FakeMounter{}, exec, "secrets")
 	if err != nil {
 		t.Errorf("Failed to make a new Mounter: %v", err)
 	}
@@ -136,7 +142,7 @@ func doTestPlugin(t *testing.T, spec *volume.Spec) {
 		}
 	}
 
-	unmounter, err := plug.(*rbdPlugin).newUnmounterInternal("vol1", types.UID("poduid"), fdm, &mount.FakeMounter{})
+	unmounter, err := plug.(*rbdPlugin).newUnmounterInternal("vol1", types.UID("poduid"), fdm, &mount.FakeMounter{}, exec)
 	if err != nil {
 		t.Errorf("Failed to make a new Unmounter: %v", err)
 	}
@@ -169,7 +175,7 @@ func TestPluginVolume(t *testing.T) {
 }
 func TestPluginPersistentVolume(t *testing.T) {
 	vol := &v1.PersistentVolume{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: "vol1",
 		},
 		Spec: v1.PersistentVolumeSpec{
@@ -194,7 +200,7 @@ func TestPersistentClaimReadOnlyFlag(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	pv := &v1.PersistentVolume{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: "pvA",
 		},
 		Spec: v1.PersistentVolumeSpec{
@@ -212,7 +218,7 @@ func TestPersistentClaimReadOnlyFlag(t *testing.T) {
 	}
 
 	claim := &v1.PersistentVolumeClaim{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "claimA",
 			Namespace: "nsA",
 		},
@@ -227,15 +233,99 @@ func TestPersistentClaimReadOnlyFlag(t *testing.T) {
 	client := fake.NewSimpleClientset(pv, claim)
 
 	plugMgr := volume.VolumePluginMgr{}
-	plugMgr.InitPlugins(ProbeVolumePlugins(), volumetest.NewFakeVolumeHost(tmpDir, client, nil))
+	plugMgr.InitPlugins(ProbeVolumePlugins(), nil /* prober */, volumetest.NewFakeVolumeHost(tmpDir, client, nil))
 	plug, _ := plugMgr.FindPluginByName(rbdPluginName)
 
 	// readOnly bool is supplied by persistent-claim volume source when its mounter creates other volumes
 	spec := volume.NewSpecFromPersistentVolume(pv, true)
-	pod := &v1.Pod{ObjectMeta: v1.ObjectMeta{UID: types.UID("poduid")}}
+	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{UID: types.UID("poduid")}}
 	mounter, _ := plug.NewMounter(spec, pod, volume.VolumeOptions{})
+	if mounter == nil {
+		t.Fatalf("Got a nil Mounter")
+	}
 
 	if !mounter.GetAttributes().ReadOnly {
 		t.Errorf("Expected true for mounter.IsReadOnly")
+	}
+}
+
+func TestPersistAndLoadRBD(t *testing.T) {
+	tmpDir, err := utiltesting.MkTmpdir("rbd_test")
+	if err != nil {
+		t.Fatalf("error creating temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	testcases := []struct {
+		rbdMounter               rbdMounter
+		expectedJSONStr          string
+		expectedLoadedRBDMounter rbdMounter
+	}{
+		{
+			rbdMounter{},
+			`{"Mon":null,"Id":"","Keyring":"","Secret":""}`,
+			rbdMounter{},
+		},
+		{
+			rbdMounter{
+				rbd: &rbd{
+					podUID:          "poduid",
+					Pool:            "kube",
+					Image:           "some-test-image",
+					ReadOnly:        false,
+					MetricsProvider: volume.NewMetricsStatFS("/tmp"),
+				},
+				Mon:     []string{"127.0.0.1"},
+				Id:      "kube",
+				Keyring: "",
+				Secret:  "QVFEcTdKdFp4SmhtTFJBQUNwNDI3UnhGRzBvQ1Y0SUJwLy9pRUE9PQ==",
+			},
+			`
+{
+	"Pool": "kube",
+	"Image": "some-test-image",
+	"ReadOnly": false,
+	"Mon": ["127.0.0.1"],
+	"Id": "kube",
+	"Keyring": "",
+	"Secret": "QVFEcTdKdFp4SmhtTFJBQUNwNDI3UnhGRzBvQ1Y0SUJwLy9pRUE9PQ=="
+}
+			`,
+			rbdMounter{
+				rbd: &rbd{
+					Pool:     "kube",
+					Image:    "some-test-image",
+					ReadOnly: false,
+				},
+				Mon:     []string{"127.0.0.1"},
+				Id:      "kube",
+				Keyring: "",
+				Secret:  "QVFEcTdKdFp4SmhtTFJBQUNwNDI3UnhGRzBvQ1Y0SUJwLy9pRUE9PQ==",
+			},
+		},
+	}
+
+	util := &RBDUtil{}
+	for _, c := range testcases {
+		err = util.persistRBD(c.rbdMounter, tmpDir)
+		if err != nil {
+			t.Errorf("failed to persist rbd: %v, err: %v", c.rbdMounter, err)
+		}
+		jsonFile := filepath.Join(tmpDir, "rbd.json")
+		jsonData, err := ioutil.ReadFile(jsonFile)
+		if err != nil {
+			t.Errorf("failed to read json file %s: %v", jsonFile, err)
+		}
+		if !assert.JSONEq(t, c.expectedJSONStr, string(jsonData)) {
+			t.Errorf("json file does not match expected one: %s, should be %s", string(jsonData), c.expectedJSONStr)
+		}
+		tmpRBDMounter := rbdMounter{}
+		err = util.loadRBD(&tmpRBDMounter, tmpDir)
+		if err != nil {
+			t.Errorf("faild to load rbd: %v", err)
+		}
+		if !reflect.DeepEqual(tmpRBDMounter, c.expectedLoadedRBDMounter) {
+			t.Errorf("loaded rbd does not equal to expected one: %v, should be %v", tmpRBDMounter, c.rbdMounter)
+		}
 	}
 }

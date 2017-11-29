@@ -17,10 +17,16 @@ limitations under the License.
 package vfsclientset
 
 import (
+	"fmt"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
 	api "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/apis/kops/v1alpha1"
-	"k8s.io/kops/pkg/client/simple"
-	k8sapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/kops/pkg/apis/kops/validation"
+	kopsinternalversion "k8s.io/kops/pkg/client/clientset_generated/clientset/typed/kops/internalversion"
 )
 
 type FederationVFS struct {
@@ -34,12 +40,18 @@ func newFederationVFS(c *VFSClientset) *FederationVFS {
 	r.init(kind, c.basePath.Join("_federation"), StoreVersion)
 	defaultReadVersion := v1alpha1.SchemeGroupVersion.WithKind(kind)
 	r.defaultReadVersion = &defaultReadVersion
+	r.validate = func(o runtime.Object) error {
+		return validation.ValidateFederation(o.(*api.Federation))
+	}
 	return r
 }
 
-var _ simple.FederationInterface = &FederationVFS{}
+var _ kopsinternalversion.FederationInterface = &FederationVFS{}
 
-func (c *FederationVFS) Get(name string) (*api.Federation, error) {
+func (c *FederationVFS) Get(name string, options metav1.GetOptions) (*api.Federation, error) {
+	if options.ResourceVersion != "" {
+		return nil, fmt.Errorf("ResourceVersion not supported in FederationVFS::Get")
+	}
 	o, err := c.get(name)
 	if err != nil {
 		return nil, err
@@ -50,7 +62,7 @@ func (c *FederationVFS) Get(name string) (*api.Federation, error) {
 	return o.(*api.Federation), nil
 }
 
-func (c *FederationVFS) List(options k8sapi.ListOptions) (*api.FederationList, error) {
+func (c *FederationVFS) List(options metav1.ListOptions) (*api.FederationList, error) {
 	list := &api.FederationList{}
 	items, err := c.list(list.Items, options)
 	if err != nil {
@@ -61,7 +73,7 @@ func (c *FederationVFS) List(options k8sapi.ListOptions) (*api.FederationList, e
 }
 
 func (c *FederationVFS) Create(g *api.Federation) (*api.Federation, error) {
-	err := c.create(g)
+	err := c.create(nil, g)
 	if err != nil {
 		return nil, err
 	}
@@ -69,13 +81,25 @@ func (c *FederationVFS) Create(g *api.Federation) (*api.Federation, error) {
 }
 
 func (c *FederationVFS) Update(g *api.Federation) (*api.Federation, error) {
-	err := c.update(g)
+	err := c.update(nil, g)
 	if err != nil {
 		return nil, err
 	}
 	return g, nil
 }
 
-func (c *FederationVFS) Delete(name string, options *k8sapi.DeleteOptions) error {
+func (c *FederationVFS) Delete(name string, options *metav1.DeleteOptions) error {
 	return c.delete(name, options)
+}
+
+func (r *FederationVFS) DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error {
+	return fmt.Errorf("FederationVFS DeleteCollection not implemented for vfs store")
+}
+
+func (r *FederationVFS) Watch(opts metav1.ListOptions) (watch.Interface, error) {
+	return nil, fmt.Errorf("FederationVFS Watch not implemented for vfs store")
+}
+
+func (r *FederationVFS) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *api.Federation, err error) {
+	return nil, fmt.Errorf("FederationVFS Patch not implemented for vfs store")
 }

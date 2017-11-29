@@ -19,8 +19,9 @@ package volume
 import (
 	"testing"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/types"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func TestSpecSourceConverters(t *testing.T) {
@@ -38,7 +39,7 @@ func TestSpecSourceConverters(t *testing.T) {
 	}
 
 	pv := &v1.PersistentVolume{
-		ObjectMeta: v1.ObjectMeta{Name: "bar"},
+		ObjectMeta: metav1.ObjectMeta{Name: "bar"},
 		Spec: v1.PersistentVolumeSpec{
 			PersistentVolumeSource: v1.PersistentVolumeSource{AWSElasticBlockStore: &v1.AWSElasticBlockStoreVolumeSource{}},
 		},
@@ -76,6 +77,14 @@ func (plugin *testPlugins) RequiresRemount() bool {
 	return false
 }
 
+func (plugin *testPlugins) SupportsMountOption() bool {
+	return false
+}
+
+func (plugin *testPlugins) SupportsBulkVolumeVerification() bool {
+	return false
+}
+
 func (plugin *testPlugins) NewMounter(spec *Spec, podRef *v1.Pod, opts VolumeOptions) (Mounter, error) {
 	return nil, nil
 }
@@ -94,7 +103,8 @@ func newTestPlugin() []VolumePlugin {
 
 func TestVolumePluginMgrFunc(t *testing.T) {
 	vpm := VolumePluginMgr{}
-	vpm.InitPlugins(newTestPlugin(), nil)
+	var prober DynamicPluginProber = nil // TODO (#51147) inject mock
+	vpm.InitPlugins(newTestPlugin(), prober, nil)
 
 	plug, err := vpm.FindPluginByName("testPlugin")
 	if err != nil {
@@ -102,5 +112,54 @@ func TestVolumePluginMgrFunc(t *testing.T) {
 	}
 	if plug.GetPluginName() != "testPlugin" {
 		t.Errorf("Wrong name: %s", plug.GetPluginName())
+	}
+
+	plug, err = vpm.FindPluginBySpec(nil)
+	if err == nil {
+		t.Errorf("Should return error if volume spec is nil")
+	}
+
+	volumeSpec := &Spec{}
+	plug, err = vpm.FindPluginBySpec(volumeSpec)
+	if err != nil {
+		t.Errorf("Should return test plugin if volume spec is not nil")
+	}
+}
+
+func Test_ValidatePodTemplate(t *testing.T) {
+	pod := &v1.Pod{
+		Spec: v1.PodSpec{
+			Volumes: []v1.Volume{
+				{
+					Name:         "vol",
+					VolumeSource: v1.VolumeSource{},
+				},
+			},
+		},
+	}
+	var want error
+	if got := ValidateRecyclerPodTemplate(pod); got != want {
+		t.Errorf("isPodTemplateValid(%v) returned (%v), want (%v)", pod.String(), got.Error(), want)
+	}
+
+	// Check that the default recycle pod template is valid
+	pod = NewPersistentVolumeRecyclerPodTemplate()
+	want = nil
+	if got := ValidateRecyclerPodTemplate(pod); got != want {
+		t.Errorf("isPodTemplateValid(%v) returned (%v), want (%v)", pod.String(), got.Error(), want)
+	}
+
+	pod = &v1.Pod{
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{
+				{
+					Name: "pv-recycler",
+				},
+			},
+		},
+	}
+	// want = an error
+	if got := ValidateRecyclerPodTemplate(pod); got == nil {
+		t.Errorf("isPodTemplateValid(%v) returned (%v), want (%v)", pod.String(), got, "Error: pod specification does not contain any volume(s).")
 	}
 }

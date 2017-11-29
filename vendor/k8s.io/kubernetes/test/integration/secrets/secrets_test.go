@@ -1,5 +1,3 @@
-// +build integration,!no-etcd
-
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -23,10 +21,11 @@ package secrets
 import (
 	"testing"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/apimachinery/registered"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
-	"k8s.io/kubernetes/pkg/client/restclient"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientset "k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/kubernetes/pkg/api/testapi"
 	"k8s.io/kubernetes/test/integration"
 	"k8s.io/kubernetes/test/integration/framework"
 )
@@ -39,10 +38,10 @@ func deleteSecretOrErrorf(t *testing.T, c clientset.Interface, ns, name string) 
 
 // TestSecrets tests apiserver-side behavior of creation of secret objects and their use by pods.
 func TestSecrets(t *testing.T) {
-	_, s := framework.RunAMaster(nil)
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
 
-	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: &registered.GroupOrDie(v1.GroupName).GroupVersion}})
+	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: testapi.Groups[v1.GroupName].GroupVersion()}})
 
 	ns := framework.CreateTestingNamespace("secret", s, t)
 	defer framework.DeleteTestingNamespace(ns, s, t)
@@ -54,7 +53,7 @@ func TestSecrets(t *testing.T) {
 func DoTestSecrets(t *testing.T, client clientset.Interface, ns *v1.Namespace) {
 	// Make a secret object.
 	s := v1.Secret{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "secret",
 			Namespace: ns.Name,
 		},
@@ -70,7 +69,7 @@ func DoTestSecrets(t *testing.T, client clientset.Interface, ns *v1.Namespace) {
 
 	// Template for pods that use a secret.
 	pod := &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "XXX",
 			Namespace: ns.Name,
 		},

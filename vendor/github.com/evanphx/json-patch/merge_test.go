@@ -271,6 +271,23 @@ func TestMergeEmptyArray(t *testing.T) {
 	}
 }
 
+func TestCreateMergePatchNil(t *testing.T) {
+	doc := `{ "title": "hello", "nested": {"one": 1, "two": [{"one":null}, {"two":null}, {"three":null}]} }`
+	pat := doc
+
+	exp := `{}`
+
+	res, err := CreateMergePatch([]byte(doc), []byte(pat))
+
+	if err != nil {
+		t.Errorf("Unexpected error: %s, %s", err, string(res))
+	}
+
+	if !compareJSON(exp, string(res)) {
+		t.Fatalf("Object array was not added")
+	}
+}
+
 func TestMergeObjArray(t *testing.T) {
 	doc := `{ "array": [ {"a": {"b": 2}}, {"a": {"b": 3}} ]}`
 	exp := `{}`
@@ -362,11 +379,11 @@ func TestMergeObjectWithInnerArray(t *testing.T) {
 	}
 }
 
-func TestMergeReplaceKeyRequiringEscape(t *testing.T) {
+func TestMergeReplaceKeyNotEscape(t *testing.T) {
 	doc := `{ "title": "hello", "nested": {"title/escaped": 1, "two": 2} }`
 	pat := `{ "title": "goodbye", "nested": {"title/escaped": 2, "two": 2}  }`
 
-	exp := `{ "title": "goodbye", "nested": {"title~1escaped": 2}  }`
+	exp := `{ "title": "goodbye", "nested": {"title/escaped": 2}  }`
 
 	res, err := CreateMergePatch([]byte(doc), []byte(pat))
 
@@ -380,14 +397,75 @@ func TestMergeReplaceKeyRequiringEscape(t *testing.T) {
 	}
 }
 
-func TestMergePatchReplaceKeyRequiringEscaping(t *testing.T) {
+func TestMergePatchReplaceKeyNotEscaping(t *testing.T) {
 	doc := `{ "obj": { "title/escaped": "hello" } }`
-	pat := `{ "obj": { "title~1escaped": "goodbye" } }`
+	pat := `{ "obj": { "title/escaped": "goodbye" } }`
 	exp := `{ "obj": { "title/escaped": "goodbye" } }`
 
 	res := mergePatch(doc, pat)
 
 	if !compareJSON(exp, res) {
 		t.Fatalf("Key was not replaced")
+	}
+}
+
+func TestMergeMergePatches(t *testing.T) {
+	cases := []struct {
+		demonstrates string
+		p1           string
+		p2           string
+		exp          string
+	}{
+		{
+			demonstrates: "simple patches are merged normally",
+			p1:           `{"add1": 1}`,
+			p2:           `{"add2": 2}`,
+			exp:          `{"add1": 1, "add2": 2}`,
+		},
+		{
+			demonstrates: "nulls are kept",
+			p1:           `{"del1": null}`,
+			p2:           `{"del2": null}`,
+			exp:          `{"del1": null, "del2": null}`,
+		},
+		{
+			demonstrates: "a key added then deleted is kept deleted",
+			p1:           `{"add_then_delete": "atd"}`,
+			p2:           `{"add_then_delete": null}`,
+			exp:          `{"add_then_delete": null}`,
+		},
+		{
+			demonstrates: "a key deleted then added is kept added",
+			p1:           `{"delete_then_add": null}`,
+			p2:           `{"delete_then_add": "dta"}`,
+			exp:          `{"delete_then_add": "dta"}`,
+		},
+		{
+			demonstrates: "object overrides array",
+			p1:           `[]`,
+			p2:           `{"del": null, "add": "a"}`,
+			exp:          `{"del": null, "add": "a"}`,
+		},
+		{
+			demonstrates: "array overrides object",
+			p1:           `{"del": null, "add": "a"}`,
+			p2:           `[]`,
+			exp:          `[]`,
+		},
+	}
+
+	for _, c := range cases {
+		out, err := MergeMergePatches([]byte(c.p1), []byte(c.p2))
+
+		if err != nil {
+			panic(err)
+		}
+
+		if !compareJSON(c.exp, string(out)) {
+			t.Logf("Error while trying to demonstrate: %v", c.demonstrates)
+			t.Logf("Got %v", string(out))
+			t.Logf("Expected %v", c.exp)
+			t.Fatalf("Merged merge patch is incorrect")
+		}
 	}
 }

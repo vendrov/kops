@@ -23,8 +23,9 @@ import (
 	"reflect"
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	utiltesting "k8s.io/client-go/util/testing"
 	"k8s.io/kubernetes/pkg/api"
-	utiltesting "k8s.io/kubernetes/pkg/util/testing"
 )
 
 var rsaCertPEM = `-----BEGIN CERTIFICATE-----
@@ -133,8 +134,27 @@ func TestSecretForTLSGenerate(t *testing.T) {
 				"cert": validCertPath,
 			},
 			expected: &api.Secret{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "foo",
+				},
+				Data: map[string][]byte{
+					api.TLSCertKey:       []byte(rsaCertPEM),
+					api.TLSPrivateKeyKey: []byte(rsaKeyPEM),
+				},
+				Type: api.SecretTypeTLS,
+			},
+			expectErr: false,
+		},
+		"test-valid-tls-secret-append-hash": {
+			params: map[string]interface{}{
+				"name":        "foo",
+				"key":         validKeyPath,
+				"cert":        validCertPath,
+				"append-hash": true,
+			},
+			expected: &api.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "foo-272h6tt825",
 				},
 				Data: map[string][]byte{
 					api.TLSCertKey:       []byte(rsaCertPEM),
@@ -151,7 +171,7 @@ func TestSecretForTLSGenerate(t *testing.T) {
 				"cert": invalidCertPath,
 			},
 			expected: &api.Secret{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "foo",
 				},
 				Data: map[string][]byte{
@@ -169,7 +189,7 @@ func TestSecretForTLSGenerate(t *testing.T) {
 				"cert": mismatchCertPath,
 			},
 			expected: &api.Secret{
-				ObjectMeta: api.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "foo",
 				},
 				Data: map[string][]byte{

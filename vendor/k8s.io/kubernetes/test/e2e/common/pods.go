@@ -26,18 +26,20 @@ import (
 
 	"golang.org/x/net/websocket"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	metav1 "k8s.io/kubernetes/pkg/apis/meta/v1"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/util/uuid"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apimachinery/pkg/watch"
+	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	"k8s.io/kubernetes/pkg/kubelet"
-	"k8s.io/kubernetes/pkg/labels"
-	"k8s.io/kubernetes/pkg/util/intstr"
-	"k8s.io/kubernetes/pkg/util/uuid"
-	"k8s.io/kubernetes/pkg/util/wait"
-	"k8s.io/kubernetes/pkg/watch"
 	"k8s.io/kubernetes/test/e2e/framework"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	imageutils "k8s.io/kubernetes/test/utils/image"
 )
 
 var (
@@ -103,7 +105,7 @@ func getRestartDelay(podClient *framework.PodClient, podName string, containerNa
 		time.Sleep(time.Second)
 		pod, err := podClient.Get(podName, metav1.GetOptions{})
 		framework.ExpectNoError(err, fmt.Sprintf("getting pod %s", podName))
-		status, ok := v1.GetContainerStatus(pod.Status.ContainerStatuses, containerName)
+		status, ok := podutil.GetContainerStatus(pod.Status.ContainerStatuses, containerName)
 		if !ok {
 			framework.Logf("getRestartDelay: status missing")
 			continue
@@ -129,7 +131,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 	It("should get a host IP [Conformance]", func() {
 		name := "pod-hostip-" + string(uuid.NewUUID())
 		testHostIP(podClient, &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
 			Spec: v1.PodSpec{
@@ -148,7 +150,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		name := "pod-submit-remove-" + string(uuid.NewUUID())
 		value := strconv.Itoa(time.Now().Nanosecond())
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 				Labels: map[string]string{
 					"name": "foo",
@@ -159,7 +161,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:  "nginx",
-						Image: "gcr.io/google_containers/nginx-slim:0.7",
+						Image: imageutils.GetE2EImage(imageutils.NginxSlim),
 					},
 				},
 			},
@@ -167,11 +169,11 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("setting up watch")
 		selector := labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options := v1.ListOptions{LabelSelector: selector.String()}
+		options := metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err := podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(0))
-		options = v1.ListOptions{
+		options = metav1.ListOptions{
 			LabelSelector:   selector.String(),
 			ResourceVersion: pods.ListMeta.ResourceVersion,
 		}
@@ -183,7 +185,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("verifying the pod is in kubernetes")
 		selector = labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options = v1.ListOptions{LabelSelector: selector.String()}
+		options = metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err = podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(1))
@@ -195,7 +197,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				framework.Failf("Failed to observe pod creation: %v", event)
 			}
 		case <-time.After(framework.PodStartTimeout):
-			Fail("Timeout while waiting for pod creation")
+			framework.Failf("Timeout while waiting for pod creation")
 		}
 
 		// We need to wait for the pod to be running, otherwise the deletion
@@ -207,7 +209,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		framework.Logf("running pod: %#v", pod)
 
 		By("deleting the pod gracefully")
-		err = podClient.Delete(pod.Name, v1.NewDeleteOptions(30))
+		err = podClient.Delete(pod.Name, metav1.NewDeleteOptions(30))
 		Expect(err).NotTo(HaveOccurred(), "failed to delete pod")
 
 		By("verifying the kubelet observed the termination notice")
@@ -233,29 +235,32 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("verifying pod deletion was observed")
 		deleted := false
-		timeout := false
 		var lastPod *v1.Pod
-		timer := time.After(30 * time.Second)
-		for !deleted && !timeout {
+		timer := time.After(framework.DefaultPodDeletionTimeout)
+		for !deleted {
 			select {
 			case event, _ := <-w.ResultChan():
-				if event.Type == watch.Deleted {
+				switch event.Type {
+				case watch.Deleted:
 					lastPod = event.Object.(*v1.Pod)
 					deleted = true
+				case watch.Error:
+					framework.Logf("received a watch error: %v", event.Object)
+					framework.Failf("watch closed with error")
 				}
 			case <-timer:
-				timeout = true
+				framework.Failf("timed out waiting for pod deletion")
 			}
 		}
 		if !deleted {
-			Fail("Failed to observe pod deletion")
+			framework.Failf("Failed to observe pod deletion")
 		}
 
 		Expect(lastPod.DeletionTimestamp).ToNot(BeNil())
 		Expect(lastPod.Spec.TerminationGracePeriodSeconds).ToNot(BeZero())
 
 		selector = labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options = v1.ListOptions{LabelSelector: selector.String()}
+		options = metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err = podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(0))
@@ -266,7 +271,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		name := "pod-update-" + string(uuid.NewUUID())
 		value := strconv.Itoa(time.Now().Nanosecond())
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 				Labels: map[string]string{
 					"name": "foo",
@@ -277,7 +282,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:  "nginx",
-						Image: "gcr.io/google_containers/nginx-slim:0.7",
+						Image: imageutils.GetE2EImage(imageutils.NginxSlim),
 					},
 				},
 			},
@@ -288,7 +293,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("verifying the pod is in kubernetes")
 		selector := labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options := v1.ListOptions{LabelSelector: selector.String()}
+		options := metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err := podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(1))
@@ -303,7 +308,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("verifying the updated pod is in kubernetes")
 		selector = labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options = v1.ListOptions{LabelSelector: selector.String()}
+		options = metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err = podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(1))
@@ -315,7 +320,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		name := "pod-update-activedeadlineseconds-" + string(uuid.NewUUID())
 		value := strconv.Itoa(time.Now().Nanosecond())
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 				Labels: map[string]string{
 					"name": "foo",
@@ -326,7 +331,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:  "nginx",
-						Image: "gcr.io/google_containers/nginx-slim:0.7",
+						Image: imageutils.GetE2EImage(imageutils.NginxSlim),
 					},
 				},
 			},
@@ -337,7 +342,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("verifying the pod is in kubernetes")
 		selector := labels.SelectorFromSet(labels.Set(map[string]string{"time": value}))
-		options := v1.ListOptions{LabelSelector: selector.String()}
+		options := metav1.ListOptions{LabelSelector: selector.String()}
 		pods, err := podClient.List(options)
 		Expect(err).NotTo(HaveOccurred(), "failed to query for pods")
 		Expect(len(pods.Items)).To(Equal(1))
@@ -356,7 +361,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		// This pod serves its hostname via HTTP.
 		serverName := "server-envvars-" + string(uuid.NewUUID())
 		serverPod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:   serverName,
 				Labels: map[string]string{"name": serverName},
 			},
@@ -364,7 +369,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:  "srv",
-						Image: "gcr.io/google_containers/serve_hostname:v1.4",
+						Image: framework.ServeHostnameImage,
 						Ports: []v1.ContainerPort{{ContainerPort: 9376}},
 					},
 				},
@@ -381,7 +386,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		// allow overriding the prefix in the service manifest.
 		svcName := "fooservice"
 		svc := &v1.Service{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: svcName,
 				Labels: map[string]string{
 					"name": svcName,
@@ -404,7 +409,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		podName := "client-envvars-" + string(uuid.NewUUID())
 		const containerName = "env3cont"
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:   podName,
 				Labels: map[string]string{"name": podName},
 			},
@@ -412,7 +417,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:    containerName,
-						Image:   "gcr.io/google_containers/busybox:1.24",
+						Image:   busyboxImage,
 						Command: []string{"sh", "-c", "env"},
 					},
 				},
@@ -444,14 +449,14 @@ var _ = framework.KubeDescribe("Pods", func() {
 		By("creating the pod")
 		name := "pod-exec-websocket-" + string(uuid.NewUUID())
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
 			Spec: v1.PodSpec{
 				Containers: []v1.Container{
 					{
 						Name:    "main",
-						Image:   "gcr.io/google_containers/busybox:1.24",
+						Image:   busyboxImage,
 						Command: []string{"/bin/sh", "-c", "echo container is alive; sleep 600"},
 					},
 				},
@@ -514,14 +519,14 @@ var _ = framework.KubeDescribe("Pods", func() {
 		By("creating the pod")
 		name := "pod-logs-websocket-" + string(uuid.NewUUID())
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
 			Spec: v1.PodSpec{
 				Containers: []v1.Container{
 					{
 						Name:    "main",
-						Image:   "gcr.io/google_containers/busybox:1.24",
+						Image:   busyboxImage,
 						Command: []string{"/bin/sh", "-c", "echo container is alive; sleep 10000"},
 					},
 				},
@@ -568,7 +573,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		podName := "pod-back-off-image"
 		containerName := "back-off"
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:   podName,
 				Labels: map[string]string{"test": "back-off-image"},
 			},
@@ -576,7 +581,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:    containerName,
-						Image:   "gcr.io/google_containers/busybox:1.24",
+						Image:   busyboxImage,
 						Command: []string{"/bin/sh", "-c", "sleep 5", "/crash/missing"},
 					},
 				},
@@ -587,7 +592,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 
 		By("updating the image")
 		podClient.Update(podName, func(pod *v1.Pod) {
-			pod.Spec.Containers[0].Image = "gcr.io/google_containers/nginx-slim:0.7"
+			pod.Spec.Containers[0].Image = imageutils.GetE2EImage(imageutils.NginxSlim)
 		})
 
 		time.Sleep(syncLoopFrequency)
@@ -609,7 +614,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 		podName := "back-off-cap"
 		containerName := "back-off-cap"
 		pod := &v1.Pod{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:   podName,
 				Labels: map[string]string{"test": "liveness"},
 			},
@@ -617,7 +622,7 @@ var _ = framework.KubeDescribe("Pods", func() {
 				Containers: []v1.Container{
 					{
 						Name:    containerName,
-						Image:   "gcr.io/google_containers/busybox:1.24",
+						Image:   busyboxImage,
 						Command: []string{"/bin/sh", "-c", "sleep 5", "/crash/missing"},
 					},
 				},

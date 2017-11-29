@@ -1,11 +1,11 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"C5oy1hgQsABtYOYIOXWcR3BgYqU/TTpQ7yNPZTHyT5AjnjNL_hN6eFo\"",
+ "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/13U3pV34J3OFMsQ27oCh5yZ4wck\"",
  "discoveryVersion": "v1",
  "id": "bigquery:v2",
  "name": "bigquery",
  "version": "v2",
- "revision": "20160617",
+ "revision": "20170730",
  "title": "BigQuery API",
  "description": "A data platform for customers to create, manage, share and query data.",
  "ownerDomain": "google.com",
@@ -167,6 +167,10 @@
     "ignoreUnspecifiedColumnFamilies": {
      "type": "boolean",
      "description": "[Optional] If field is true, then the column families that are not specified in columnFamilies list are not exposed in the table schema. Otherwise, they are read with BYTES type values. The default value is false."
+    },
+    "readRowkeyAsString": {
+     "type": "boolean",
+     "description": "[Optional] If field is true, then the rowkey column families will be read and converted to string. Otherwise they are read with BYTES type values and users need to manually cast them with CAST if necessary. The default value is false."
     }
    }
   },
@@ -275,6 +279,13 @@
      "description": "[Output-only] The resource type.",
      "default": "bigquery#dataset"
     },
+    "labels": {
+     "type": "object",
+     "description": "The labels associated with this dataset. You can use these to organize and group your datasets. You can set this property when inserting or updating a dataset. See Labeling Datasets for more information.",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
     "lastModifiedTime": {
      "type": "string",
      "description": "[Output-only] The date when this dataset or any of its tables was last modified, in milliseconds since the epoch.",
@@ -282,7 +293,7 @@
     },
     "location": {
      "type": "string",
-     "description": "[Experimental] The geographic location where the dataset should reside. Possible values include EU and US. The default value is US."
+     "description": "The geographic location where the dataset should reside. Possible values include EU and US. The default value is US."
     },
     "selfLink": {
      "type": "string",
@@ -316,6 +327,13 @@
         "type": "string",
         "description": "The resource type. This property always returns the value \"bigquery#dataset\".",
         "default": "bigquery#dataset"
+       },
+       "labels": {
+        "type": "object",
+        "description": "The labels associated with this dataset. You can use these to organize and group your datasets.",
+        "additionalProperties": {
+         "type": "string"
+        }
        }
       }
      }
@@ -424,6 +442,10 @@
      "description": "Number of records written by the stage.",
      "format": "int64"
     },
+    "status": {
+     "type": "string",
+     "description": "Current status for the stage."
+    },
     "steps": {
      "type": "array",
      "description": "List of operations within the stage in dependency order (approximately chronological).",
@@ -476,7 +498,7 @@
    "properties": {
     "autodetect": {
      "type": "boolean",
-     "description": "[Experimental] Try to detect schema and format options automatically. Any option specified explicitly will be honored."
+     "description": "Try to detect schema and format options automatically. Any option specified explicitly will be honored."
     },
     "bigtableOptions": {
      "$ref": "BigtableOptions",
@@ -509,7 +531,7 @@
     },
     "sourceFormat": {
      "type": "string",
-     "description": "[Required] The data format. For CSV files, specify \"CSV\". For Google sheets, specify \"GOOGLE_SHEETS\". For newline-delimited JSON, specify \"NEWLINE_DELIMITED_JSON\". For Avro files, specify \"AVRO\". For Google Cloud Datastore backups, specify \"DATASTORE_BACKUP\". [Experimental] For Google Cloud Bigtable, specify \"BIGTABLE\". Please note that reading from Google Cloud Bigtable is experimental and has to be enabled for your project. Please contact Google Cloud Support to enable this for your project."
+     "description": "[Required] The data format. For CSV files, specify \"CSV\". For Google sheets, specify \"GOOGLE_SHEETS\". For newline-delimited JSON, specify \"NEWLINE_DELIMITED_JSON\". For Avro files, specify \"AVRO\". For Google Cloud Datastore backups, specify \"DATASTORE_BACKUP\". [Beta] For Google Cloud Bigtable, specify \"BIGTABLE\"."
     },
     "sourceUris": {
      "type": "array",
@@ -530,7 +552,7 @@
     },
     "errors": {
      "type": "array",
-     "description": "[Output-only] All errors and warnings encountered during the running of the job. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
+     "description": "[Output-only] The first errors or warnings encountered during the running of the job. The final message includes the number of errors that caused the process to stop. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
      "items": {
       "$ref": "ErrorProto"
      }
@@ -551,6 +573,11 @@
      "type": "string",
      "description": "The resource type of the response.",
      "default": "bigquery#getQueryResultsResponse"
+    },
+    "numDmlAffectedRows": {
+     "type": "string",
+     "description": "[Output-only] The number of rows affected by a DML statement. Present only for DML statements INSERT, UPDATE or DELETE.",
+     "format": "int64"
     },
     "pageToken": {
      "type": "string",
@@ -664,6 +691,13 @@
      "$ref": "JobConfigurationExtract",
      "description": "[Pick one] Configures an extract job."
     },
+    "labels": {
+     "type": "object",
+     "description": "[Experimental] The labels associated with this job. You can use these to organize and group your jobs. Label keys and values can be no longer than 63 characters, can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed. Label values are optional. Label keys must start with a letter and each label in the list must have a different key.",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
     "load": {
      "$ref": "JobConfigurationLoad",
      "description": "[Pick one] Configures a load job."
@@ -726,7 +760,7 @@
     },
     "autodetect": {
      "type": "boolean",
-     "description": "[Experimental] Indicates if we should automatically infer the options and schema for CSV and JSON sources."
+     "description": "Indicates if we should automatically infer the options and schema for CSV and JSON sources."
     },
     "createDisposition": {
      "type": "string",
@@ -753,9 +787,13 @@
      "description": "[Optional] The maximum number of bad records that BigQuery can ignore when running the job. If the number of bad records exceeds this value, an invalid error is returned in the job result. The default value is 0, which requires that all records are valid.",
      "format": "int32"
     },
+    "nullMarker": {
+     "type": "string",
+     "description": "[Optional] Specifies a string that represents a null value in a CSV file. For example, if you specify \"\\N\", BigQuery interprets \"\\N\" as a null value when loading a CSV file. The default value is the empty string. If you set this property to a custom value, BigQuery throws an error if an empty string is present for all data types except for STRING and BYTE. For STRING and BYTE columns, BigQuery interprets the empty string as an empty value."
+    },
     "projectionFields": {
      "type": "array",
-     "description": "[Experimental] If sourceFormat is set to \"DATASTORE_BACKUP\", indicates which entity properties to load into BigQuery from a Cloud Datastore backup. Property names are case sensitive and must be top-level properties. If no properties are specified, BigQuery loads all properties. If any named property isn't found in the Cloud Datastore backup, an invalid error is returned in the job result.",
+     "description": "If sourceFormat is set to \"DATASTORE_BACKUP\", indicates which entity properties to load into BigQuery from a Cloud Datastore backup. Property names are case sensitive and must be top-level properties. If no properties are specified, BigQuery loads all properties. If any named property isn't found in the Cloud Datastore backup, an invalid error is returned in the job result.",
      "items": {
       "type": "string"
      }
@@ -778,6 +816,13 @@
      "type": "string",
      "description": "[Deprecated] The format of the schemaInline property."
     },
+    "schemaUpdateOptions": {
+     "type": "array",
+     "description": "[Experimental] Allows the schema of the desitination table to be updated as a side effect of the load job if a schema is autodetected or supplied in the job configuration. Schema update options are supported in two cases: when writeDisposition is WRITE_APPEND; when writeDisposition is WRITE_TRUNCATE and the destination table is a partition of a table, specified by partition decorators. For normal tables, WRITE_TRUNCATE will always overwrite the schema. One or more of the following values are specified: ALLOW_FIELD_ADDITION: allow adding a nullable field to the schema. ALLOW_FIELD_RELAXATION: allow relaxing a required field in the original schema to nullable.",
+     "items": {
+      "type": "string"
+     }
+    },
     "skipLeadingRows": {
      "type": "integer",
      "description": "[Optional] The number of rows at the top of a CSV file that BigQuery will skip when loading the data. The default value is 0. This property is useful if you have header rows in the file that should be skipped.",
@@ -789,7 +834,7 @@
     },
     "sourceUris": {
      "type": "array",
-     "description": "[Required] The fully-qualified URIs that point to your data in Google Cloud Storage. Each URI can contain one '*' wildcard character and it must come after the 'bucket' name.",
+     "description": "[Required] The fully-qualified URIs that point to your data in Google Cloud. For Google Cloud Storage URIs: Each URI can contain one '*' wildcard character and it must come after the 'bucket' name. Size limits related to load jobs apply to external data sources. For Google Cloud Bigtable URIs: Exactly one URI can be specified and it has be a fully specified and valid HTTPS URL for a Google Cloud Bigtable table. For Google Cloud Datastore backups: Exactly one URI can be specified, and it must end with '.backup_info'. Also, the '*' wildcard character is not allowed.",
      "items": {
       "type": "string"
      }
@@ -806,7 +851,8 @@
    "properties": {
     "allowLargeResults": {
      "type": "boolean",
-     "description": "If true, allows the query to produce arbitrarily large result tables at a slight cost in performance. Requires destinationTable to be set."
+     "description": "[Optional] If true and query uses legacy SQL dialect, allows the query to produce arbitrarily large result tables at a slight cost in performance. Requires destinationTable to be set. For standard SQL queries, this flag is ignored and large results are always allowed. However, you must still set destinationTable when result size exceeds the allowed maximum response size.",
+     "default": "false"
     },
     "createDisposition": {
      "type": "string",
@@ -818,11 +864,11 @@
     },
     "destinationTable": {
      "$ref": "TableReference",
-     "description": "[Optional] Describes the table where the query results should be stored. If not present, a new table will be created to store the results."
+     "description": "[Optional] Describes the table where the query results should be stored. If not present, a new table will be created to store the results. This property must be set for large results that exceed the maximum response size."
     },
     "flattenResults": {
      "type": "boolean",
-     "description": "[Optional] Flattens all nested and repeated fields in the query results. The default value is true. allowLargeResults must be true if this is set to false.",
+     "description": "[Optional] If true and query uses legacy SQL dialect, flattens all nested and repeated fields in the query results. allowLargeResults must be true if this is set to false. For standard SQL queries, this flag is ignored and results are never flattened.",
      "default": "true"
     },
     "maximumBillingTier": {
@@ -836,6 +882,10 @@
      "description": "[Optional] Limits the bytes billed for this job. Queries that will have bytes billed beyond this limit will fail (without incurring a charge). If unspecified, this will be set to your project default.",
      "format": "int64"
     },
+    "parameterMode": {
+     "type": "string",
+     "description": "Standard SQL only. Set to POSITIONAL to use positional (?) query parameters or to NAMED to use named (@myparam) query parameters in this query."
+    },
     "preserveNulls": {
      "type": "boolean",
      "description": "[Deprecated] This property is deprecated."
@@ -846,7 +896,21 @@
     },
     "query": {
      "type": "string",
-     "description": "[Required] BigQuery SQL query to execute."
+     "description": "[Required] SQL query text to execute. The useLegacySql field can be used to indicate whether the query uses legacy SQL or standard SQL."
+    },
+    "queryParameters": {
+     "type": "array",
+     "description": "Query parameters for standard SQL queries.",
+     "items": {
+      "$ref": "QueryParameter"
+     }
+    },
+    "schemaUpdateOptions": {
+     "type": "array",
+     "description": "[Experimental] Allows the schema of the destination table to be updated as a side effect of the query job. Schema update options are supported in two cases: when writeDisposition is WRITE_APPEND; when writeDisposition is WRITE_TRUNCATE and the destination table is a partition of a table, specified by partition decorators. For normal tables, WRITE_TRUNCATE will always overwrite the schema. One or more of the following values are specified: ALLOW_FIELD_ADDITION: allow adding a nullable field to the schema. ALLOW_FIELD_RELAXATION: allow relaxing a required field in the original schema to nullable.",
+     "items": {
+      "type": "string"
+     }
     },
     "tableDefinitions": {
      "type": "object",
@@ -857,7 +921,7 @@
     },
     "useLegacySql": {
      "type": "boolean",
-     "description": "[Experimental] Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true. If set to false, the query will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ When useLegacySql is set to false, the values of allowLargeResults and flattenResults are ignored; query will be run as if allowLargeResults is true and flattenResults is false."
+     "description": "Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true. If set to false, the query will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ When useLegacySql is set to false, the value of flattenResults is ignored; query will be run as if flattenResults is false."
     },
     "useQueryCache": {
      "type": "boolean",
@@ -866,14 +930,14 @@
     },
     "userDefinedFunctionResources": {
      "type": "array",
-     "description": "[Experimental] Describes user-defined function resources used in the query.",
+     "description": "Describes user-defined function resources used in the query.",
      "items": {
       "$ref": "UserDefinedFunctionResource"
      }
     },
     "writeDisposition": {
      "type": "string",
-     "description": "[Optional] Specifies the action that occurs if the destination table already exists. The following values are supported: WRITE_TRUNCATE: If the table already exists, BigQuery overwrites the table data. WRITE_APPEND: If the table already exists, BigQuery appends the data to the table. WRITE_EMPTY: If the table already exists and contains data, a 'duplicate' error is returned in the job result. The default value is WRITE_EMPTY. Each action is atomic and only occurs if BigQuery is able to complete the job successfully. Creation, truncation and append actions occur as one atomic update upon job completion."
+     "description": "[Optional] Specifies the action that occurs if the destination table already exists. The following values are supported: WRITE_TRUNCATE: If the table already exists, BigQuery overwrites the table data and uses the schema from the query result. WRITE_APPEND: If the table already exists, BigQuery appends the data to the table. WRITE_EMPTY: If the table already exists and contains data, a 'duplicate' error is returned in the job result. The default value is WRITE_EMPTY. Each action is atomic and only occurs if BigQuery is able to complete the job successfully. Creation, truncation and append actions occur as one atomic update upon job completion."
     }
    }
   },
@@ -1046,9 +1110,14 @@
      "type": "boolean",
      "description": "[Output-only] Whether the query result was fetched from the query cache."
     },
+    "numDmlAffectedRows": {
+     "type": "string",
+     "description": "[Output-only] The number of rows affected by a DML statement. Present only for DML statements INSERT, UPDATE or DELETE.",
+     "format": "int64"
+    },
     "queryPlan": {
      "type": "array",
-     "description": "[Output-only, Experimental] Describes execution plan for the query as a list of stages.",
+     "description": "[Output-only] Describes execution plan for the query.",
      "items": {
       "$ref": "ExplainQueryStage"
      }
@@ -1064,6 +1133,10 @@
      "$ref": "TableSchema",
      "description": "[Output-only, Experimental] The schema of the results. Present only for successful dry run of non-legacy SQL queries."
     },
+    "statementType": {
+     "type": "string",
+     "description": "[Output-only, Experimental] The type of query statement, if valid."
+    },
     "totalBytesBilled": {
      "type": "string",
      "description": "[Output-only] Total bytes billed for the job.",
@@ -1073,6 +1146,13 @@
      "type": "string",
      "description": "[Output-only] Total bytes processed for the job.",
      "format": "int64"
+    },
+    "undeclaredQueryParameters": {
+     "type": "array",
+     "description": "[Output-only, Experimental] Standard SQL only: list of undeclared query parameters detected during a dry run validation.",
+     "items": {
+      "$ref": "QueryParameter"
+     }
     }
    }
   },
@@ -1080,6 +1160,11 @@
    "id": "JobStatistics3",
    "type": "object",
    "properties": {
+    "badRecords": {
+     "type": "string",
+     "description": "[Output-only] The number of bad records encountered. Note that if the job has failed because of more bad records encountered than the maximum allowed in the load job configuration, then this number can be less than the total number of bad records present in the input data.",
+     "format": "int64"
+    },
     "inputFileBytes": {
      "type": "string",
      "description": "[Output-only] Number of bytes of source data in a load job.",
@@ -1126,7 +1211,7 @@
     },
     "errors": {
      "type": "array",
-     "description": "[Output-only] All errors encountered during the running of the job. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
+     "description": "[Output-only] The first errors encountered during the running of the job. The final message includes the number of errors that caused the process to stop. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
      "items": {
       "$ref": "ErrorProto"
      }
@@ -1214,6 +1299,83 @@
     }
    }
   },
+  "QueryParameter": {
+   "id": "QueryParameter",
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "[Optional] If unset, this is a positional parameter. Otherwise, should be unique within a query."
+    },
+    "parameterType": {
+     "$ref": "QueryParameterType",
+     "description": "[Required] The type of this parameter."
+    },
+    "parameterValue": {
+     "$ref": "QueryParameterValue",
+     "description": "[Required] The value of this parameter."
+    }
+   }
+  },
+  "QueryParameterType": {
+   "id": "QueryParameterType",
+   "type": "object",
+   "properties": {
+    "arrayType": {
+     "$ref": "QueryParameterType",
+     "description": "[Optional] The type of the array's elements, if this is an array."
+    },
+    "structTypes": {
+     "type": "array",
+     "description": "[Optional] The types of the fields of this struct, in order, if this is a struct.",
+     "items": {
+      "type": "object",
+      "properties": {
+       "description": {
+        "type": "string",
+        "description": "[Optional] Human-oriented description of the field."
+       },
+       "name": {
+        "type": "string",
+        "description": "[Optional] The name of this field."
+       },
+       "type": {
+        "$ref": "QueryParameterType",
+        "description": "[Required] The type of this field."
+       }
+      }
+     }
+    },
+    "type": {
+     "type": "string",
+     "description": "[Required] The top level type of this field."
+    }
+   }
+  },
+  "QueryParameterValue": {
+   "id": "QueryParameterValue",
+   "type": "object",
+   "properties": {
+    "arrayValues": {
+     "type": "array",
+     "description": "[Optional] The array values, if this is an array type.",
+     "items": {
+      "$ref": "QueryParameterValue"
+     }
+    },
+    "structValues": {
+     "type": "object",
+     "description": "[Optional] The struct field values, in order of the struct type's declaration.",
+     "additionalProperties": {
+      "$ref": "QueryParameterValue"
+     }
+    },
+    "value": {
+     "type": "string",
+     "description": "[Optional] The value of this value, if a simple scalar type."
+    }
+   }
+  },
   "QueryRequest": {
    "id": "QueryRequest",
    "type": "object",
@@ -1236,6 +1398,10 @@
      "description": "[Optional] The maximum number of rows of data to return per page of results. Setting this flag to a small value such as 1000 and then paging through results might improve reliability when the query result set is large. In addition to this limit, responses are also limited to 10 MB. By default, there is no maximum row count, and only the byte limit applies.",
      "format": "uint32"
     },
+    "parameterMode": {
+     "type": "string",
+     "description": "Standard SQL only. Set to POSITIONAL to use positional (?) query parameters or to NAMED to use named (@myparam) query parameters in this query."
+    },
     "preserveNulls": {
      "type": "boolean",
      "description": "[Deprecated] This property is deprecated."
@@ -1249,6 +1415,13 @@
       ]
      }
     },
+    "queryParameters": {
+     "type": "array",
+     "description": "Query parameters for Standard SQL queries.",
+     "items": {
+      "$ref": "QueryParameter"
+     }
+    },
     "timeoutMs": {
      "type": "integer",
      "description": "[Optional] How long to wait for the query to complete, in milliseconds, before the request times out and returns. Note that this is only a timeout for the request, not the query. If the query takes longer to run than the timeout value, the call returns without any results and with the 'jobComplete' flag set to false. You can call GetQueryResults() to wait for the query to complete and read the results. The default value is 10000 milliseconds (10 seconds).",
@@ -1256,7 +1429,8 @@
     },
     "useLegacySql": {
      "type": "boolean",
-     "description": "[Experimental] Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true. If set to false, the query will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ When useLegacySql is set to false, the values of allowLargeResults and flattenResults are ignored; query will be run as if allowLargeResults is true and flattenResults is false."
+     "description": "Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true. If set to false, the query will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ When useLegacySql is set to false, the value of flattenResults is ignored; query will be run as if flattenResults is false.",
+     "default": "true"
     },
     "useQueryCache": {
      "type": "boolean",
@@ -1275,7 +1449,7 @@
     },
     "errors": {
      "type": "array",
-     "description": "[Output-only] All errors and warnings encountered during the running of the job. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
+     "description": "[Output-only] The first errors or warnings encountered during the running of the job. The final message includes the number of errors that caused the process to stop. Errors here do not necessarily mean that the job has completed or was unsuccessful.",
      "items": {
       "$ref": "ErrorProto"
      }
@@ -1292,6 +1466,11 @@
      "type": "string",
      "description": "The resource type.",
      "default": "bigquery#queryResponse"
+    },
+    "numDmlAffectedRows": {
+     "type": "string",
+     "description": "[Output-only] The number of rows affected by a DML statement. Present only for DML statements INSERT, UPDATE or DELETE.",
+     "format": "int64"
     },
     "pageToken": {
      "type": "string",
@@ -1379,6 +1558,13 @@
      "type": "string",
      "description": "[Output-only] The type of the resource.",
      "default": "bigquery#table"
+    },
+    "labels": {
+     "type": "object",
+     "description": "[Experimental] The labels associated with this table. You can use these to organize and group your tables. Label keys and values can be no longer than 63 characters, can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed. Label values are optional. Label keys must start with a letter and each label in the list must have a different key.",
+     "additionalProperties": {
+      "type": "string"
+     }
     },
     "lastModifiedTime": {
      "type": "string",
@@ -1552,7 +1738,7 @@
    "properties": {
     "description": {
      "type": "string",
-     "description": "[Optional] The field description. The maximum length is 16K characters."
+     "description": "[Optional] The field description. The maximum length is 1,024 characters."
     },
     "fields": {
      "type": "array",
@@ -1571,7 +1757,7 @@
     },
     "type": {
      "type": "string",
-     "description": "[Required] The field data type. Possible values include STRING, BYTES, INTEGER, FLOAT, BOOLEAN, TIMESTAMP or RECORD (where RECORD indicates that the field contains a nested schema)."
+     "description": "[Required] The field data type. Possible values include STRING, BYTES, INTEGER, INT64 (same as INTEGER), FLOAT, FLOAT64 (same as FLOAT), BOOLEAN, BOOL (same as BOOLEAN), TIMESTAMP, DATE, TIME, DATETIME, RECORD (where RECORD indicates that the field contains a nested schema) or STRUCT (same as RECORD)."
     }
    }
   },
@@ -1611,13 +1797,34 @@
         "description": "The resource type.",
         "default": "bigquery#table"
        },
+       "labels": {
+        "type": "object",
+        "description": "[Experimental] The labels associated with this table. You can use these to organize and group your tables.",
+        "additionalProperties": {
+         "type": "string"
+        }
+       },
        "tableReference": {
         "$ref": "TableReference",
         "description": "A reference uniquely identifying the table."
        },
+       "timePartitioning": {
+        "$ref": "TimePartitioning",
+        "description": "[Experimental] The time-based partitioning for this table."
+       },
        "type": {
         "type": "string",
         "description": "The type of table. Possible values are: TABLE, VIEW."
+       },
+       "view": {
+        "type": "object",
+        "description": "Additional details for a view.",
+        "properties": {
+         "useLegacySql": {
+          "type": "boolean",
+          "description": "True if view is defined in legacy SQL dialect, false if in standard SQL."
+         }
+        }
        }
       }
      }
@@ -1727,11 +1934,11 @@
     },
     "useLegacySql": {
      "type": "boolean",
-     "description": "[Experimental] Specifies whether to use BigQuery's legacy SQL for this view. The default value is true. If set to false, the view will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ Queries and views that reference this view must use the same flag value."
+     "description": "Specifies whether to use BigQuery's legacy SQL for this view. The default value is true. If set to false, the view will use BigQuery's standard SQL: https://cloud.google.com/bigquery/sql-reference/ Queries and views that reference this view must use the same flag value."
     },
     "userDefinedFunctionResources": {
      "type": "array",
-     "description": "[Experimental] Describes user-defined function resources used in the query.",
+     "description": "Describes user-defined function resources used in the query.",
      "items": {
       "$ref": "UserDefinedFunctionResource"
      }
@@ -1845,6 +2052,11 @@
        "description": "Whether to list all datasets, including hidden ones",
        "location": "query"
       },
+      "filter": {
+       "type": "string",
+       "description": "An expression for filtering the results of the request by label. The syntax is \"labels.\u003cname\u003e[:\u003cvalue\u003e]\". Multiple filters can be ANDed together by connecting with a space. Example: \"labels.department:receiving labels.active\". See Filtering datasets using labels for details.",
+       "location": "query"
+      },
       "maxResults": {
        "type": "integer",
        "description": "The maximum number of results to return",
@@ -1949,7 +2161,7 @@
    "methods": {
     "cancel": {
      "id": "bigquery.jobs.cancel",
-     "path": "project/{projectId}/jobs/{jobId}/cancel",
+     "path": "projects/{projectId}/jobs/{jobId}/cancel",
      "httpMethod": "POST",
      "description": "Requests that a job be cancelled. This call will return immediately, and the client will need to poll for the job status to see if the cancel completed successfully. Cancelled jobs may still incur costs.",
      "parameters": {
@@ -2315,6 +2527,11 @@
        "required": true,
        "location": "path"
       },
+      "selectedFields": {
+       "type": "string",
+       "description": "List of fields to return (comma-separated). If unspecified, all fields are returned",
+       "location": "query"
+      },
       "startIndex": {
        "type": "string",
        "description": "Zero-based index of the starting row to read",
@@ -2398,6 +2615,11 @@
        "description": "Project ID of the requested table",
        "required": true,
        "location": "path"
+      },
+      "selectedFields": {
+       "type": "string",
+       "description": "List of fields to return (comma-separated). If unspecified, all fields are returned",
+       "location": "query"
       },
       "tableId": {
        "type": "string",

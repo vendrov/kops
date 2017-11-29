@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/kubernetes/pkg/api/v1"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
-	"k8s.io/kubernetes/pkg/util/intstr"
 )
 
 func TestResolvePortInt(t *testing.T) {

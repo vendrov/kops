@@ -23,54 +23,10 @@ import (
 
 	"github.com/golang/glog"
 
-	"k8s.io/kubernetes/pkg/api/v1"
-	extensions "k8s.io/kubernetes/pkg/apis/extensions/v1beta1"
+	"k8s.io/api/core/v1"
+	extensions "k8s.io/api/extensions/v1beta1"
 	"k8s.io/kubernetes/pkg/controller/deployment/util"
 )
-
-// hasFailed determines if a deployment has failed or not by estimating its progress.
-// Progress for a deployment is considered when a new replica set is created or adopted,
-// and when new pods scale up or old pods scale down. Progress is not estimated for paused
-// deployments or when users don't really care about it ie. progressDeadlineSeconds is not
-// specified.
-func (dc *DeploymentController) hasFailed(d *extensions.Deployment) (bool, error) {
-	if d.Spec.ProgressDeadlineSeconds == nil || d.Spec.RollbackTo != nil || d.Spec.Paused {
-		return false, nil
-	}
-
-	newRS, oldRSs, err := dc.getAllReplicaSetsAndSyncRevision(d, false)
-	if err != nil {
-		return false, err
-	}
-
-	// There is a template change so we don't need to check for any progress right now.
-	if newRS == nil {
-		return false, nil
-	}
-
-	// Look at the status of the deployment - if there is already a NewRSAvailableReason
-	// then we don't need to estimate any progress. This is needed in order to avoid
-	// estimating progress for scaling events after a rollout has finished.
-	cond := util.GetDeploymentCondition(d.Status, extensions.DeploymentProgressing)
-	if cond != nil && cond.Reason == util.NewRSAvailableReason {
-		return false, nil
-	}
-
-	// TODO: Look for permanent failures here.
-	// See https://github.com/kubernetes/kubernetes/issues/18568
-
-	allRSs := append(oldRSs, newRS)
-	newStatus := calculateStatus(allRSs, newRS, d)
-
-	// If the deployment is complete or it is progressing, there is no need to check if it
-	// has timed out.
-	if util.DeploymentComplete(d, &newStatus) || util.DeploymentProgressing(d, &newStatus) {
-		return false, nil
-	}
-
-	// Check if the deployment has timed out.
-	return util.DeploymentTimedOut(d, &newStatus), nil
-}
 
 // syncRolloutStatus updates the status of a deployment during a rollout. There are
 // cases this helper will run that cannot be prevented from the scaling detection,
@@ -146,21 +102,8 @@ func (dc *DeploymentController) syncRolloutStatus(allRSs []*extensions.ReplicaSe
 
 	// Do not update if there is nothing new to add.
 	if reflect.DeepEqual(d.Status, newStatus) {
-		// If there is no sign of progress at this point then there is a high chance that the
-		// deployment is stuck. We should resync this deployment at some point[1] in the future
-		// and check if it has timed out. We definitely need this, otherwise we depend on the
-		// controller resync interval. See https://github.com/kubernetes/kubernetes/issues/34458.
-		//
-		// [1] time.Now() + progressDeadlineSeconds - lastUpdateTime (of the Progressing condition).
-		if d.Spec.ProgressDeadlineSeconds != nil &&
-			!util.DeploymentComplete(d, &newStatus) &&
-			!util.DeploymentTimedOut(d, &newStatus) &&
-			currentCond != nil {
-
-			after := time.Now().Add(time.Duration(*d.Spec.ProgressDeadlineSeconds) * time.Second).Sub(currentCond.LastUpdateTime.Time)
-			glog.V(4).Infof("Queueing up deployment %q for a progress check after %ds", d.Name, int(after.Seconds()))
-			dc.checkProgressAfter(d, after)
-		}
+		// Requeue the deployment if required.
+		dc.requeueStuckDeployment(d, newStatus)
 		return nil
 	}
 
@@ -202,4 +145,51 @@ func (dc *DeploymentController) getReplicaFailures(allRSs []*extensions.ReplicaS
 		}
 	}
 	return conditions
+}
+
+// used for unit testing
+var nowFn = func() time.Time { return time.Now() }
+
+// requeueStuckDeployment checks whether the provided deployment needs to be synced for a progress
+// check. It returns the time after the deployment will be requeued for the progress check, 0 if it
+// will be requeued now, or -1 if it does not need to be requeued.
+func (dc *DeploymentController) requeueStuckDeployment(d *extensions.Deployment, newStatus extensions.DeploymentStatus) time.Duration {
+	currentCond := util.GetDeploymentCondition(d.Status, extensions.DeploymentProgressing)
+	// Can't estimate progress if there is no deadline in the spec or progressing condition in the current status.
+	if d.Spec.ProgressDeadlineSeconds == nil || currentCond == nil {
+		return time.Duration(-1)
+	}
+	// No need to estimate progress if the rollout is complete or already timed out.
+	if util.DeploymentComplete(d, &newStatus) || currentCond.Reason == util.TimedOutReason {
+		return time.Duration(-1)
+	}
+	// If there is no sign of progress at this point then there is a high chance that the
+	// deployment is stuck. We should resync this deployment at some point in the future[1]
+	// and check whether it has timed out. We definitely need this, otherwise we depend on the
+	// controller resync interval. See https://github.com/kubernetes/kubernetes/issues/34458.
+	//
+	// [1] ProgressingCondition.LastUpdatedTime + progressDeadlineSeconds - time.Now()
+	//
+	// For example, if a Deployment updated its Progressing condition 3 minutes ago and has a
+	// deadline of 10 minutes, it would need to be resynced for a progress check after 7 minutes.
+	//
+	// lastUpdated: 			00:00:00
+	// now: 					00:03:00
+	// progressDeadlineSeconds: 600 (10 minutes)
+	//
+	// lastUpdated + progressDeadlineSeconds - now => 00:00:00 + 00:10:00 - 00:03:00 => 07:00
+	after := currentCond.LastUpdateTime.Time.Add(time.Duration(*d.Spec.ProgressDeadlineSeconds) * time.Second).Sub(nowFn())
+	// If the remaining time is less than a second, then requeue the deployment immediately.
+	// Make it ratelimited so we stay on the safe side, eventually the Deployment should
+	// transition either to a Complete or to a TimedOut condition.
+	if after < time.Second {
+		glog.V(4).Infof("Queueing up deployment %q for a progress check now", d.Name)
+		dc.enqueueRateLimited(d)
+		return time.Duration(0)
+	}
+	glog.V(4).Infof("Queueing up deployment %q for a progress check after %ds", d.Name, int(after.Seconds()))
+	// Add a second to avoid milliseconds skew in AddAfter.
+	// See https://github.com/kubernetes/kubernetes/issues/39785#issuecomment-279959133 for more info.
+	dc.enqueueAfter(d, after+time.Second)
+	return after
 }

@@ -61,16 +61,6 @@ so we leave the nil value as meaning "default policy, whatever it may be in futu
 So, we just need to check if `UpdatePolicy` is not nil and == `external`; we add the tag `_automatic_upgrades`,
 which enabled automatic upgrades, only if that is _not_ the case!
 
-## How it works
-
-Everything is driven by a local configuration directory tree, called the "model".  The model represents
-the desired state of the world.
-
-Each file in the tree describes a Task.
-
-On the nodeup side, Tasks can manage files, systemd services, packages etc.
-On the `kops update cluster` side, Tasks manage cloud resources: instances, networks, disks etc.
-
 ## Validation
 
 We should add some validation that the value entered is valid.  We only accept nil or `external` right now.
@@ -196,7 +186,7 @@ and then push nodeup using:
 
 ```
 export S3_BUCKET_NAME=<yourbucketname>
-make upload S3_BUCKET=s3://${S3_BUCKET_NAME} VERSION=dev
+make kops-install upload S3_BUCKET=s3://${S3_BUCKET_NAME} VERSION=dev
 
 export KOPS_BASE_URL=https://${S3_BUCKET_NAME}.s3.amazonaws.com/kops/dev/
 

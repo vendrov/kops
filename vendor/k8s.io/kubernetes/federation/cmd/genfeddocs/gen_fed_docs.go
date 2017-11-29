@@ -24,9 +24,12 @@ import (
 	"k8s.io/kubernetes/cmd/genutils"
 	fedapiservapp "k8s.io/kubernetes/federation/cmd/federation-apiserver/app"
 	fedcmapp "k8s.io/kubernetes/federation/cmd/federation-controller-manager/app"
+	kubefedapp "k8s.io/kubernetes/federation/cmd/kubefed/app"
+	"k8s.io/kubernetes/federation/pkg/kubefed"
+	cmdutil "k8s.io/kubernetes/pkg/kubectl/cmd/util"
 )
 
-// Note: We have a separate binary for generating federation docs and kube docs because of the way api groups are registered.
+// Note: We have a separate binary for generating federation docs and kube docs because of the way api groups are api.Registry.
 // If we import both kube-apiserver and federation-apiserver in the same binary then api groups from both kube and federation will get registered in both the apiservers
 // and hence will produce incorrect flag values.
 // We can potentially merge cmd/kubegendocs and this when we have fixed that problem.
@@ -57,6 +60,10 @@ func main() {
 		// generate docs for kube-controller-manager
 		controllermanager := fedcmapp.NewControllerManagerCommand()
 		doc.GenMarkdownTree(controllermanager, outDir)
+	case "kubefed":
+		// generate docs for kubefed
+		kubefed := kubefed.NewKubeFedCommand(cmdutil.NewFactory(nil), os.Stdin, os.Stdout, os.Stderr, kubefedapp.GetDefaultServerImage(), kubefedapp.DefaultEtcdImage)
+		doc.GenMarkdownTree(kubefed, outDir)
 	default:
 		fmt.Fprintf(os.Stderr, "Module %s is not supported", module)
 		os.Exit(1)

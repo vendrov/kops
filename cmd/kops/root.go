@@ -21,20 +21,46 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kops/cmd/kops/util"
 	kopsapi "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/client/simple"
-	"k8s.io/kops/upup/pkg/kutil"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
-	"k8s.io/kubernetes/pkg/util/validation/field"
-
-	// Register our APIs
-	_ "k8s.io/kops/pkg/apis/kops/install"
 	"k8s.io/kops/pkg/kubeconfig"
+	"k8s.io/kops/upup/pkg/kutil"
+	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
+)
+
+const (
+	validResources = `
+
+	* cluster
+	* instancegroup
+	* secret
+	* federation
+
+	`
+)
+
+var (
+	root_long = templates.LongDesc(i18n.T(`
+	kops is Kubernetes ops.
+
+	kops is the easiest way to get a production grade Kubernetes cluster up and running.
+	We like to think of it as kubectl for clusters.
+
+	kops helps you create, destroy, upgrade and maintain production-grade, highly available,
+	Kubernetes clusters from the command line.  AWS (Amazon Web Services) is currently
+	officially supported, with GCE and VMware vSphere in alpha support.
+	`))
+
+	root_short = i18n.T(`kops is Kubernetes ops.`)
 )
 
 type Factory interface {
@@ -58,9 +84,8 @@ var _ Factory = &RootCmd{}
 var rootCommand = RootCmd{
 	cobraCommand: &cobra.Command{
 		Use:   "kops",
-		Short: "kops is kubernetes ops",
-		Long: `kops is kubernetes ops.
-It allows you to create, destroy, upgrade and maintain clusters.`,
+		Short: root_short,
+		Long:  root_long,
 	},
 }
 
@@ -82,15 +107,26 @@ func init() {
 }
 
 func NewCmdRoot(f *util.Factory, out io.Writer) *cobra.Command {
-	//options := &RootOptions{}
 
 	cmd := rootCommand.cobraCommand
 
-	cmd.PersistentFlags().AddGoFlagSet(goflag.CommandLine)
+	//cmd.PersistentFlags().AddGoFlagSet(goflag.CommandLine)
+	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
+		switch goflag.Name {
+		case "cloud-provider-gce-lb-src-cidrs":
+			// Skip; this is dragged in by the google cloudprovider dependency
+
+		default:
+			cmd.PersistentFlags().AddGoFlag(goflag)
+		}
+	})
 
 	cmd.PersistentFlags().StringVar(&rootCommand.configFile, "config", "", "config file (default is $HOME/.kops.yaml)")
 
 	defaultStateStore := os.Getenv("KOPS_STATE_STORE")
+	if strings.HasSuffix(defaultStateStore, "/") {
+		defaultStateStore = strings.TrimSuffix(defaultStateStore, "/")
+	}
 	cmd.PersistentFlags().StringVarP(&rootCommand.RegistryPath, "state", "", defaultStateStore, "Location of state storage")
 
 	cmd.PersistentFlags().StringVarP(&rootCommand.clusterName, "name", "", "", "Name of cluster")
@@ -100,6 +136,8 @@ func NewCmdRoot(f *util.Factory, out io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreate(f, out))
 	cmd.AddCommand(NewCmdDelete(f, out))
 	cmd.AddCommand(NewCmdEdit(f, out))
+	cmd.AddCommand(NewCmdExport(f, out))
+	cmd.AddCommand(NewCmdGet(f, out))
 	cmd.AddCommand(NewCmdUpdate(f, out))
 	cmd.AddCommand(NewCmdReplace(f, out))
 	cmd.AddCommand(NewCmdRollingUpdate(f, out))
@@ -245,7 +283,7 @@ func GetCluster(factory *util.Factory, clusterName string) (*kopsapi.Cluster, er
 		return nil, err
 	}
 
-	cluster, err := clientset.Clusters().Get(clusterName)
+	cluster, err := clientset.GetCluster(clusterName)
 	if err != nil {
 		return nil, fmt.Errorf("error reading cluster configuration: %v", err)
 	}

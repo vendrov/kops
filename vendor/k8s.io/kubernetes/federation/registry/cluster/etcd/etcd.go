@@ -17,13 +17,14 @@ limitations under the License.
 package etcd
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
+	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/apiserver/pkg/registry/generic"
+	genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
+	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/kubernetes/federation/apis/federation"
 	"k8s.io/kubernetes/federation/registry/cluster"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/rest"
-	"k8s.io/kubernetes/pkg/registry/generic"
-	genericregistry "k8s.io/kubernetes/pkg/registry/generic/registry"
-	"k8s.io/kubernetes/pkg/runtime"
 )
 
 type REST struct {
@@ -39,20 +40,18 @@ func (r *StatusREST) New() runtime.Object {
 }
 
 // Update alters the status subset of an object.
-func (r *StatusREST) Update(ctx api.Context, name string, objInfo rest.UpdatedObjectInfo) (runtime.Object, bool, error) {
+func (r *StatusREST) Update(ctx genericapirequest.Context, name string, objInfo rest.UpdatedObjectInfo) (runtime.Object, bool, error) {
 	return r.store.Update(ctx, name, objInfo)
 }
 
 // NewREST returns a RESTStorage object that will work against clusters.
 func NewREST(optsGetter generic.RESTOptionsGetter) (*REST, *StatusREST) {
 	store := &genericregistry.Store{
-		NewFunc:     func() runtime.Object { return &federation.Cluster{} },
-		NewListFunc: func() runtime.Object { return &federation.ClusterList{} },
-		ObjectNameFunc: func(obj runtime.Object) (string, error) {
-			return obj.(*federation.Cluster).Name, nil
-		},
-		PredicateFunc:     cluster.MatchCluster,
-		QualifiedResource: federation.Resource("clusters"),
+		Copier:                   api.Scheme,
+		NewFunc:                  func() runtime.Object { return &federation.Cluster{} },
+		NewListFunc:              func() runtime.Object { return &federation.ClusterList{} },
+		PredicateFunc:            cluster.MatchCluster,
+		DefaultQualifiedResource: federation.Resource("clusters"),
 
 		CreateStrategy:      cluster.Strategy,
 		UpdateStrategy:      cluster.Strategy,

@@ -19,18 +19,39 @@ package components
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/blang/semver"
-	"k8s.io/kops/pkg/apis/kops"
-	"k8s.io/kops/pkg/apis/kops/util"
 	"math/big"
 	"net"
+	"strings"
+
+	"k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/apis/kops/util"
+	"k8s.io/kops/pkg/assets"
+	"k8s.io/kops/upup/pkg/fi/cloudup/gce"
+	"k8s.io/kops/util/pkg/vfs"
+
+	"github.com/blang/semver"
+	"github.com/golang/glog"
 )
 
 // OptionsContext is the context object for options builders
 type OptionsContext struct {
+	ClusterName string
+
+	KubernetesVersion semver.Version
+
+	AssetBuilder *assets.AssetBuilder
+}
+
+func (c *OptionsContext) IsKubernetesGTE(version string) bool {
+	return util.IsKubernetesGTE(version, c.KubernetesVersion)
+}
+
+func (c *OptionsContext) IsKubernetesLT(version string) bool {
+	return !c.IsKubernetesGTE(version)
 }
 
 // KubernetesVersion parses the semver version of kubernetes, from the cluster spec
+// Deprecated: prefer using OptionsContext.KubernetesVersion
 func KubernetesVersion(clusterSpec *kops.ClusterSpec) (*semver.Version, error) {
 	kubernetesVersion := clusterSpec.KubernetesVersion
 
@@ -56,13 +77,13 @@ func UsesKubenet(clusterSpec *kops.ClusterSpec) (bool, error) {
 	} else if networking.External != nil {
 		// external is based on kubenet
 		return true, nil
-	} else if networking.CNI != nil || networking.Weave != nil || networking.Flannel != nil || networking.Calico != nil || networking.Canal != nil {
+	} else if networking.CNI != nil || networking.Weave != nil || networking.Flannel != nil || networking.Calico != nil || networking.Canal != nil || networking.Kuberouter != nil || networking.Romana != nil {
 		return false, nil
 	} else if networking.Kopeio != nil {
 		// Kopeio is based on kubenet / external
 		return true, nil
 	} else {
-		return false, fmt.Errorf("No networking mode set")
+		return false, fmt.Errorf("no networking mode set")
 	}
 }
 
@@ -96,4 +117,49 @@ func WellKnownServiceIP(clusterSpec *kops.ClusterSpec, id int) (net.IP, error) {
 	}
 
 	return nil, fmt.Errorf("Unexpected IP address type for ServiceClusterIPRange: %s", clusterSpec.ServiceClusterIPRange)
+}
+
+func IsBaseURL(kubernetesVersion string) bool {
+	return strings.HasPrefix(kubernetesVersion, "http:") || strings.HasPrefix(kubernetesVersion, "https:")
+}
+
+// Image returns the docker image name for the specified component
+func Image(component string, clusterSpec *kops.ClusterSpec, assetsBuilder *assets.AssetBuilder) (string, error) {
+	if assetsBuilder == nil {
+		return "", fmt.Errorf("unable to parse assets as assetBuilder is not defined")
+	}
+	// TODO remove this, as it is an addon now
+	if component == "kube-dns" {
+		// TODO: Once we are shipping different versions, start to use them
+		return "gcr.io/google_containers/kubedns-amd64:1.3", nil
+	}
+
+	if !IsBaseURL(clusterSpec.KubernetesVersion) {
+		image := "gcr.io/google_containers/" + component + ":" + "v" + clusterSpec.KubernetesVersion
+
+		image, err := assetsBuilder.RemapImage(image)
+		if err != nil {
+			return "", fmt.Errorf("unable to remap container %q: %v", image, err)
+		}
+		return image, nil
+	}
+
+	baseURL := clusterSpec.KubernetesVersion
+	baseURL = strings.TrimSuffix(baseURL, "/")
+
+	tagURL := baseURL + "/bin/linux/amd64/" + component + ".docker_tag"
+	glog.V(2).Infof("Downloading docker tag for %s from: %s", component, tagURL)
+
+	b, err := vfs.Context.ReadFile(tagURL)
+	if err != nil {
+		return "", fmt.Errorf("error reading tag file %q: %v", tagURL, err)
+	}
+	tag := strings.TrimSpace(string(b))
+	glog.V(2).Infof("Found tag %q for %q", tag, component)
+
+	return "gcr.io/google_containers/" + component + ":" + tag, nil
+}
+
+func GCETagForRole(clusterName string, role kops.InstanceGroupRole) string {
+	return gce.SafeClusterName(clusterName) + "-" + gce.GceLabelNameRolePrefix + strings.ToLower(string(role))
 }

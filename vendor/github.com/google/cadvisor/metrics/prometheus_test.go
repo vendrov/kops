@@ -60,7 +60,7 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 				HasCpu: true,
 				Cpu: info.CpuSpec{
 					Limit:  1000,
-					Period: 10,
+					Period: 100000,
 					Quota:  10000,
 				},
 				CreationTime: time.Unix(1257894000, 0),
@@ -80,6 +80,12 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 							User:   6,
 							System: 7,
 						},
+						CFS: info.CpuCFS{
+							Periods:          723,
+							ThrottledPeriods: 18,
+							ThrottledTime:    1724314000,
+						},
+						LoadAverage: 2,
 					},
 					Memory: info.MemoryStats{
 						Usage:      8,
@@ -94,6 +100,7 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 						},
 						Cache: 14,
 						RSS:   15,
+						Swap:  8192,
 					},
 					Network: info.NetworkStats{
 						InterfaceStats: info.InterfaceStats{
@@ -120,10 +127,31 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 								TxDropped: 21,
 							},
 						},
+						Tcp: info.TcpStat{
+							Established: 13,
+							SynSent:     0,
+							SynRecv:     0,
+							FinWait1:    0,
+							FinWait2:    0,
+							TimeWait:    0,
+							Close:       0,
+							CloseWait:   0,
+							LastAck:     0,
+							Listen:      3,
+							Closing:     0,
+						},
+						Udp: info.UdpStat{
+							Listen:   0,
+							Dropped:  0,
+							RxQueued: 0,
+							TxQueued: 0,
+						},
 					},
 					Filesystem: []info.FsStats{
 						{
 							Device:          "sda1",
+							InodesFree:      524288,
+							Inodes:          2097152,
 							Limit:           22,
 							Usage:           23,
 							ReadsCompleted:  24,
@@ -140,6 +168,8 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 						},
 						{
 							Device:          "sda2",
+							InodesFree:      262144,
+							Inodes:          2097152,
 							Limit:           37,
 							Usage:           38,
 							ReadsCompleted:  39,
@@ -174,10 +204,10 @@ var (
 )
 
 func TestPrometheusCollector(t *testing.T) {
-	c := NewPrometheusCollector(testSubcontainersInfoProvider{}, func(name string) map[string]string {
-		return map[string]string{
-			"zone.name": "hello",
-		}
+	c := NewPrometheusCollector(testSubcontainersInfoProvider{}, func(container *info.ContainerInfo) map[string]string {
+		s := DefaultContainerLabels(container)
+		s["zone.name"] = "hello"
+		return s
 	})
 	prometheus.MustRegister(c)
 	defer prometheus.Unregister(c)
@@ -206,7 +236,7 @@ func testPrometheusCollector(t *testing.T, c *PrometheusCollector, metricsFile s
 			continue
 		}
 		if want != gotLines[i] {
-			t.Fatalf("want %s, got %s", want, gotLines[i])
+			t.Fatalf("unexpected metric line\nwant: %s\nhave: %s", want, gotLines[i])
 		}
 	}
 }
@@ -244,10 +274,10 @@ func TestPrometheusCollector_scrapeFailure(t *testing.T) {
 		shouldFail:         true,
 	}
 
-	c := NewPrometheusCollector(provider, func(name string) map[string]string {
-		return map[string]string{
-			"zone.name": "hello",
-		}
+	c := NewPrometheusCollector(provider, func(container *info.ContainerInfo) map[string]string {
+		s := DefaultContainerLabels(container)
+		s["zone.name"] = "hello"
+		return s
 	})
 	prometheus.MustRegister(c)
 	defer prometheus.Unregister(c)

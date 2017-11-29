@@ -1,15 +1,15 @@
 approvers:
-- bgrant0607
 - erictune
 - lavalamp
 - smarterclayton
 - thockin
+- liggitt
+# - bgrant0607 # manual escalations only
 reviewers:
 - thockin
 - lavalamp
 - smarterclayton
 - wojtek-t
-- bgrant0607
 - deads2k
 - yujuhong
 - brendandburns
@@ -19,13 +19,11 @@ reviewers:
 - mikedanese
 - liggitt
 - nikhiljindal
-- bprashanth
 - gmarek
 - erictune
 - davidopp
 - pmorie
 - sttts
-- kargakis
 - dchen1107
 - saad-ali
 - zmerlynn
@@ -35,7 +33,7 @@ reviewers:
 - pwittrock
 - roberthbailey
 - ncdc
-- timstclair
+- tallclair
 - yifan-gu
 - eparis
 - mwielgus

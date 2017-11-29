@@ -17,19 +17,37 @@ limitations under the License.
 package main
 
 import (
-	"github.com/spf13/cobra"
 	"io"
+
+	"github.com/spf13/cobra"
 	"k8s.io/kops/cmd/kops/util"
+	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
+	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
+)
+
+var (
+	toolbox_long = templates.LongDesc(i18n.T(`
+	Misc infrequently used commands.`))
+
+	toolbox_example = templates.Examples(i18n.T(`
+	# Dump cluster information
+	kops toolbox dump --name k8s-cluster.example.com
+	`))
+
+	toolbox_short = i18n.T(`Misc infrequently used commands.`)
 )
 
 func NewCmdToolbox(f *util.Factory, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "toolbox",
-		Short: "Misc infrequently used commands",
+		Use:     "toolbox",
+		Short:   toolbox_short,
+		Long:    toolbox_long,
+		Example: toolbox_example,
 	}
 
 	cmd.AddCommand(NewCmdToolboxConvertImported(f, out))
 	cmd.AddCommand(NewCmdToolboxDump(f, out))
+	cmd.AddCommand(NewCmdToolboxTemplate(f, out))
 
 	return cmd
 }

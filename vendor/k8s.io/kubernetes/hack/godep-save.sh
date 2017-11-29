@@ -20,27 +20,42 @@ set -o pipefail
 
 KUBE_ROOT=$(dirname "${BASH_SOURCE}")/..
 source "${KUBE_ROOT}/hack/lib/init.sh"
-export GOPATH=${GOPATH}:${KUBE_ROOT}/staging
-GODEP="${GODEP:-godep}"
+source "${KUBE_ROOT}/hack/lib/util.sh"
 
+kube::util::ensure_single_dir_gopath
+kube::util::ensure_godep_version v79
+kube::util::ensure_no_staging_repos_in_gopath
+
+if [ -e "${KUBE_ROOT}/vendor" -o -e "${KUBE_ROOT}/Godeps" ]; then
+  echo "The directory vendor/ or Godeps/ exists. Remove them before running godep-save.sh" 1>&2
+  exit 1
+fi
 
 # Some things we want in godeps aren't code dependencies, so ./...
 # won't pick them up.
 REQUIRED_BINS=(
-  "github.com/ugorji/go/codec/codecgen"
   "github.com/onsi/ginkgo/ginkgo"
   "github.com/jteeuwen/go-bindata/go-bindata"
   "./..."
 )
 
 pushd "${KUBE_ROOT}" > /dev/null
-  "${GODEP}" version
-  GO15VENDOREXPERIMENT=1 ${GODEP} save "${REQUIRED_BINS[@]}"
+  echo "Running godep save. This will take around 15 minutes."
+  GOPATH=${GOPATH}:${KUBE_ROOT}/staging godep save "${REQUIRED_BINS[@]}"
+
   # create a symlink in vendor directory pointing to the staging client. This
   # let other packages use the staging client as if it were vendored.
-  if [ ! -e "vendor/k8s.io/client-go" ]; then
-    ln -s ../../staging/src/k8s.io/client-go vendor/k8s.io/client-go
-  fi
+  for repo in $(ls ${KUBE_ROOT}/staging/src/k8s.io); do
+   if [ ! -e "vendor/k8s.io/${repo}" ]; then
+     ln -s "../../staging/src/k8s.io/${repo}" "vendor/k8s.io/${repo}"
+   fi
+  done
 popd > /dev/null
 
-echo "Don't forget to run hack/update-godep-licenses.sh if you added or removed a dependency!"
+# Workaround broken symlink in docker repo because godep copies the link, but not the target
+rm -rf ${KUBE_ROOT}/vendor/github.com/docker/docker/project/
+
+echo
+echo "Don't forget to run:"
+echo "- hack/update-bazel.sh to recreate the BUILD files"
+echo "- hack/update-godep-licenses.sh if you added or removed a dependency!"

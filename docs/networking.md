@@ -22,15 +22,25 @@ routing table, and thus it requires its own subnet.  It is theoretically possibl
 with other infrastructure (but not a second cluster!), but this is not really recommended.  Certain
 `cni` networking solutions claim to address these problems.
 
+Users running `--topology private` will not be able to choose `kubenet` networking because `kubenet`
+requires a single routing table. These advanced users are usually running in multiple availability zones
+and NAT gateways are single AZ, multiple route tables are needed to use each NAT gateway.
+
 ### Supported CNI Networking
 
-Several different providers are currently built into kops:
+[Container Network Interface](https://github.com/containernetworking/cni)  provides a specification
+and libraries for writing plugins to configure network interfaces in Linux containers.  Kubernetes
+has built in support for CNI networking components.
 
-1. kopeio-vxlan
-2. [weave](https://github.com/weaveworks/weave-kube)
-3. [flannel](https://github.com/coreos/flannel)
-4. [Calico](http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/)
-5. [Canal (Flannel + Calico)](https://github.com/projectcalico/canal)
+Several different CNI providers are currently built into kops:
+
+* [Calico](http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/)
+* [Canal (Flannel + Calico)](https://github.com/projectcalico/canal)
+* [flannel](https://github.com/coreos/flannel) - use `--networking flannel-vxlan` (recommended) or `--networking flannel-udp` (legacy).  `--networking flannel` now selects `flannel-vxlan`.
+* [kopeio-vxlan](https://github.com/kopeio/networking)
+* [kube-router](./networking.md#kube-router-example-for-cni-ipvs-based-service-proxy-and-network-policy-enforcer)
+* [romana](https://github.com/romana/romana)
+* [weave](https://github.com/weaveworks/weave-kube)
 
 The manifests for the providers are included with kops, and you simply use `--networking provider-name`.
 Replace the provider name with the names listed above with you `kops cluster create`.  For instance
@@ -40,18 +50,7 @@ to install `kopeio-vxlan` execute the following:
 $ kops create cluster --networking kopeio-vxlan
 ```
 
-### CNI Networking
-
-[Container Network Interface](https://github.com/containernetworking/cni)  provides a specification
-and libraries for writing plugins to configure network interfaces in Linux containers.  Kubernetes
-has built in support for CNI networking components.  Various solutions exist that
-support Kubernetes CNI networking, listed in alphabetical order:
-
-- [Romana](https://github.com/romana/romana/tree/master/containerize#using-kops)
-
-This is not an all comprehensive list. At the time of writing this documentation, weave has
-been tested and used in the example below.  This project has no bias over the CNI provider
-that you run, we care that we provide the correct setup to run CNI providers.
+This project has no bias over the CNI provider that you run, we care that we provide the correct setup to run CNI providers.
 
 Both `kubenet` and `classic` networking options are completely baked into kops, while since
 CNI networking providers are not part of the Kubernetes project, we do not maintain
@@ -87,11 +86,28 @@ step is to install CNI networking. Most of the CNI network providers are
 moving to installing their components plugins via a Daemonset.  For instance weave will
 install with the following command:
 
+Daemonset installation for K8s 1.6.x or above.
+```console
+$ kubectl create -f https://git.io/weave-kube-1.6
+```
+
+Daemonset installation for K8s 1.4.x or 1.5.x.
 ```console
 $ kubectl create -f https://git.io/weave-kube
 ```
 
-The above daemonset installation requires K8s 1.4.x or above.
+### Configuring Weave MTU
+
+The Weave MTU is configurable by editing the cluster and setting `mtu` option in the weave configuration.
+AWS VPCs support jumbo frames, so on cluster creation kops sets the weave MTU to 8912 bytes (9001 minus overhead).
+
+```
+spec:
+  networking:
+    weave:
+      mtu: 8912
+```
+
 
 ### Calico Example for CNI and Network Policy
 
@@ -113,9 +129,55 @@ $ kops create cluster \
 
 The above will deploy a daemonset installation which requires K8s 1.4.x or above.
 
+##### Enable Cross-Subnet mode in Calico (AWS only)
+Calico [since 2.1] supports a new option for IP-in-IP mode where traffic is only encapsulated
+when it’s destined to subnets with intermediate infrastructure lacking Calico route awareness
+– for example, across heterogeneous public clouds or on AWS where traffic is crossing availability zones/ regions.
+
+With this mode, IP-in-IP encapsulation is only performed selectively. This provides better performance in AWS
+multi-AZ deployments, and in general when deploying on networks where pools of nodes with L2 connectivity
+are connected via a router. 
+
+Reference: [Calico 2.1 Release Notes](https://www.projectcalico.org/project-calico-2-1-released/)
+
+Note that Calico by default, routes between nodes within a subnet are distributed using a full node-to-node BGP mesh.
+Each node automatically sets up a BGP peering with every other node within the same L2 network.
+This full node-to-node mesh per L2 network has its scaling challenges for larger scale deployments.
+BGP route reflectors can be used as a replacement to a full mesh, and is useful for scaling up a cluster.
+The setup of BGP route reflectors is currently out of the scope of kops.
+
+Read more here: [BGP route reflectors](http://docs.projectcalico.org/latest/usage/routereflector/calico-routereflector)
+
+
+To enable this mode in a cluster, with Calico as the CNI and Network Policy provider, you must edit the cluster after the previous `kops create ...` command.
+
+`kops edit cluster`  will show you a block like this:
+
+```
+  networking:
+    calico: {}
+```
+
+You will need to change that block, and add an additional field, to look like this:
+
+```
+  networking:
+    calico:
+      crossSubnet: true
+```
+
+This `crossSubnet` field can also be defined within a cluster specification file, and the entire cluster can be create by running:
+`kops create -f k8s-cluster.example.com.yaml`
+
+In the case of AWS, EC2 instances have source/destination checks enabled by default.
+When you enable cross-subnet mode in kops, an addon controller ([k8s-ec2-srcdst](https://github.com/ottoyiu/k8s-ec2-srcdst))
+will be deployed as a Pod (which will be scheduled on one of the masters) to facilitate the disabling of said source/destination address checks.
+Only the masters have the IAM policy (`ec2:*`) to allow k8s-ec2-srcdst to execute `ec2:ModifyInstanceAttribute`.
+
+
 #### More information about Calico
 
-For Calico specific documentation please visit the [Calico Docs](http://docs.projectcalico.org/v2.0/getting-started/kubernetes/).
+For Calico specific documentation please visit the [Calico Docs](http://docs.projectcalico.org/latest/getting-started/kubernetes/).
 
 #### Getting help with Calico
 
@@ -130,7 +192,7 @@ Calico currently uses etcd as a backend for storing information about workloads 
 
 ### Canal Example for CNI and Network Policy
 
-Canal is a project that combines [Flannel](https://github.com/coreos/flannel) and [Calico](http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/) for CNI Networking.  It uses Flannel for networking pod traffic between hosts via VXLAN and Calico for network policy enforcement and pod to pod traffic.
+Canal is a project that combines [Flannel](https://github.com/coreos/flannel) and [Calico](http://docs.projectcalico.org/latest/getting-started/kubernetes/installation/hosted/) for CNI Networking.  It uses Flannel for networking pod traffic between hosts via VXLAN and Calico for network policy enforcement and pod to pod traffic.
 
 #### Installing Canal on a new Cluster
 
@@ -165,6 +227,69 @@ For support with Flannel you can submit an issue on Github:
 
 - [Flannel](https://github.com/coreos/flannel/issues)
 
+### Kube-router example for CNI, IPVS based service proxy and Network Policy enforcer
+
+[Kube-router](https://github.com/cloudnativelabs/kube-router) is project that provides one cohesive soltion that provides CNI networking for pods, an IPVS based network service proxy and iptables based network policy enforcement.
+
+#### Installing kube-router on a new Cluster
+
+The following command sets up a cluster with Kube-router as the CNI, service proxy and networking policy provider
+
+```
+$ kops create cluster \
+  --node-count 2 \
+  --zones us-west-2a \
+  --master-zones us-west-2a \
+  --dns-zone aws.cloudnativelabs.net \
+  --node-size t2.medium \
+  --master-size t2.medium \
+  --networking kube-router \
+  --yes \
+  --name myclustername.mydns.io
+```
+
+Currently kube-router supports 1.6 and above. Please note that kube-router will also provide service proxy, so kube-proxy will not be deployed in to the cluster.
+
+No additional configurations are required to be done by user. Kube-router automatically disables source-destination check on all AWS EC2 instances. For the traffic within a subnet there is no overlay or tunneling used. For cross-subnet pod traffic ip-ip tunneling is used implicitly and no configuration is required. 
+
+### Romana Example for CNI
+
+#### Installing Romana on a new Cluster
+
+The following command sets up a cluster with Romana as the CNI.
+
+**NOTE** This currently deploys v2.0 Preview 2, and will be updated when the 2.0 release is completed.
+
+```console
+$ export $ZONES=mylistofzones
+$ kops create cluster \
+  --zones $ZONES \
+  --master-zones $ZONES \
+  --master-size m4.large \
+  --node-size m4.large \
+  --networking romana \
+  --yes \
+  --name myclustername.mydns.io
+```
+
+Currently Romana supports Kubernetes 1.6 and above.
+
+#### Getting help with Romana
+
+For problems with deploying Romana please post an issue to Github:
+
+- [Romana Issues](https://github.com/romana/romana/issues)
+
+You can also contact the Romana team on Slack
+
+- [Romana Slack](https://romana.slack.com) (invite required - email [info@romana.io](mailto:info@romana.io))
+
+#### Romana Backend
+
+Romana uses the cluster's etcd as a backend for storing information about routes, hosts, host-groups and IP allocations.
+This does not affect normal etcd operations or require special treatment when upgrading etcd.
+The etcd port (4001) is opened between masters and nodes when using this networking option.
+
 ### Validating CNI Installation
 
 You will notice that `kube-dns` fails to start properly until you deploy your CNI provider.
@@ -174,7 +299,7 @@ Here are some steps items that will confirm a good CNI install:
 
 - `kubelet` is running with the with `--network-plugin=cni` option.
 - The CNS provider started without errors.
-- `kube-dns` daesonset starts.
+- `kube-dns` daemonset starts.
 - Logging on a node will display messages on pod create and delete.
 
 The sig-networking and sig-cluster-lifecycle channels on K8s slack are always good starting places

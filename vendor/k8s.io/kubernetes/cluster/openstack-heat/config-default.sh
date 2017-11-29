@@ -17,7 +17,7 @@
 ## Contains configuration values for the Openstack cluster
 
 # Stack name
-STACK_NAME=${STACK_NAME:-KubernetesStack}
+STACK_NAME=${STACK_NAME:-kube-stack}
 
 # Keypair for kubernetes stack
 KUBERNETES_KEYPAIR_NAME=${KUBERNETES_KEYPAIR_NAME:-kubernetes_keypair}
@@ -42,6 +42,9 @@ SERVICE_CLUSTER_IP_RANGE=${SERVICE_CLUSTER_IP_RANGE:-10.0.0.0/16}
 CLUSTER_IP_RANGE=${CLUSTER_IP_RANGE:-10.244.0.0/16}
 
 SWIFT_SERVER_URL=${SWIFT_SERVER_URL:-}
+
+# The name of the object store container to use
+SWIFT_OBJECT_STORE=${SWIFT_OBJECT_STORE:-kubernetes}
 
 # Flag indicates if new image must be created. If 'false' then image with IMAGE_ID will be used.
 # If 'true' then new image will be created from file config-image.sh
@@ -73,3 +76,6 @@ SOCKS_PROXY=${SOCKS_PROXY:-}
 
 # IPs and Domains that bypass the proxy.
 NO_PROXY=${NO_PROXY:-}
+
+# Whether to assign floating IPs to minions
+ASSIGN_FLOATING_IP=${ASSIGN_FLOATING_IP:-true}

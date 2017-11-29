@@ -29,61 +29,112 @@ KUBE_ROOT=$(dirname "${BASH_SOURCE}")/../..
 # For `kube::log::status` function since it already sources
 # "${KUBE_ROOT}/cluster/lib/logging.sh" and DEFAULT_KUBECONFIG
 source "${KUBE_ROOT}/cluster/common.sh"
-# For $KUBE_PLATFORM, $KUBE_ARCH, $KUBE_BUILD_STAGE,
-# $FEDERATION_PUSH_REPO_BASE and $FEDERATION_NAMESPACE.
+# For $FEDERATION_NAME, $FEDERATION_NAMESPACE, $FEDERATION_KUBE_CONTEXT,
+# and $HOST_CLUSTER_CONTEXT.
 source "${KUBE_ROOT}/federation/cluster/common.sh"
-# For `get_version` function and $KUBE_REGISTRY.
-# TODO(madhusudancs): Remove this when the code here is moved
-# to federation/develop.sh
-source "${KUBE_ROOT}/federation/develop/develop.sh"
 
-FEDERATION_NAME="${FEDERATION_NAME:-e2e-federation}"
-FEDERATION_KUBE_CONTEXT="${FEDERATION_KUBE_CONTEXT:-e2e-federation}"
 DNS_ZONE_NAME="${FEDERATION_DNS_ZONE_NAME:-}"
-HOST_CLUSTER_CONTEXT="${FEDERATION_HOST_CLUSTER_CONTEXT:-${1}}"
-readonly CLIENT_BIN_DIR="${KUBE_ROOT}/_output/${KUBE_BUILD_STAGE}/client/${KUBE_PLATFORM}-${KUBE_ARCH}/kubernetes/client/bin"
-kubefed="${CLIENT_BIN_DIR}/kubefed"
-kubectl="${CLIENT_BIN_DIR}/kubectl"
+DNS_PROVIDER="${FEDERATION_DNS_PROVIDER:-google-clouddns}"
+
+# get_version returns the version in KUBERNETES_RELEASE or defaults to the
+# value in the federation `versions` file.
+# TODO(madhusudancs): This is a duplicate of the function in
+# federation/develop/develop.sh with a minor difference. This
+# function tries to default to the version information in
+# _output/federation/versions file where as the one in develop.sh
+# tries to default to the version in the kubernetes versions file.
+# These functions should be consolidated to read the version from
+# kubernetes version defs file.
+function get_version() {
+  local -r versions_file="${KUBE_ROOT}/_output/federation/versions"
+
+  if [[ -n "${KUBERNETES_RELEASE:-}" ]]; then
+    echo "${KUBERNETES_RELEASE//+/_}"
+    return
+  fi
+
+  if [[ ! -f "${versions_file}" ]]; then
+    echo "Couldn't determine the release version: neither the " \
+     "KUBERNETES_RELEASE environment variable is set, nor does " \
+     "the versions file exist at ${versions_file}"
+    exit 1
+  fi
+
+  # Read the version back from the versions file if no version is given.
+  local -r kube_version="$(cat "${versions_file}" | python -c '\
+import json, sys;\
+print json.load(sys.stdin)["KUBE_VERSION"]')"
+
+  echo "${kube_version//+/_}"
+}
+
+function wait_for_rbac() {
+  # The very first thing that kubefed does when it comes up is run RBAC API
+  # discovery. If it doesn't appear to be available, issue 'get role' to ensure
+  # that kubectl updates its cache.
+  ${KUBE_ROOT}/cluster/kubectl.sh get role
+  local i=1
+  local timeout=60
+  while [[ ${i} -le ${timeout} ]]; do
+    if [[ "$(${KUBE_ROOT}/cluster/kubectl.sh api-versions)" =~ "rbac.authorization.k8s.io/" ]]; then
+      break
+    fi
+    ${KUBE_ROOT}/cluster/kubectl.sh get role
+    sleep 1
+    i=$((i+1))
+  done
+  if [[ ${i} -gt ${timeout} ]]; then
+    kube::log::status "rbac.authorization.k8s.io API group not available after at least ${timeout} seconds:"
+    kube::log::status "$(${KUBE_ROOT}/cluster/kubectl.sh api-versions)"
+    exit 123
+  fi
+  kube::log::status "rbac.authorization.k8s.io API group is available"
+}
 
 # Initializes the control plane.
 # TODO(madhusudancs): Move this to federation/develop.sh.
 function init() {
   kube::log::status "Deploying federation control plane for ${FEDERATION_NAME} in cluster ${HOST_CLUSTER_CONTEXT}"
 
+  local -r project="${KUBE_PROJECT:-${PROJECT:-}}"
+  local -r kube_registry="${KUBE_REGISTRY:-gcr.io/${project}}"
   local -r kube_version="$(get_version)"
 
-  ${kubefed} init \
+  kube::log::status "DNS_ZONE_NAME: \"${DNS_ZONE_NAME}\", DNS_PROVIDER: \"${DNS_PROVIDER}\""
+  kube::log::status "Image: \"${kube_registry}/hyperkube-amd64:${kube_version}\""
+
+  wait_for_rbac
+
+  # Send INT after 20m and KILL 1m after that if process is still alive.
+  timeout --signal=INT --kill-after=1m 20m \
+      "${KUBE_ROOT}/federation/develop/kubefed.sh" init \
       "${FEDERATION_NAME}" \
+      --federation-system-namespace=${FEDERATION_NAMESPACE} \
       --host-cluster-context="${HOST_CLUSTER_CONTEXT}" \
       --dns-zone-name="${DNS_ZONE_NAME}" \
-      --image="${KUBE_REGISTRY}/hyperkube-amd64:${kube_version}"
+      --dns-provider="${DNS_PROVIDER}" \
+      --image="${kube_registry}/hyperkube-amd64:${kube_version}" \
+      --apiserver-enable-basic-auth=true \
+      --apiserver-enable-token-auth=true \
+      --apiserver-arg-overrides="--runtime-config=api/all=true,--v=4" \
+      --controllermanager-arg-overrides="--v=4" \
+      --v=4
 }
 
-# create_cluster_secrets creates the secrets containing the kubeconfigs
-# of the participating clusters in the host cluster. The kubeconfigs itself
-# are created while deploying clusters, i.e. when kube-up is run.
-function create_cluster_secrets() {
-  local -r kubeconfig_dir="$(dirname ${DEFAULT_KUBECONFIG})"
-  local -r base_dir="${kubeconfig_dir}/federation/kubernetes-apiserver"
+# join_clusters joins the clusters in the local kubeconfig to federation. The clusters
+# and their kubeconfig entries in the local kubeconfig are created while deploying clusters, i.e. when kube-up is run.
+function join_clusters() {
+  for context in $(federation_cluster_contexts); do
+    kube::log::status "Joining cluster with name '${context}' to federation with name '${FEDERATION_NAME}'"
 
-  # Create secrets with all the kubernetes-apiserver's kubeconfigs.
-  for dir in $(ls "${base_dir}"); do
-    # We create a secret with the same name as the directory name (which is
-    # same as cluster name in kubeconfig).
-    # Massage the name so that it is valid (should not contain "_" and max 253
-    # chars)
-    name=$(echo "${dir}" | sed -e "s/_/-/g")  # Replace "_" by "-"
-    name=${name:0:252}
-    kube::log::status "Creating secret with name: ${name} in namespace ${FEDERATION_NAMESPACE}"
-    ${kubectl} create secret generic ${name} --from-file="${base_dir}/${dir}/kubeconfig" --namespace="${FEDERATION_NAMESPACE}"
+    "${KUBE_ROOT}/federation/develop/kubefed.sh" join \
+        "${context}" \
+        --federation-system-namespace=${FEDERATION_NAMESPACE} \
+        --host-cluster-context="${HOST_CLUSTER_CONTEXT}" \
+        --context="${FEDERATION_KUBE_CONTEXT}" \
+        --v=4
   done
 }
 
-USE_KUBEFED="${USE_KUBEFED:-}"
-if [[ "${USE_KUBEFED}" == "true" ]]; then
-  init
-  create_cluster_secrets
-else
-  export FEDERATION_IMAGE_TAG="$(get_version)"
-  create-federation-api-objects
-fi
+init
+join_clusters

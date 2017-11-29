@@ -26,12 +26,14 @@ import (
 var (
 	timestamp = time.Date(1987, time.August, 10, 0, 0, 0, 0, time.UTC)
 	labels    = map[string]string{"foo": "bar"}
+	envs      = map[string]string{"foo": "bar"}
 )
 
 func TestContanierSpecFromV1(t *testing.T) {
 	v1Spec := v1.ContainerSpec{
 		CreationTime: timestamp,
 		Labels:       labels,
+		Envs:         envs,
 		HasCpu:       true,
 		Cpu: v1.CpuSpec{
 			Limit:    2048,
@@ -63,6 +65,7 @@ func TestContanierSpecFromV1(t *testing.T) {
 	expectedV2Spec := ContainerSpec{
 		CreationTime: timestamp,
 		Labels:       labels,
+		Envs:         envs,
 		HasCpu:       true,
 		Cpu: CpuSpec{
 			Limit:    2048,
@@ -185,10 +188,11 @@ func TestContainerStatsFromV1(t *testing.T) {
 		Filesystem: &FilesystemStats{
 			TotalUsageBytes: &v1Stats.Filesystem[0].Usage,
 			BaseUsageBytes:  &v1Stats.Filesystem[0].BaseUsage,
+			InodeUsage:      &v1Stats.Filesystem[0].Inodes,
 		},
 	}
 
-	v2Stats := ContainerStatsFromV1(&v1Spec, []*v1.ContainerStats{&v1Stats})
+	v2Stats := ContainerStatsFromV1("test", &v1Spec, []*v1.ContainerStats{&v1Stats})
 	actualV2Stats := *v2Stats[0]
 
 	if !reflect.DeepEqual(expectedV2Stats, actualV2Stats) {

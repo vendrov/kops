@@ -1,18 +1,18 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"C5oy1hgQsABtYOYIOXWcR3BgYqU/kDVOG_nLeWEXUFYsMAXo19Rc6tI\"",
+ "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/p_O8VQ1GgwnmLUmXhlZf5JsJdkk\"",
  "discoveryVersion": "v1",
  "id": "fusiontables:v2",
  "name": "fusiontables",
  "version": "v2",
- "revision": "20160526",
+ "revision": "20170413",
  "title": "Fusion Tables API",
  "description": "API for working with Fusion Tables data.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "http://www.google.com/images/icons/product/search-16.gif",
-  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
+  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
  },
  "documentationLink": "https://developers.google.com/fusiontables",
  "protocol": "rest",

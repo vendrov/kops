@@ -19,6 +19,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+
 DOCKER_OPTS=${DOCKER_OPTS:-""}
 DOCKER=(docker ${DOCKER_OPTS})
 DOCKER_HOST=${DOCKER_HOST:-""}
@@ -29,15 +32,6 @@ readonly DOCKER_MACHINE_DRIVER=${DOCKER_MACHINE_DRIVER:-"virtualbox --virtualbox
 KUBE_ROOT=$(cd $(dirname "${BASH_SOURCE}")/.. && pwd -P)
 
 source "${KUBE_ROOT}/hack/lib/init.sh"
-
-# Set KUBE_BUILD_PPC64LE to y to build for ppc64le in addition to other
-# platforms.
-# TODO(IBM): remove KUBE_BUILD_PPC64LE and reenable ppc64le compilation by
-# default when
-# https://github.com/kubernetes/kubernetes/issues/30384 and
-# https://github.com/kubernetes/kubernetes/issues/25886 are fixed.
-# The majority of the logic is in hack/lib/golang.sh.
-readonly KUBE_BUILD_PPC64LE="${KUBE_BUILD_PPC64LE:-n}"
 
 # Constants
 readonly KUBE_BUILD_IMAGE_REPO=kube-build
@@ -91,47 +85,55 @@ readonly KUBE_CONTAINER_RSYNC_PORT=8730
 #
 # $1 - server architecture
 kube::build::get_docker_wrapped_binaries() {
+  debian_iptables_version=v8
+  ### If you change any of these lists, please also update DOCKERIZED_BINARIES
+  ### in build/BUILD.
   case $1 in
     "amd64")
         local targets=(
+          cloud-controller-manager,busybox
           kube-apiserver,busybox
           kube-controller-manager,busybox
           kube-scheduler,busybox
-          kubernetes-discovery,busybox
-          kube-proxy,gcr.io/google_containers/debian-iptables-amd64:v4
+          kube-aggregator,busybox
+          kube-proxy,gcr.io/google-containers/debian-iptables-amd64:${debian_iptables_version}
         );;
     "arm")
         local targets=(
-          kube-apiserver,armel/busybox
-          kube-controller-manager,armel/busybox
-          kube-scheduler,armel/busybox
-          kubernetes-discovery,armel/busybox
-          kube-proxy,gcr.io/google_containers/debian-iptables-arm:v4
+          cloud-controller-manager,arm32v7/busybox
+          kube-apiserver,arm32v7/busybox
+          kube-controller-manager,arm32v7/busybox
+          kube-scheduler,arm32v7/busybox
+          kube-aggregator,arm32v7/busybox
+          kube-proxy,gcr.io/google-containers/debian-iptables-arm:${debian_iptables_version}
         );;
     "arm64")
         local targets=(
-          kube-apiserver,aarch64/busybox
-          kube-controller-manager,aarch64/busybox
-          kube-scheduler,aarch64/busybox
-          kubernetes-discovery,aarch64/busybox
-          kube-proxy,gcr.io/google_containers/debian-iptables-arm64:v4
+          cloud-controller-manager,arm64v8/busybox
+          kube-apiserver,arm64v8/busybox
+          kube-controller-manager,arm64v8/busybox
+          kube-scheduler,arm64v8/busybox
+          kube-aggregator,arm64v8/busybox
+          kube-proxy,gcr.io/google-containers/debian-iptables-arm64:${debian_iptables_version}
         );;
     "ppc64le")
         local targets=(
+          cloud-controller-manager,ppc64le/busybox
           kube-apiserver,ppc64le/busybox
           kube-controller-manager,ppc64le/busybox
           kube-scheduler,ppc64le/busybox
-          kubernetes-discovery,ppc64le/busybox
-          kube-proxy,gcr.io/google_containers/debian-iptables-ppc64le:v4
+          kube-aggregator,ppc64le/busybox
+          kube-proxy,gcr.io/google-containers/debian-iptables-ppc64le:${debian_iptables_version}
         );;
     "s390x")
         local targets=(
+          cloud-controller-manager,s390x/busybox
           kube-apiserver,s390x/busybox
           kube-controller-manager,s390x/busybox
           kube-scheduler,s390x/busybox
-          kubernetes-discovery,s390x/busybox
-          kube-proxy,gcr.io/google_containers/debian-iptables-s390x:v4
-        );;		
+          kube-aggregator,s390x/busybox
+          kube-proxy,gcr.io/google-containers/debian-iptables-s390x:${debian_iptables_version}
+        );;
   esac
 
   echo "${targets[@]}"
@@ -176,7 +178,8 @@ function kube::build::verify_prereqs() {
     fi
   fi
 
-  KUBE_ROOT_HASH=$(kube::build::short_hash "${HOSTNAME:-}:${KUBE_ROOT}")
+  KUBE_GIT_BRANCH=$(git symbolic-ref --short -q HEAD 2>/dev/null || true)
+  KUBE_ROOT_HASH=$(kube::build::short_hash "${HOSTNAME:-}:${KUBE_ROOT}:${KUBE_GIT_BRANCH}")
   KUBE_BUILD_IMAGE_TAG_BASE="build-${KUBE_ROOT_HASH}"
   KUBE_BUILD_IMAGE_TAG="${KUBE_BUILD_IMAGE_TAG_BASE}-${KUBE_BUILD_IMAGE_VERSION}"
   KUBE_BUILD_IMAGE="${KUBE_BUILD_IMAGE_REPO}:${KUBE_BUILD_IMAGE_TAG}"
@@ -381,7 +384,13 @@ function kube::build::short_hash() {
 # a workaround for bug https://github.com/docker/docker/issues/3968.
 function kube::build::destroy_container() {
   "${DOCKER[@]}" kill "$1" >/dev/null 2>&1 || true
-  "${DOCKER[@]}" wait "$1" >/dev/null 2>&1 || true
+  if [[ $("${DOCKER[@]}" version --format '{{.Server.Version}}') = 17.06.0* ]]; then
+    # Workaround https://github.com/moby/moby/issues/33948.
+    # TODO: remove when 17.06.0 is not relevant anymore
+    DOCKER_API_VERSION=v1.29 "${DOCKER[@]}" wait "$1" >/dev/null 2>&1 || true
+  else
+    "${DOCKER[@]}" wait "$1" >/dev/null 2>&1 || true
+  fi
   "${DOCKER[@]}" rm -f -v "$1" >/dev/null 2>&1 || true
 }
 
@@ -400,13 +409,17 @@ function kube::build::clean() {
     "${DOCKER[@]}" rmi $("${DOCKER[@]}" images -q --filter 'dangling=true') 2> /dev/null || true
   fi
 
-  kube::log::status "Removing _output directory"
-  rm -rf "${LOCAL_OUTPUT_ROOT}"
+  if [[ -d "${LOCAL_OUTPUT_ROOT}" ]]; then
+    kube::log::status "Removing _output directory"
+    rm -rf "${LOCAL_OUTPUT_ROOT}"
+  fi
 }
 
 # Set up the context directory for the kube-build image and build it.
 function kube::build::build_image() {
   mkdir -p "${LOCAL_OUTPUT_BUILD_CONTEXT}"
+  # Make sure the context directory owned by the right user for syncing sources to container.
+  chown -R ${USER_ID}:${GROUP_ID} "${LOCAL_OUTPUT_BUILD_CONTEXT}"
 
   cp /etc/localtime "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
 
@@ -494,7 +507,7 @@ function kube::build::ensure_data_container() {
       --name "${KUBE_DATA_CONTAINER_NAME}"
       --hostname "${HOSTNAME}"
       "${KUBE_BUILD_IMAGE}"
-      chown -R $(id -u).$(id -g)
+      chown -R ${USER_ID}:${GROUP_ID}
         "${REMOTE_ROOT}"
         /usr/local/go/pkg/
     )
@@ -553,8 +566,10 @@ function kube::build::run_build_command_ex() {
   docker_run_opts+=(
     --env "KUBE_FASTBUILD=${KUBE_FASTBUILD:-false}"
     --env "KUBE_BUILDER_OS=${OSTYPE:-notdetected}"
-    --env "KUBE_BUILD_PPC64LE=${KUBE_BUILD_PPC64LE}"  # TODO(IBM): remove
     --env "KUBE_VERBOSE=${KUBE_VERBOSE}"
+    --env "GOFLAGS=${GOFLAGS:-}"
+    --env "GOLDFLAGS=${GOLDFLAGS:-}"
+    --env "GOGCFLAGS=${GOGCFLAGS:-}"
   )
 
   # If we have stdin we can run interactive.  This allows things like 'shell.sh'
@@ -594,8 +609,8 @@ function kube::build::rsync_probe {
   return 1
 }
 
-# Start up the rsync container in the backgound.  This should be explicitly
-# stoped with kube::build::stop_rsyncd_container.
+# Start up the rsync container in the background. This should be explicitly
+# stopped with kube::build::stop_rsyncd_container.
 #
 # This will set the global var KUBE_RSYNC_ADDR to the effective port that the
 # rsync daemon can be reached out.
@@ -604,6 +619,7 @@ function kube::build::start_rsyncd_container() {
   V=3 kube::log::status "Starting rsyncd container"
   kube::build::run_build_command_ex \
     "${KUBE_RSYNC_CONTAINER_NAME}" -p 127.0.0.1:${KUBE_RSYNC_PORT}:${KUBE_CONTAINER_RSYNC_PORT} -d \
+    -e ALLOW_HOST="$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')" \
     -- /rsyncd.sh >/dev/null
 
   local mapped_port
@@ -641,7 +657,6 @@ function kube::build::stop_rsyncd_container() {
 function kube::build::rsync {
   local -a rsync_opts=(
     --archive
-    --prune-empty-dirs
     --password-file="${LOCAL_OUTPUT_BUILD_CONTEXT}/rsyncd.password"
   )
   if (( ${KUBE_VERBOSE} >= 6 )); then
@@ -666,17 +681,19 @@ function kube::build::sync_to_container() {
   # directory and generated files. The '- /' filter prevents rsync
   # from trying to set the uid/gid/perms on the root of the sync tree.
   # As an exception, we need to sync generated files in staging/, because
-  # they will not be re-generated by 'make'.
+  # they will not be re-generated by 'make'. Note that the 'H' filtered files
+  # are hidden from rsync so they will be deleted in the target container if
+  # they exist. This will allow them to be re-created in the container if
+  # necessary.
   kube::build::rsync \
     --delete \
-    --filter='+ /staging/**' \
-    --filter='- /.git/' \
+    --filter='H /.git/' \
     --filter='- /.make/' \
     --filter='- /_tmp/' \
     --filter='- /_output/' \
     --filter='- /' \
-    --filter='- zz_generated.*' \
-    --filter='- generated.proto' \
+    --filter='H zz_generated.*' \
+    --filter='H generated.proto' \
     "${KUBE_ROOT}/" "rsync://k8s@${KUBE_RSYNC_ADDR}/k8s/"
 
   kube::build::stop_rsyncd_container
@@ -702,12 +719,16 @@ function kube::build::copy_output() {
   # We are looking to copy out all of the built binaries along with various
   # generated files.
   kube::build::rsync \
-    --filter='- /vendor/' \
+    --prune-empty-dirs \
     --filter='- /_temp/' \
+    --filter='+ /vendor/' \
+    --filter='+ /Godeps/' \
+    --filter='+ /staging/***/Godeps/**' \
     --filter='+ /_output/dockerized/bin/**' \
     --filter='+ zz_generated.*' \
     --filter='+ generated.proto' \
     --filter='+ *.pb.go' \
+    --filter='+ types.go' \
     --filter='+ */' \
     --filter='- /**' \
     "rsync://k8s@${KUBE_RSYNC_ADDR}/k8s/" "${KUBE_ROOT}"

@@ -32,7 +32,9 @@ import (
 
 //go:generate fitask -type=DNSName
 type DNSName struct {
-	Name         *string
+	Name      *string
+	Lifecycle *fi.Lifecycle
+
 	ID           *string
 	Zone         *DNSZone
 	ResourceType *string
@@ -102,6 +104,7 @@ func (e *DNSName) Find(c *fi.Context) (*DNSName, error) {
 	actual.Zone = e.Zone
 	actual.Name = e.Name
 	actual.ResourceType = e.ResourceType
+	actual.Lifecycle = e.Lifecycle
 
 	if found.AliasTarget != nil {
 		dnsName := aws.StringValue(found.AliasTarget.DNSName)
@@ -115,7 +118,17 @@ func (e *DNSName) Find(c *fi.Context) (*DNSName, error) {
 			if lb == nil {
 				glog.Warningf("Unable to find load balancer with DNS name: %q", dnsName)
 			} else {
-				actual.TargetLoadBalancer = &LoadBalancer{ID: lb.LoadBalancerName}
+				loadBalancerName := aws.StringValue(lb.LoadBalancerName)
+				tagMap, err := describeLoadBalancerTags(cloud, []string{loadBalancerName})
+				if err != nil {
+					return nil, err
+				}
+				tags := tagMap[loadBalancerName]
+				nameTag, _ := awsup.FindELBTag(tags, "Name")
+				if nameTag == "" {
+					return nil, fmt.Errorf("Found ELB %q linked to DNS name %q, but it did not have a Name tag", loadBalancerName, fi.StringValue(e.Name))
+				}
+				actual.TargetLoadBalancer = &LoadBalancer{Name: fi.String(nameTag)}
 			}
 		}
 	}

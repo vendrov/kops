@@ -23,25 +23,29 @@ import (
 
 	"github.com/golang/glog"
 
-	"k8s.io/kubernetes/pkg/admission"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/apiserver/pkg/admission"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/errors"
-	metav1 "k8s.io/kubernetes/pkg/apis/meta/v1"
-	"k8s.io/kubernetes/pkg/client/cache"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/controller/informers"
-	"k8s.io/kubernetes/pkg/labels"
-	"k8s.io/kubernetes/pkg/util/yaml"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	informers "k8s.io/kubernetes/pkg/client/informers/informers_generated/internalversion"
+	corelisters "k8s.io/kubernetes/pkg/client/listers/core/internalversion"
+	kubeapiserveradmission "k8s.io/kubernetes/pkg/kubeapiserver/admission"
+	"k8s.io/kubernetes/pkg/kubeapiserver/admission/util"
 )
 
 // The annotation key scheduler.alpha.kubernetes.io/node-selector is for assigning
 // node selectors labels to namespaces
 var NamespaceNodeSelectors = []string{"scheduler.alpha.kubernetes.io/node-selector"}
 
-func init() {
-	admission.RegisterPlugin("PodNodeSelector", func(client clientset.Interface, config io.Reader) (admission.Interface, error) {
+// Register registers a plugin
+func Register(plugins *admission.Plugins) {
+	plugins.Register("PodNodeSelector", func(config io.Reader) (admission.Interface, error) {
+		// TODO move this to a versioned configuration file format.
 		pluginConfig := readConfig(config)
-		plugin := NewPodNodeSelector(client, pluginConfig.PodNodeSelectorPluginConfig)
+		plugin := NewPodNodeSelector(pluginConfig.PodNodeSelectorPluginConfig)
 		return plugin, nil
 	})
 }
@@ -49,11 +53,14 @@ func init() {
 // podNodeSelector is an implementation of admission.Interface.
 type podNodeSelector struct {
 	*admission.Handler
-	client            clientset.Interface
-	namespaceInformer cache.SharedIndexInformer
+	client          internalclientset.Interface
+	namespaceLister corelisters.NamespaceLister
 	// global default node selector and namespace whitelists in a cluster.
 	clusterNodeSelectors map[string]string
 }
+
+var _ = kubeapiserveradmission.WantsInternalKubeClientSet(&podNodeSelector{})
+var _ = kubeapiserveradmission.WantsInternalKubeInformerFactory(&podNodeSelector{})
 
 type pluginConfig struct {
 	PodNodeSelectorPluginConfig map[string]string
@@ -106,22 +113,21 @@ func (p *podNodeSelector) Admit(a admission.Attributes) error {
 		return admission.NewForbidden(a, fmt.Errorf("not yet ready to handle request"))
 	}
 
+	updateInitialized, err := util.IsUpdatingInitializedObject(a)
+	if err != nil {
+		return err
+	}
+	if updateInitialized {
+		// node selector of an initialized pod is immutable
+		return nil
+	}
+
 	name := pod.Name
 	nsName := a.GetNamespace()
 	var namespace *api.Namespace
 
-	namespaceObj, exists, err := p.namespaceInformer.GetStore().Get(&api.Namespace{
-		ObjectMeta: api.ObjectMeta{
-			Name:      nsName,
-			Namespace: "",
-		},
-	})
-	if err != nil {
-		return errors.NewInternalError(err)
-	}
-	if exists {
-		namespace = namespaceObj.(*api.Namespace)
-	} else {
+	namespace, err = p.namespaceLister.Get(nsName)
+	if errors.IsNotFound(err) {
 		namespace, err = p.defaultGetNamespace(nsName)
 		if err != nil {
 			if errors.IsNotFound(err) {
@@ -129,7 +135,10 @@ func (p *podNodeSelector) Admit(a admission.Attributes) error {
 			}
 			return errors.NewInternalError(err)
 		}
+	} else if err != nil {
+		return errors.NewInternalError(err)
 	}
+
 	namespaceNodeSelector, err := p.getNodeSelectorMap(namespace)
 	if err != nil {
 		return err
@@ -157,22 +166,29 @@ func (p *podNodeSelector) Admit(a admission.Attributes) error {
 	return nil
 }
 
-func NewPodNodeSelector(client clientset.Interface, clusterNodeSelectors map[string]string) *podNodeSelector {
+func NewPodNodeSelector(clusterNodeSelectors map[string]string) *podNodeSelector {
 	return &podNodeSelector{
-		Handler:              admission.NewHandler(admission.Create),
-		client:               client,
+		Handler:              admission.NewHandler(admission.Create, admission.Update),
 		clusterNodeSelectors: clusterNodeSelectors,
 	}
 }
 
-func (p *podNodeSelector) SetInformerFactory(f informers.SharedInformerFactory) {
-	p.namespaceInformer = f.InternalNamespaces().Informer()
-	p.SetReadyFunc(p.namespaceInformer.HasSynced)
+func (a *podNodeSelector) SetInternalKubeClientSet(client internalclientset.Interface) {
+	a.client = client
+}
+
+func (p *podNodeSelector) SetInternalKubeInformerFactory(f informers.SharedInformerFactory) {
+	namespaceInformer := f.Core().InternalVersion().Namespaces()
+	p.namespaceLister = namespaceInformer.Lister()
+	p.SetReadyFunc(namespaceInformer.Informer().HasSynced)
 }
 
 func (p *podNodeSelector) Validate() error {
-	if p.namespaceInformer == nil {
-		return fmt.Errorf("missing namespaceInformer")
+	if p.namespaceLister == nil {
+		return fmt.Errorf("missing namespaceLister")
+	}
+	if p.client == nil {
+		return fmt.Errorf("missing client")
 	}
 	return nil
 }

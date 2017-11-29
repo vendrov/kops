@@ -1,5 +1,3 @@
-// +build integration,!no-etcd
-
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -21,8 +19,8 @@ package kubectl
 import (
 	"testing"
 
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
-	clientcmdapi "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/kubernetes/pkg/kubectl/cmd/util"
 	"k8s.io/kubernetes/test/integration/framework"
 )
@@ -58,7 +56,7 @@ func TestKubectlValidation(t *testing.T) {
 	}
 	cmdConfig := clientcmd.NewNonInteractiveClientConfig(*cfg, "test", &overrides, nil)
 	factory := util.NewFactory(cmdConfig)
-	schema, err := factory.Validator(true, "")
+	schema, err := factory.Validator(true, true, "")
 	if err != nil {
 		t.Errorf("failed to get validator: %v", err)
 		return

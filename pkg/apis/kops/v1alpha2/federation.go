@@ -17,14 +17,16 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"k8s.io/kubernetes/pkg/api/v1"
-	meta_v1 "k8s.io/kubernetes/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Federation represents a federated set of kubernetes clusters
 type Federation struct {
-	meta_v1.TypeMeta `json:",inline"`
-	ObjectMeta       v1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec FederationSpec `json:"spec,omitempty"`
 }
@@ -36,9 +38,11 @@ type FederationSpec struct {
 	DNSName string `json:"dnsName,omitempty"`
 }
 
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
 type FederationList struct {
-	meta_v1.TypeMeta `json:",inline"`
-	meta_v1.ListMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 
 	Items []Federation `json:"items"`
 }

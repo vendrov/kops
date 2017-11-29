@@ -28,6 +28,7 @@ import (
 	"github.com/google/cadvisor/cache/memory"
 	"github.com/google/cadvisor/collector"
 	"github.com/google/cadvisor/container"
+	"github.com/google/cadvisor/container/crio"
 	"github.com/google/cadvisor/container/docker"
 	"github.com/google/cadvisor/container/raw"
 	"github.com/google/cadvisor/container/rkt"
@@ -44,9 +45,10 @@ import (
 	"github.com/google/cadvisor/utils/sysfs"
 	"github.com/google/cadvisor/version"
 
+	"net/http"
+
 	"github.com/golang/glog"
 	"github.com/opencontainers/runc/libcontainer/cgroups"
-	"net/http"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -100,6 +102,14 @@ type Manager interface {
 	// Get version information about different components we depend on.
 	GetVersionInfo() (*info.VersionInfo, error)
 
+	// GetFsInfoByFsUUID returns the information of the device having the
+	// specified filesystem uuid. If no such device with the UUID exists, this
+	// function will return the fs.ErrNoSuchDevice error.
+	GetFsInfoByFsUUID(uuid string) (v2.FsInfo, error)
+
+	// Get filesystem information for the filesystem that contains the given directory
+	GetDirFsInfo(dir string) (v2.FsInfo, error)
+
 	// Get filesystem information for a given label.
 	// Returns information for all global filesystems if label is empty.
 	GetFsInfo(label string) ([]v2.FsInfo, error)
@@ -132,7 +142,7 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, maxHousekeepingIn
 	}
 
 	// Detect the container we are running on.
-	selfContainer, err := cgroups.GetThisCgroupDir("cpu")
+	selfContainer, err := cgroups.GetOwnCgroupPath("cpu")
 	if err != nil {
 		return nil, err
 	}
@@ -147,6 +157,15 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, maxHousekeepingIn
 		glog.Warningf("unable to connect to Rkt api service: %v", err)
 	}
 
+	crioClient, err := crio.Client()
+	if err != nil {
+		return nil, err
+	}
+	crioInfo, err := crioClient.Info()
+	if err != nil {
+		glog.Warningf("unable to connect to CRI-O api service: %v", err)
+	}
+
 	context := fs.Context{
 		Docker: fs.DockerContext{
 			Root:         docker.RootDir(),
@@ -154,6 +173,9 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, maxHousekeepingIn
 			DriverStatus: dockerStatus.DriverStatus,
 		},
 		RktPath: rktPath,
+		Crio: fs.CrioContext{
+			Root: crioInfo.StorageRoot,
+		},
 	}
 	fsInfo, err := fs.NewFsInfo(context)
 	if err != nil {
@@ -247,6 +269,11 @@ func (self *manager) Start() error {
 			return err
 		}
 		self.containerWatchers = append(self.containerWatchers, watcher)
+	}
+
+	err = crio.Register(self, self.fsInfo, self.ignoreMetrics)
+	if err != nil {
+		glog.Warningf("Registration of the crio container factory failed: %v", err)
 	}
 
 	err = systemd.Register(self, self.fsInfo, self.ignoreMetrics)
@@ -396,7 +423,7 @@ func (self *manager) GetContainerSpec(containerName string, options v2.RequestOp
 	var errs partialFailure
 	specs := make(map[string]v2.ContainerSpec)
 	for name, cont := range conts {
-		cinfo, err := cont.GetInfo()
+		cinfo, err := cont.GetInfo(false)
 		if err != nil {
 			errs.append(name, "GetInfo", err)
 		}
@@ -445,7 +472,7 @@ func (self *manager) GetContainerInfoV2(containerName string, options v2.Request
 	infos := make(map[string]v2.ContainerInfo, len(containers))
 	for name, container := range containers {
 		result := v2.ContainerInfo{}
-		cinfo, err := container.GetInfo()
+		cinfo, err := container.GetInfo(false)
 		if err != nil {
 			errs.append(name, "GetInfo", err)
 			infos[name] = result
@@ -460,7 +487,7 @@ func (self *manager) GetContainerInfoV2(containerName string, options v2.Request
 			continue
 		}
 
-		result.Stats = v2.ContainerStatsFromV1(&cinfo.Spec, stats)
+		result.Stats = v2.ContainerStatsFromV1(containerName, &cinfo.Spec, stats)
 		infos[name] = result
 	}
 
@@ -469,7 +496,7 @@ func (self *manager) GetContainerInfoV2(containerName string, options v2.Request
 
 func (self *manager) containerDataToContainerInfo(cont *containerData, query *info.ContainerInfoRequest) (*info.ContainerInfo, error) {
 	// Get the info from the container.
-	cinfo, err := cont.GetInfo()
+	cinfo, err := cont.GetInfo(true)
 	if err != nil {
 		return nil, err
 	}
@@ -562,9 +589,24 @@ func (self *manager) getDockerContainer(containerName string) (*containerData, e
 		Namespace: docker.DockerNamespace,
 		Name:      containerName,
 	}]
+
+	// Look for container by short prefix name if no exact match found.
 	if !ok {
-		return nil, fmt.Errorf("unable to find Docker container %q", containerName)
+		for contName, c := range self.containers {
+			if contName.Namespace == docker.DockerNamespace && strings.HasPrefix(contName.Name, containerName) {
+				if cont == nil {
+					cont = c
+				} else {
+					return nil, fmt.Errorf("unable to find container. Container %q is not unique", containerName)
+				}
+			}
+		}
+
+		if cont == nil {
+			return nil, fmt.Errorf("unable to find Docker container %q", containerName)
+		}
 	}
+
 	return cont, nil
 }
 
@@ -656,6 +698,22 @@ func (self *manager) getRequestedContainers(containerName string, options v2.Req
 	return containersMap, nil
 }
 
+func (self *manager) GetDirFsInfo(dir string) (v2.FsInfo, error) {
+	device, err := self.fsInfo.GetDirFsDevice(dir)
+	if err != nil {
+		return v2.FsInfo{}, fmt.Errorf("failed to get device for dir %q: %v", dir, err)
+	}
+	return self.getFsInfoByDeviceName(device.Device)
+}
+
+func (self *manager) GetFsInfoByFsUUID(uuid string) (v2.FsInfo, error) {
+	device, err := self.fsInfo.GetDeviceInfoByFsUUID(uuid)
+	if err != nil {
+		return v2.FsInfo{}, err
+	}
+	return self.getFsInfoByDeviceName(device.Device)
+}
+
 func (self *manager) GetFsInfo(label string) ([]v2.FsInfo, error) {
 	var empty time.Time
 	// Get latest data from filesystems hanging off root container.
@@ -671,7 +729,8 @@ func (self *manager) GetFsInfo(label string) ([]v2.FsInfo, error) {
 		}
 	}
 	fsInfo := []v2.FsInfo{}
-	for _, fs := range stats[0].Filesystem {
+	for i := range stats[0].Filesystem {
+		fs := stats[0].Filesystem[i]
 		if len(label) != 0 && fs.Device != dev {
 			continue
 		}
@@ -683,14 +742,19 @@ func (self *manager) GetFsInfo(label string) ([]v2.FsInfo, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		fi := v2.FsInfo{
+			Timestamp:  stats[0].Timestamp,
 			Device:     fs.Device,
 			Mountpoint: mountpoint,
 			Capacity:   fs.Limit,
 			Usage:      fs.Usage,
 			Available:  fs.Available,
 			Labels:     labels,
-			InodesFree: fs.InodesFree,
+		}
+		if fs.HasInodes {
+			fi.Inodes = &fs.Inodes
+			fi.InodesFree = &fs.InodesFree
 		}
 		fsInfo = append(fsInfo, fi)
 	}
@@ -1220,16 +1284,35 @@ func (m *manager) DebugInfo() map[string][]string {
 	return debugInfo
 }
 
+func (self *manager) getFsInfoByDeviceName(deviceName string) (v2.FsInfo, error) {
+	mountPoint, err := self.fsInfo.GetMountpointForDevice(deviceName)
+	if err != nil {
+		return v2.FsInfo{}, fmt.Errorf("failed to get mount point for device %q: %v", deviceName, err)
+	}
+	infos, err := self.GetFsInfo("")
+	if err != nil {
+		return v2.FsInfo{}, err
+	}
+	for _, info := range infos {
+		if info.Mountpoint == mountPoint {
+			return info, nil
+		}
+	}
+	return v2.FsInfo{}, fmt.Errorf("cannot find filesystem info for device %q", deviceName)
+}
+
 func getVersionInfo() (*info.VersionInfo, error) {
 
 	kernel_version := machine.KernelVersion()
 	container_os := machine.ContainerOsVersion()
 	docker_version := docker.VersionString()
+	docker_api_version := docker.APIVersionString()
 
 	return &info.VersionInfo{
 		KernelVersion:      kernel_version,
 		ContainerOsVersion: container_os,
 		DockerVersion:      docker_version,
+		DockerAPIVersion:   docker_api_version,
 		CadvisorVersion:    version.Info["version"],
 		CadvisorRevision:   version.Info["revision"],
 	}, nil

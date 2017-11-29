@@ -183,6 +183,40 @@ func TestProviderConfigUnmarshal(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			// token_endpoint_auth_methods_supported can contain `none`
+			data: `{
+				"issuer": "https://server.example.com",
+				"authorization_endpoint": "https://server.example.com/connect/authorize",
+				"token_endpoint": "https://server.example.com/connect/token",
+				"jwks_uri": "https://server.example.com/jwks.json",
+				"response_types_supported": [
+					"code", "code id_token", "id_token", "id_token token"
+				],
+				"subject_types_supported": ["public", "pairwise"],
+				"id_token_signing_alg_values_supported": ["RS256", "ES256", "HS256"],
+				"token_endpoint_auth_methods_supported": ["client_secret_basic", "none"]
+			}
+			`,
+			want: ProviderConfig{
+				Issuer:        &url.URL{Scheme: "https", Host: "server.example.com"},
+				AuthEndpoint:  uri("/connect/authorize"),
+				TokenEndpoint: uri("/connect/token"),
+				KeysEndpoint:  uri("/jwks.json"),
+				ResponseTypesSupported: []string{
+					oauth2.ResponseTypeCode, oauth2.ResponseTypeCodeIDToken,
+					oauth2.ResponseTypeIDToken, oauth2.ResponseTypeIDTokenToken,
+				},
+				SubjectTypesSupported: []string{
+					SubjectTypePublic, SubjectTypePairwise,
+				},
+				IDTokenSigningAlgValues: []string{jose.AlgRS256, jose.AlgES256, jose.AlgHS256},
+				TokenEndpointAuthMethodsSupported: []string{
+					oauth2.AuthMethodClientSecretBasic, "none",
+				},
+			},
+			wantErr: false,
+		},
+		{
 			// invalid scheme 'ftp://'
 			data: `{
 				"issuer": "https://server.example.com",
@@ -439,14 +473,18 @@ func (g *fakeProviderConfigGetterSetter) Set(cfg ProviderConfig) error {
 }
 
 type fakeProviderConfigHandler struct {
-	cfg    ProviderConfig
-	maxAge time.Duration
+	cfg       ProviderConfig
+	maxAge    time.Duration
+	noExpires bool
 }
 
 func (s *fakeProviderConfigHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	b, _ := json.Marshal(&s.cfg)
 	if s.maxAge.Seconds() >= 0 {
 		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", int(s.maxAge.Seconds())))
+	}
+	if s.noExpires {
+		w.Header().Set("Expires", "0")
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)
@@ -518,10 +556,11 @@ func TestHTTPProviderConfigGetter(t *testing.T) {
 	now := fc.Now().UTC()
 
 	tests := []struct {
-		dsc string
-		age time.Duration
-		cfg ProviderConfig
-		ok  bool
+		dsc       string
+		age       time.Duration
+		cfg       ProviderConfig
+		noExpires bool
+		ok        bool
 	}{
 		// everything is good
 		{
@@ -561,6 +600,17 @@ func TestHTTPProviderConfigGetter(t *testing.T) {
 				Issuer: &url.URL{Scheme: "https", Host: "example.com"},
 			},
 			ok: true,
+		},
+		// An expires header set to 0
+		{
+			dsc: "https://example.com",
+			age: time.Minute,
+			cfg: ProviderConfig{
+				Issuer:    &url.URL{Scheme: "https", Host: "example.com"},
+				ExpiresAt: now.Add(time.Minute),
+			},
+			ok:        true,
+			noExpires: true,
 		},
 	}
 

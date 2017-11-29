@@ -19,12 +19,14 @@ package storageclass
 import (
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/apis/storage"
 )
 
 func TestStorageClassStrategy(t *testing.T) {
-	ctx := api.NewDefaultContext()
+	ctx := genericapirequest.NewDefaultContext()
 	if Strategy.NamespaceScoped() {
 		t.Errorf("StorageClass must not be namespace scoped")
 	}
@@ -32,14 +34,16 @@ func TestStorageClassStrategy(t *testing.T) {
 		t.Errorf("StorageClass should not allow create on update")
 	}
 
+	deleteReclaimPolicy := api.PersistentVolumeReclaimDelete
 	storageClass := &storage.StorageClass{
-		ObjectMeta: api.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: "valid-class",
 		},
 		Provisioner: "kubernetes.io/aws-ebs",
 		Parameters: map[string]string{
 			"foo": "bar",
 		},
+		ReclaimPolicy: &deleteReclaimPolicy,
 	}
 
 	Strategy.PrepareForCreate(ctx, storageClass)
@@ -50,7 +54,7 @@ func TestStorageClassStrategy(t *testing.T) {
 	}
 
 	newStorageClass := &storage.StorageClass{
-		ObjectMeta: api.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:            "valid-class-2",
 			ResourceVersion: "4",
 		},
@@ -58,6 +62,7 @@ func TestStorageClassStrategy(t *testing.T) {
 		Parameters: map[string]string{
 			"foo": "bar",
 		},
+		ReclaimPolicy: &deleteReclaimPolicy,
 	}
 
 	Strategy.PrepareForUpdate(ctx, newStorageClass, storageClass)

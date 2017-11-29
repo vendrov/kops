@@ -1,18 +1,18 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"C5oy1hgQsABtYOYIOXWcR3BgYqU/l7rO6CbXZHG1D23xOowyyvnzSns\"",
+ "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/PSZLmkjt_9IWTJ6ZQ-VpYeFyZ2w\"",
  "discoveryVersion": "v1",
  "id": "fitness:v1",
  "name": "fitness",
  "version": "v1",
- "revision": "20160609",
+ "revision": "20170731",
  "title": "Fitness",
  "description": "Stores and accesses user data in the fitness store from apps on any platform.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "http://www.google.com/images/icons/product/search-16.gif",
-  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
+  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
  },
  "documentationLink": "https://developers.google.com/fit/rest/",
  "protocol": "rest",
@@ -75,17 +75,53 @@
     "https://www.googleapis.com/auth/fitness.activity.write": {
      "description": "View and store your activity information in Google Fit"
     },
+    "https://www.googleapis.com/auth/fitness.blood_glucose.read": {
+     "description": "View blood glucose data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.blood_glucose.write": {
+     "description": "View and store blood glucose data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.blood_pressure.read": {
+     "description": "View blood pressure data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.blood_pressure.write": {
+     "description": "View and store blood pressure data in Google Fit"
+    },
     "https://www.googleapis.com/auth/fitness.body.read": {
      "description": "View body sensor information in Google Fit"
     },
     "https://www.googleapis.com/auth/fitness.body.write": {
      "description": "View and store body sensor data in Google Fit"
     },
+    "https://www.googleapis.com/auth/fitness.body_temperature.read": {
+     "description": "View body temperature data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.body_temperature.write": {
+     "description": "View and store body temperature data in Google Fit"
+    },
     "https://www.googleapis.com/auth/fitness.location.read": {
      "description": "View your stored location data in Google Fit"
     },
     "https://www.googleapis.com/auth/fitness.location.write": {
      "description": "View and store your location data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.nutrition.read": {
+     "description": "View nutrition information in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.nutrition.write": {
+     "description": "View and store nutrition information in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.oxygen_saturation.read": {
+     "description": "View oxygen saturation data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.oxygen_saturation.write": {
+     "description": "View and store oxygen saturation data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.reproductive_health.read": {
+     "description": "View reproductive health data in Google Fit"
+    },
+    "https://www.googleapis.com/auth/fitness.reproductive_health.write": {
+     "description": "View and store reproductive health data in Google Fit"
     }
    }
   }
@@ -159,6 +195,7 @@
   "AggregateRequest": {
    "id": "AggregateRequest",
    "type": "object",
+   "description": "Next id: 10",
    "properties": {
     "aggregateBy": {
      "type": "array",
@@ -195,6 +232,37 @@
      "annotations": {
       "required": [
        "fitness.users.dataset.aggregate"
+      ]
+     }
+    },
+    "filteredDataQualityStandard": {
+     "type": "array",
+     "description": "A list of acceptable data quality standards. Only data points which conform to at least one of the specified data quality standards will be returned. If the list is empty, all data points are returned.",
+     "items": {
+      "type": "string",
+      "enum": [
+       "dataQualityBloodGlucoseIso151972003",
+       "dataQualityBloodGlucoseIso151972013",
+       "dataQualityBloodPressureAami",
+       "dataQualityBloodPressureBhsAA",
+       "dataQualityBloodPressureBhsAB",
+       "dataQualityBloodPressureBhsBA",
+       "dataQualityBloodPressureBhsBB",
+       "dataQualityBloodPressureEsh2002",
+       "dataQualityBloodPressureEsh2010",
+       "dataQualityUnknown"
+      ],
+      "enumDescriptions": [
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       ""
       ]
      }
     },
@@ -408,10 +476,26 @@
      "items": {
       "type": "string",
       "enum": [
+       "dataQualityBloodGlucoseIso151972003",
+       "dataQualityBloodGlucoseIso151972013",
+       "dataQualityBloodPressureAami",
+       "dataQualityBloodPressureBhsAA",
+       "dataQualityBloodPressureBhsAB",
+       "dataQualityBloodPressureBhsBA",
+       "dataQualityBloodPressureBhsBB",
        "dataQualityBloodPressureEsh2002",
+       "dataQualityBloodPressureEsh2010",
        "dataQualityUnknown"
       ],
       "enumDescriptions": [
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "",
        "",
        ""
       ]
@@ -419,7 +503,7 @@
     },
     "dataStreamId": {
      "type": "string",
-     "description": "A unique identifier for the data stream produced by this data source. The identifier includes:\n\n \n- The physical device's manufacturer, model, and serial number (UID). \n- The application's package name or name. Package name is used when the data source was created by an Android application. The developer project number is used when the data source was created by a REST client. \n- The data source's type. \n- The data source's stream name.  Note that not all attributes of the data source are used as part of the stream identifier. In particular, the version of the hardware/the application isn't used. This allows us to preserve the same stream through version updates. This also means that two DataSource objects may represent the same data stream even if they're not equal.\n\nThe exact format of the data stream ID created by an Android application is: type:dataType.name:application.packageName:device.manufacturer:device.model:device.uid:dataStreamName \n\nThe exact format of the data stream ID created by a REST client is: type:dataType.name:developer project number:device.manufacturer:device.model:device.uid:dataStreamName \n\nWhen any of the optional fields that comprise of the data stream ID are blank, they will be omitted from the data stream ID. The minnimum viable data stream ID would be: type:dataType.name:developer project number\n\nFinally, the developer project number is obfuscated when read by any REST or Android client that did not create the data source. Only the data source creator will see the developer project number in clear and normal form.",
+     "description": "A unique identifier for the data stream produced by this data source. The identifier includes:\n\n \n- The physical device's manufacturer, model, and serial number (UID). \n- The application's package name or name. Package name is used when the data source was created by an Android application. The developer project number is used when the data source was created by a REST client. \n- The data source's type. \n- The data source's stream name.  Note that not all attributes of the data source are used as part of the stream identifier. In particular, the version of the hardware/the application isn't used. This allows us to preserve the same stream through version updates. This also means that two DataSource objects may represent the same data stream even if they're not equal.\n\nThe exact format of the data stream ID created by an Android application is: type:dataType.name:application.packageName:device.manufacturer:device.model:device.uid:dataStreamName \n\nThe exact format of the data stream ID created by a REST client is: type:dataType.name:developer project number:device.manufacturer:device.model:device.uid:dataStreamName \n\nWhen any of the optional fields that comprise of the data stream ID are blank, they will be omitted from the data stream ID. The minimum viable data stream ID would be: type:dataType.name:developer project number\n\nFinally, the developer project number is obfuscated when read by any REST or Android client that did not create the data source. Only the data source creator will see the developer project number in clear and normal form.",
      "annotations": {
       "required": [
        "fitness.users.dataSources.update"
@@ -634,6 +718,7 @@
      "description": "A constant representing the type of the device.",
      "enum": [
       "chestStrap",
+      "headMounted",
       "phone",
       "scale",
       "tablet",
@@ -641,6 +726,7 @@
       "watch"
      ],
      "enumDescriptions": [
+      "",
       "",
       "",
       "",
@@ -700,6 +786,10 @@
      "items": {
       "$ref": "Session"
      }
+    },
+    "hasMoreData": {
+     "type": "boolean",
+     "description": "Flag to indicate server has more data to transfer"
     },
     "nextPageToken": {
      "type": "string",
@@ -807,7 +897,7 @@
   "Value": {
    "id": "Value",
    "type": "object",
-   "description": "Holder object for the value of a single field in a data point.\n\nA field value has a particular format and is only ever set to one of an integer or a floating point value.",
+   "description": "Holder object for the value of a single field in a data point.\n\nA field value has a particular format and is only ever set to one of an integer or a floating point value. LINT.IfChange",
    "properties": {
     "fpVal": {
      "type": "number",
@@ -874,8 +964,14 @@
        },
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.write",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "delete": {
@@ -906,8 +1002,14 @@
        },
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.write",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "get": {
@@ -939,10 +1041,22 @@
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.read",
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.read",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.read",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.read",
         "https://www.googleapis.com/auth/fitness.body.write",
+        "https://www.googleapis.com/auth/fitness.body_temperature.read",
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
         "https://www.googleapis.com/auth/fitness.location.read",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.read",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.read",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "list": {
@@ -973,10 +1087,22 @@
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.read",
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.read",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.read",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.read",
         "https://www.googleapis.com/auth/fitness.body.write",
+        "https://www.googleapis.com/auth/fitness.body_temperature.read",
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
         "https://www.googleapis.com/auth/fitness.location.read",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.read",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.read",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "patch": {
@@ -1010,8 +1136,14 @@
        },
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.write",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "update": {
@@ -1045,8 +1177,14 @@
        },
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.write",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       }
      },
@@ -1097,8 +1235,14 @@
          ],
          "scopes": [
           "https://www.googleapis.com/auth/fitness.activity.write",
+          "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+          "https://www.googleapis.com/auth/fitness.blood_pressure.write",
           "https://www.googleapis.com/auth/fitness.body.write",
-          "https://www.googleapis.com/auth/fitness.location.write"
+          "https://www.googleapis.com/auth/fitness.body_temperature.write",
+          "https://www.googleapis.com/auth/fitness.location.write",
+          "https://www.googleapis.com/auth/fitness.nutrition.write",
+          "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+          "https://www.googleapis.com/auth/fitness.reproductive_health.write"
          ]
         },
         "get": {
@@ -1121,7 +1265,7 @@
           },
           "limit": {
            "type": "integer",
-           "description": "If specified, no more than this many data points will be included in the dataset. If the there are more data points in the dataset, nextPageToken will be set in the dataset response.",
+           "description": "If specified, no more than this many data points will be included in the dataset. If there are more data points in the dataset, nextPageToken will be set in the dataset response.",
            "format": "int32",
            "location": "query"
           },
@@ -1148,10 +1292,22 @@
          "scopes": [
           "https://www.googleapis.com/auth/fitness.activity.read",
           "https://www.googleapis.com/auth/fitness.activity.write",
+          "https://www.googleapis.com/auth/fitness.blood_glucose.read",
+          "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+          "https://www.googleapis.com/auth/fitness.blood_pressure.read",
+          "https://www.googleapis.com/auth/fitness.blood_pressure.write",
           "https://www.googleapis.com/auth/fitness.body.read",
           "https://www.googleapis.com/auth/fitness.body.write",
+          "https://www.googleapis.com/auth/fitness.body_temperature.read",
+          "https://www.googleapis.com/auth/fitness.body_temperature.write",
           "https://www.googleapis.com/auth/fitness.location.read",
-          "https://www.googleapis.com/auth/fitness.location.write"
+          "https://www.googleapis.com/auth/fitness.location.write",
+          "https://www.googleapis.com/auth/fitness.nutrition.read",
+          "https://www.googleapis.com/auth/fitness.nutrition.write",
+          "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
+          "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+          "https://www.googleapis.com/auth/fitness.reproductive_health.read",
+          "https://www.googleapis.com/auth/fitness.reproductive_health.write"
          ]
         },
         "patch": {
@@ -1198,8 +1354,14 @@
          },
          "scopes": [
           "https://www.googleapis.com/auth/fitness.activity.write",
+          "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+          "https://www.googleapis.com/auth/fitness.blood_pressure.write",
           "https://www.googleapis.com/auth/fitness.body.write",
-          "https://www.googleapis.com/auth/fitness.location.write"
+          "https://www.googleapis.com/auth/fitness.body_temperature.write",
+          "https://www.googleapis.com/auth/fitness.location.write",
+          "https://www.googleapis.com/auth/fitness.nutrition.write",
+          "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+          "https://www.googleapis.com/auth/fitness.reproductive_health.write"
          ]
         }
        }
@@ -1233,10 +1395,22 @@
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.read",
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.read",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.read",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.read",
         "https://www.googleapis.com/auth/fitness.body.write",
+        "https://www.googleapis.com/auth/fitness.body_temperature.read",
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
         "https://www.googleapis.com/auth/fitness.location.read",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.read",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.read",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       }
      }
@@ -1318,10 +1492,22 @@
        "scopes": [
         "https://www.googleapis.com/auth/fitness.activity.read",
         "https://www.googleapis.com/auth/fitness.activity.write",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.read",
+        "https://www.googleapis.com/auth/fitness.blood_glucose.write",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.read",
+        "https://www.googleapis.com/auth/fitness.blood_pressure.write",
         "https://www.googleapis.com/auth/fitness.body.read",
         "https://www.googleapis.com/auth/fitness.body.write",
+        "https://www.googleapis.com/auth/fitness.body_temperature.read",
+        "https://www.googleapis.com/auth/fitness.body_temperature.write",
         "https://www.googleapis.com/auth/fitness.location.read",
-        "https://www.googleapis.com/auth/fitness.location.write"
+        "https://www.googleapis.com/auth/fitness.location.write",
+        "https://www.googleapis.com/auth/fitness.nutrition.read",
+        "https://www.googleapis.com/auth/fitness.nutrition.write",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
+        "https://www.googleapis.com/auth/fitness.oxygen_saturation.write",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.read",
+        "https://www.googleapis.com/auth/fitness.reproductive_health.write"
        ]
       },
       "update": {

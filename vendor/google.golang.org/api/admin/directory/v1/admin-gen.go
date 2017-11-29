@@ -456,12 +456,20 @@ type Alias struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Alias") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Alias) MarshalJSON() ([]byte, error) {
 	type noMethod Alias
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Aliases: JSON response template to list aliases in Directory API.
@@ -486,12 +494,20 @@ type Aliases struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Aliases") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Aliases) MarshalJSON() ([]byte, error) {
 	type noMethod Aliases
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Asp: The template that returns individual ASP (Access Code) data.
@@ -532,12 +548,20 @@ type Asp struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CodeId") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Asp) MarshalJSON() ([]byte, error) {
 	type noMethod Asp
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type Asps struct {
@@ -562,12 +586,20 @@ type Asps struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Asps) MarshalJSON() ([]byte, error) {
 	type noMethod Asps
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CalendarResource: JSON template for Calendar Resource object in
@@ -609,12 +641,20 @@ type CalendarResource struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etags") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CalendarResource) MarshalJSON() ([]byte, error) {
 	type noMethod CalendarResource
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CalendarResources: JSON template for Calendar Resource List Response
@@ -646,12 +686,20 @@ type CalendarResources struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CalendarResources) MarshalJSON() ([]byte, error) {
 	type noMethod CalendarResources
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Channel: An notification channel used to watch for resource changes.
@@ -704,12 +752,20 @@ type Channel struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Address") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Channel) MarshalJSON() ([]byte, error) {
 	type noMethod Channel
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ChromeOsDevice: JSON template for Chrome Os Device resource in
@@ -753,7 +809,7 @@ type ChromeOsDevice struct {
 	LastEnrollmentTime string `json:"lastEnrollmentTime,omitempty"`
 
 	// LastSync: Date and time the device was last synchronized with the
-	// policy settings in the Google Apps administrator control panel
+	// policy settings in the G Suite administrator control panel
 	// (Read-only)
 	LastSync string `json:"lastSync,omitempty"`
 
@@ -811,12 +867,21 @@ type ChromeOsDevice struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ActiveTimeRanges") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ChromeOsDevice) MarshalJSON() ([]byte, error) {
 	type noMethod ChromeOsDevice
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type ChromeOsDeviceActiveTimeRanges struct {
@@ -833,12 +898,20 @@ type ChromeOsDeviceActiveTimeRanges struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ActiveTime") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ChromeOsDeviceActiveTimeRanges) MarshalJSON() ([]byte, error) {
 	type noMethod ChromeOsDeviceActiveTimeRanges
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type ChromeOsDeviceRecentUsers struct {
@@ -856,12 +929,51 @@ type ChromeOsDeviceRecentUsers struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Email") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ChromeOsDeviceRecentUsers) MarshalJSON() ([]byte, error) {
 	type noMethod ChromeOsDeviceRecentUsers
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// ChromeOsDeviceAction: JSON request template for firing actions on
+// ChromeOs Device in Directory Devices API.
+type ChromeOsDeviceAction struct {
+	// Action: Action to be taken on the ChromeOs Device
+	Action string `json:"action,omitempty"`
+
+	DeprovisionReason string `json:"deprovisionReason,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Action") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Action") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *ChromeOsDeviceAction) MarshalJSON() ([]byte, error) {
+	type noMethod ChromeOsDeviceAction
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ChromeOsDevices: JSON response template for List Chrome OS Devices
@@ -890,12 +1002,50 @@ type ChromeOsDevices struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Chromeosdevices") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *ChromeOsDevices) MarshalJSON() ([]byte, error) {
 	type noMethod ChromeOsDevices
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// ChromeOsMoveDevicesToOu: JSON request template for moving ChromeOs
+// Device to given OU in Directory Devices API.
+type ChromeOsMoveDevicesToOu struct {
+	// DeviceIds: ChromeOs Devices to be moved to OU
+	DeviceIds []string `json:"deviceIds,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "DeviceIds") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DeviceIds") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *ChromeOsMoveDevicesToOu) MarshalJSON() ([]byte, error) {
+	type noMethod ChromeOsMoveDevicesToOu
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Customer: JSON template for Customer Resource object in Directory
@@ -915,7 +1065,7 @@ type Customer struct {
 	// Etag: ETag of the resource.
 	Etag string `json:"etag,omitempty"`
 
-	// Id: The unique ID for the customer's Google account. (Readonly)
+	// Id: The unique ID for the customer's G Suite account. (Readonly)
 	Id string `json:"id,omitempty"`
 
 	// Kind: Identifies the resource as a customer. Value:
@@ -943,12 +1093,21 @@ type Customer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AlternateEmail") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Customer) MarshalJSON() ([]byte, error) {
 	type noMethod Customer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // CustomerPostalAddress: JSON template for postal address of a
@@ -994,12 +1153,20 @@ type CustomerPostalAddress struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AddressLine1") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *CustomerPostalAddress) MarshalJSON() ([]byte, error) {
 	type noMethod CustomerPostalAddress
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // DomainAlias: JSON template for Domain Alias object in Directory API.
@@ -1036,12 +1203,20 @@ type DomainAlias struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreationTime") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DomainAlias) MarshalJSON() ([]byte, error) {
 	type noMethod DomainAlias
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // DomainAliases: JSON response template to list domain aliases in
@@ -1067,12 +1242,20 @@ type DomainAliases struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DomainAliases") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *DomainAliases) MarshalJSON() ([]byte, error) {
 	type noMethod DomainAliases
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Domains: JSON template for Domain object in Directory API.
@@ -1109,12 +1292,20 @@ type Domains struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CreationTime") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Domains) MarshalJSON() ([]byte, error) {
 	type noMethod Domains
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Domains2: JSON response template to list Domains in Directory API.
@@ -1139,12 +1330,20 @@ type Domains2 struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Domains") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Domains2) MarshalJSON() ([]byte, error) {
 	type noMethod Domains2
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Group: JSON template for Group resource in Directory API.
@@ -1190,12 +1389,20 @@ type Group struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AdminCreated") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Group) MarshalJSON() ([]byte, error) {
 	type noMethod Group
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Groups: JSON response template for List Groups operation in Directory
@@ -1224,12 +1431,20 @@ type Groups struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Groups) MarshalJSON() ([]byte, error) {
 	type noMethod Groups
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Member: JSON template for Member resource in Directory API.
@@ -1251,6 +1466,9 @@ type Member struct {
 	// Role: Role of member
 	Role string `json:"role,omitempty"`
 
+	// Status: Status of member (Immutable)
+	Status string `json:"status,omitempty"`
+
 	// Type: Type of member (Immutable)
 	Type string `json:"type,omitempty"`
 
@@ -1265,12 +1483,20 @@ type Member struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Email") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Member) MarshalJSON() ([]byte, error) {
 	type noMethod Member
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Members: JSON response template for List Members operation in
@@ -1299,12 +1525,20 @@ type Members struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Members) MarshalJSON() ([]byte, error) {
 	type noMethod Members
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // MobileDevice: JSON template for Mobile Device resource in Directory
@@ -1319,6 +1553,12 @@ type MobileDevice struct {
 
 	// BasebandVersion: Mobile Device Baseband version (Read-only)
 	BasebandVersion string `json:"basebandVersion,omitempty"`
+
+	// BootloaderVersion: Mobile Device Bootloader version (Read-only)
+	BootloaderVersion string `json:"bootloaderVersion,omitempty"`
+
+	// Brand: Mobile Device Brand (Read-only)
+	Brand string `json:"brand,omitempty"`
 
 	// BuildNumber: Mobile Device Build number (Read-only)
 	BuildNumber string `json:"buildNumber,omitempty"`
@@ -1337,16 +1577,25 @@ type MobileDevice struct {
 	// DeviceId: Mobile Device serial number (Read-only)
 	DeviceId string `json:"deviceId,omitempty"`
 
+	// DevicePasswordStatus: DevicePasswordStatus (Read-only)
+	DevicePasswordStatus string `json:"devicePasswordStatus,omitempty"`
+
 	// Email: List of owner user's email addresses (Read-only)
 	Email []string `json:"email,omitempty"`
+
+	// EncryptionStatus: Mobile Device Encryption Status (Read-only)
+	EncryptionStatus string `json:"encryptionStatus,omitempty"`
 
 	// Etag: ETag of the resource.
 	Etag string `json:"etag,omitempty"`
 
 	// FirstSync: Date and time the device was first synchronized with the
-	// policy settings in the Google Apps administrator control panel
+	// policy settings in the G Suite administrator control panel
 	// (Read-only)
 	FirstSync string `json:"firstSync,omitempty"`
+
+	// Hardware: Mobile Device Hardware (Read-only)
+	Hardware string `json:"hardware,omitempty"`
 
 	// HardwareId: Mobile Device Hardware Id (Read-only)
 	HardwareId string `json:"hardwareId,omitempty"`
@@ -1361,13 +1610,16 @@ type MobileDevice struct {
 	Kind string `json:"kind,omitempty"`
 
 	// LastSync: Date and time the device was last synchronized with the
-	// policy settings in the Google Apps administrator control panel
+	// policy settings in the G Suite administrator control panel
 	// (Read-only)
 	LastSync string `json:"lastSync,omitempty"`
 
 	// ManagedAccountIsOnOwnerProfile: Boolean indicating if this account is
 	// on owner/primary profile or not (Read-only)
 	ManagedAccountIsOnOwnerProfile bool `json:"managedAccountIsOnOwnerProfile,omitempty"`
+
+	// Manufacturer: Mobile Device manufacturer (Read-only)
+	Manufacturer string `json:"manufacturer,omitempty"`
 
 	// Meid: Mobile Device MEID number (Read-only)
 	Meid string `json:"meid,omitempty"`
@@ -1388,8 +1640,17 @@ type MobileDevice struct {
 	// OtherAccountsInfo: List of accounts added on device (Read-only)
 	OtherAccountsInfo []string `json:"otherAccountsInfo,omitempty"`
 
+	// Privilege: DMAgentPermission (Read-only)
+	Privilege string `json:"privilege,omitempty"`
+
+	// ReleaseVersion: Mobile Device release version version (Read-only)
+	ReleaseVersion string `json:"releaseVersion,omitempty"`
+
 	// ResourceId: Unique identifier of Mobile Device (Read-only)
 	ResourceId string `json:"resourceId,omitempty"`
+
+	// SecurityPatchLevel: Mobile Device Security patch level (Read-only)
+	SecurityPatchLevel int64 `json:"securityPatchLevel,omitempty,string"`
 
 	// SerialNumber: Mobile Device SSN or Serial Number (Read-only)
 	SerialNumber string `json:"serialNumber,omitempty"`
@@ -1424,12 +1685,20 @@ type MobileDevice struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AdbStatus") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MobileDevice) MarshalJSON() ([]byte, error) {
 	type noMethod MobileDevice
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type MobileDeviceApplications struct {
@@ -1455,12 +1724,20 @@ type MobileDeviceApplications struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "DisplayName") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MobileDeviceApplications) MarshalJSON() ([]byte, error) {
 	type noMethod MobileDeviceApplications
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // MobileDeviceAction: JSON request template for firing commands on
@@ -1476,12 +1753,20 @@ type MobileDeviceAction struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Action") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MobileDeviceAction) MarshalJSON() ([]byte, error) {
 	type noMethod MobileDeviceAction
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // MobileDevices: JSON response template for List Mobile Devices
@@ -1510,12 +1795,20 @@ type MobileDevices struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *MobileDevices) MarshalJSON() ([]byte, error) {
 	type noMethod MobileDevices
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Notification: Template for a notification resource.
@@ -1556,12 +1849,20 @@ type Notification struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Body") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Notification) MarshalJSON() ([]byte, error) {
 	type noMethod Notification
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Notifications: Template for notifications list response.
@@ -1593,12 +1894,20 @@ type Notifications struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Notifications) MarshalJSON() ([]byte, error) {
 	type noMethod Notifications
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // OrgUnit: JSON template for Org Unit resource in Directory API.
@@ -1641,12 +1950,21 @@ type OrgUnit struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BlockInheritance") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *OrgUnit) MarshalJSON() ([]byte, error) {
 	type noMethod OrgUnit
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // OrgUnits: JSON response template for List Organization Units
@@ -1672,12 +1990,20 @@ type OrgUnits struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *OrgUnits) MarshalJSON() ([]byte, error) {
 	type noMethod OrgUnits
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Privilege: JSON template for privilege resource in Directory API.
@@ -1714,12 +2040,21 @@ type Privilege struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ChildPrivileges") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Privilege) MarshalJSON() ([]byte, error) {
 	type noMethod Privilege
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Privileges: JSON response template for List privileges operation in
@@ -1746,12 +2081,20 @@ type Privileges struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Privileges) MarshalJSON() ([]byte, error) {
 	type noMethod Privileges
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Role: JSON template for role resource in Directory API.
@@ -1792,12 +2135,20 @@ type Role struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Role) MarshalJSON() ([]byte, error) {
 	type noMethod Role
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 type RoleRolePrivileges struct {
@@ -1814,12 +2165,20 @@ type RoleRolePrivileges struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "PrivilegeName") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *RoleRolePrivileges) MarshalJSON() ([]byte, error) {
 	type noMethod RoleRolePrivileges
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // RoleAssignment: JSON template for roleAssignment resource in
@@ -1863,12 +2222,20 @@ type RoleAssignment struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AssignedTo") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *RoleAssignment) MarshalJSON() ([]byte, error) {
 	type noMethod RoleAssignment
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // RoleAssignments: JSON response template for List roleAssignments
@@ -1897,12 +2264,20 @@ type RoleAssignments struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *RoleAssignments) MarshalJSON() ([]byte, error) {
 	type noMethod RoleAssignments
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Roles: JSON response template for List roles operation in Directory
@@ -1931,12 +2306,20 @@ type Roles struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Roles) MarshalJSON() ([]byte, error) {
 	type noMethod Roles
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Schema: JSON template for Schema resource in Directory API.
@@ -1967,12 +2350,20 @@ type Schema struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Schema) MarshalJSON() ([]byte, error) {
 	type noMethod Schema
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // SchemaFieldSpec: JSON template for FieldSpec resource for Schemas in
@@ -2019,12 +2410,20 @@ type SchemaFieldSpec struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *SchemaFieldSpec) MarshalJSON() ([]byte, error) {
 	type noMethod SchemaFieldSpec
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // SchemaFieldSpecNumericIndexingSpec: Indexing spec for a numeric
@@ -2049,12 +2448,36 @@ type SchemaFieldSpecNumericIndexingSpec struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "MaxValue") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *SchemaFieldSpecNumericIndexingSpec) MarshalJSON() ([]byte, error) {
 	type noMethod SchemaFieldSpecNumericIndexingSpec
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *SchemaFieldSpecNumericIndexingSpec) UnmarshalJSON(data []byte) error {
+	type noMethod SchemaFieldSpecNumericIndexingSpec
+	var s1 struct {
+		MaxValue gensupport.JSONFloat64 `json:"maxValue"`
+		MinValue gensupport.JSONFloat64 `json:"minValue"`
+		*noMethod
+	}
+	s1.noMethod = (*noMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.MaxValue = float64(s1.MaxValue)
+	s.MinValue = float64(s1.MinValue)
+	return nil
 }
 
 // Schemas: JSON response template for List Schema operation in
@@ -2080,12 +2503,20 @@ type Schemas struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Schemas) MarshalJSON() ([]byte, error) {
 	type noMethod Schemas
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Token: JSON template for token resource in Directory API.
@@ -2130,12 +2561,20 @@ type Token struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Anonymous") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Token) MarshalJSON() ([]byte, error) {
 	type noMethod Token
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Tokens: JSON response template for List tokens operation in Directory
@@ -2162,12 +2601,20 @@ type Tokens struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Tokens) MarshalJSON() ([]byte, error) {
 	type noMethod Tokens
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // User: JSON template for User object in Directory API.
@@ -2184,11 +2631,11 @@ type User struct {
 	// change password in next login
 	ChangePasswordAtNextLogin bool `json:"changePasswordAtNextLogin,omitempty"`
 
-	// CreationTime: User's Google account creation time. (Read-only)
+	// CreationTime: User's G Suite account creation time. (Read-only)
 	CreationTime string `json:"creationTime,omitempty"`
 
 	// CustomSchemas: Custom fields of the user.
-	CustomSchemas map[string]UserCustomProperties `json:"customSchemas,omitempty"`
+	CustomSchemas map[string]googleapi.RawMessage `json:"customSchemas,omitempty"`
 
 	// CustomerId: CustomerId of User (Read-only)
 	CustomerId string `json:"customerId,omitempty"`
@@ -2225,14 +2672,26 @@ type User struct {
 	// (Read-only)
 	IsDelegatedAdmin bool `json:"isDelegatedAdmin,omitempty"`
 
+	// IsEnforcedIn2Sv: Is 2-step verification enforced (Read-only)
+	IsEnforcedIn2Sv bool `json:"isEnforcedIn2Sv,omitempty"`
+
+	// IsEnrolledIn2Sv: Is enrolled in 2-step verification (Read-only)
+	IsEnrolledIn2Sv bool `json:"isEnrolledIn2Sv,omitempty"`
+
 	// IsMailboxSetup: Is mailbox setup (Read-only)
 	IsMailboxSetup bool `json:"isMailboxSetup,omitempty"`
+
+	Keywords interface{} `json:"keywords,omitempty"`
 
 	// Kind: Kind of resource this is.
 	Kind string `json:"kind,omitempty"`
 
+	Languages interface{} `json:"languages,omitempty"`
+
 	// LastLoginTime: User's last login time. (Read-only)
 	LastLoginTime string `json:"lastLoginTime,omitempty"`
+
+	Locations interface{} `json:"locations,omitempty"`
 
 	// Name: User's name
 	Name *UserName `json:"name,omitempty"`
@@ -2252,10 +2711,14 @@ type User struct {
 
 	Phones interface{} `json:"phones,omitempty"`
 
+	PosixAccounts interface{} `json:"posixAccounts,omitempty"`
+
 	// PrimaryEmail: username of User
 	PrimaryEmail string `json:"primaryEmail,omitempty"`
 
 	Relations interface{} `json:"relations,omitempty"`
+
+	SshPublicKeys interface{} `json:"sshPublicKeys,omitempty"`
 
 	// Suspended: Indicates if user is suspended
 	Suspended bool `json:"suspended,omitempty"`
@@ -2282,12 +2745,20 @@ type User struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Addresses") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *User) MarshalJSON() ([]byte, error) {
 	type noMethod User
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserAbout: JSON template for About (notes) of a user in Directory
@@ -2308,12 +2779,20 @@ type UserAbout struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ContentType") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserAbout) MarshalJSON() ([]byte, error) {
 	type noMethod UserAbout
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserAddress: JSON template for address.
@@ -2371,15 +2850,21 @@ type UserAddress struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Country") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserAddress) MarshalJSON() ([]byte, error) {
 	type noMethod UserAddress
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
-
-type UserCustomProperties interface{}
 
 // UserEmail: JSON template for an email.
 type UserEmail struct {
@@ -2407,12 +2892,20 @@ type UserEmail struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Address") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserEmail) MarshalJSON() ([]byte, error) {
 	type noMethod UserEmail
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserExternalId: JSON template for an externalId entry.
@@ -2433,12 +2926,20 @@ type UserExternalId struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomType") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserExternalId) MarshalJSON() ([]byte, error) {
 	type noMethod UserExternalId
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserIm: JSON template for instant messenger of an user.
@@ -2475,12 +2976,149 @@ type UserIm struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomProtocol") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserIm) MarshalJSON() ([]byte, error) {
 	type noMethod UserIm
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UserKeyword: JSON template for a keyword entry.
+type UserKeyword struct {
+	// CustomType: Custom Type.
+	CustomType string `json:"customType,omitempty"`
+
+	// Type: Each entry can have a type which indicates standard type of
+	// that entry. For example, keyword could be of type occupation or
+	// outlook. In addition to the standard type, an entry can have a custom
+	// type and can give it any name. Such types should have the CUSTOM
+	// value as type and also have a customType value.
+	Type string `json:"type,omitempty"`
+
+	// Value: Keyword.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "CustomType") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomType") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UserKeyword) MarshalJSON() ([]byte, error) {
+	type noMethod UserKeyword
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UserLanguage: JSON template for a language entry.
+type UserLanguage struct {
+	// CustomLanguage: Other language. User can provide own language name if
+	// there is no corresponding Google III language code. If this is set
+	// LanguageCode can't be set
+	CustomLanguage string `json:"customLanguage,omitempty"`
+
+	// LanguageCode: Language Code. Should be used for storing Google III
+	// LanguageCode string representation for language. Illegal values cause
+	// SchemaException.
+	LanguageCode string `json:"languageCode,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "CustomLanguage") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomLanguage") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UserLanguage) MarshalJSON() ([]byte, error) {
+	type noMethod UserLanguage
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UserLocation: JSON template for a location entry.
+type UserLocation struct {
+	// Area: Textual location. This is most useful for display purposes to
+	// concisely describe the location. For example, "Mountain View, CA",
+	// "Near Seattle", "US-NYC-9TH 9A209A".
+	Area string `json:"area,omitempty"`
+
+	// BuildingId: Building Identifier.
+	BuildingId string `json:"buildingId,omitempty"`
+
+	// CustomType: Custom Type.
+	CustomType string `json:"customType,omitempty"`
+
+	// DeskCode: Most specific textual code of individual desk location.
+	DeskCode string `json:"deskCode,omitempty"`
+
+	// FloorName: Floor name/number.
+	FloorName string `json:"floorName,omitempty"`
+
+	// FloorSection: Floor section. More specific location within the floor.
+	// For example, if a floor is divided into sections "A", "B", and "C",
+	// this field would identify one of those values.
+	FloorSection string `json:"floorSection,omitempty"`
+
+	// Type: Each entry can have a type which indicates standard types of
+	// that entry. For example location could be of types default and desk.
+	// In addition to standard type, an entry can have a custom type and can
+	// give it any name. Such types should have "custom" as type and also
+	// have a customType value.
+	Type string `json:"type,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Area") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Area") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UserLocation) MarshalJSON() ([]byte, error) {
+	type noMethod UserLocation
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserMakeAdmin: JSON request template for setting/revoking admin
@@ -2496,12 +3134,20 @@ type UserMakeAdmin struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Status") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserMakeAdmin) MarshalJSON() ([]byte, error) {
 	type noMethod UserMakeAdmin
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserName: JSON template for name of a user in Directory API.
@@ -2522,12 +3168,20 @@ type UserName struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FamilyName") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserName) MarshalJSON() ([]byte, error) {
 	type noMethod UserName
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserOrganization: JSON template for an organization entry.
@@ -2546,6 +3200,10 @@ type UserOrganization struct {
 
 	// Domain: The domain to which the organization belongs to.
 	Domain string `json:"domain,omitempty"`
+
+	// FullTimeEquivalent: The full-time equivalent percent within the
+	// organization (100000 = 100%).
+	FullTimeEquivalent int64 `json:"fullTimeEquivalent,omitempty"`
 
 	// Location: Location of the organization. This need not be fully
 	// qualified address.
@@ -2577,12 +3235,20 @@ type UserOrganization struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CostCenter") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserOrganization) MarshalJSON() ([]byte, error) {
 	type noMethod UserOrganization
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserPhone: JSON template for a phone entry.
@@ -2610,12 +3276,20 @@ type UserPhone struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomType") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserPhone) MarshalJSON() ([]byte, error) {
 	type noMethod UserPhone
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserPhoto: JSON template for Photo object in Directory API.
@@ -2655,12 +3329,71 @@ type UserPhoto struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserPhoto) MarshalJSON() ([]byte, error) {
 	type noMethod UserPhoto
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UserPosixAccount: JSON template for a POSIX account entry.
+// Description of the field family: go/fbs-posix.
+type UserPosixAccount struct {
+	// Gecos: The GECOS (user information) for this account.
+	Gecos string `json:"gecos,omitempty"`
+
+	// Gid: The default group ID.
+	Gid int64 `json:"gid,omitempty"`
+
+	// HomeDirectory: The path to the home directory for this account.
+	HomeDirectory string `json:"homeDirectory,omitempty"`
+
+	// Primary: If this is user's primary account within the SystemId.
+	Primary bool `json:"primary,omitempty"`
+
+	// Shell: The path to the login shell for this account.
+	Shell string `json:"shell,omitempty"`
+
+	// SystemId: System identifier for which account Username or Uid apply
+	// to.
+	SystemId string `json:"systemId,omitempty"`
+
+	// Uid: The POSIX compliant user ID.
+	Uid int64 `json:"uid,omitempty"`
+
+	// Username: The username of the account.
+	Username string `json:"username,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Gecos") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Gecos") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UserPosixAccount) MarshalJSON() ([]byte, error) {
+	type noMethod UserPosixAccount
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserRelation: JSON template for a relation entry.
@@ -2682,12 +3415,55 @@ type UserRelation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomType") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserRelation) MarshalJSON() ([]byte, error) {
 	type noMethod UserRelation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UserSshPublicKey: JSON template for a POSIX account entry.
+type UserSshPublicKey struct {
+	// ExpirationTimeUsec: An expiration time in microseconds since epoch.
+	ExpirationTimeUsec int64 `json:"expirationTimeUsec,omitempty,string"`
+
+	// Fingerprint: A SHA-256 fingerprint of the SSH public key. (Read-only)
+	Fingerprint string `json:"fingerprint,omitempty"`
+
+	// Key: An SSH public key.
+	Key string `json:"key,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "ExpirationTimeUsec")
+	// to unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ExpirationTimeUsec") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UserSshPublicKey) MarshalJSON() ([]byte, error) {
+	type noMethod UserSshPublicKey
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserUndelete: JSON request template to undelete a user in Directory
@@ -2703,12 +3479,20 @@ type UserUndelete struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "OrgUnitPath") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserUndelete) MarshalJSON() ([]byte, error) {
 	type noMethod UserUndelete
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // UserWebsite: JSON template for a website entry.
@@ -2736,12 +3520,20 @@ type UserWebsite struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CustomType") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *UserWebsite) MarshalJSON() ([]byte, error) {
 	type noMethod UserWebsite
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // Users: JSON response template for List Users operation in Apps
@@ -2774,12 +3566,20 @@ type Users struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *Users) MarshalJSON() ([]byte, error) {
 	type noMethod Users
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // VerificationCode: JSON template for verification codes in Directory
@@ -2807,12 +3607,20 @@ type VerificationCode struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *VerificationCode) MarshalJSON() ([]byte, error) {
 	type noMethod VerificationCode
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // VerificationCodes: JSON response template for List verification codes
@@ -2839,12 +3647,20 @@ type VerificationCodes struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Etag") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
 }
 
 func (s *VerificationCodes) MarshalJSON() ([]byte, error) {
 	type noMethod VerificationCodes
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // method id "directory.asps.delete":
@@ -2855,6 +3671,7 @@ type AspsDeleteCall struct {
 	codeId     int64
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete an ASP issued by a user.
@@ -2881,8 +3698,20 @@ func (c *AspsDeleteCall) Context(ctx context.Context) *AspsDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AspsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AspsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -2894,10 +3723,7 @@ func (c *AspsDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"userKey": c.userKey,
 		"codeId":  strconv.FormatInt(c.codeId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.asps.delete" call.
@@ -2952,6 +3778,7 @@ type AspsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get information about an ASP issued by a user.
@@ -2988,8 +3815,20 @@ func (c *AspsGetCall) Context(ctx context.Context) *AspsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AspsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AspsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3004,10 +3843,7 @@ func (c *AspsGetCall) doRequest(alt string) (*http.Response, error) {
 		"userKey": c.userKey,
 		"codeId":  strconv.FormatInt(c.codeId, 10),
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.asps.get" call.
@@ -3089,6 +3925,7 @@ type AspsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List the ASPs issued by a user.
@@ -3124,8 +3961,20 @@ func (c *AspsListCall) Context(ctx context.Context) *AspsListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *AspsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *AspsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3139,10 +3988,7 @@ func (c *AspsListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.asps.list" call.
@@ -3215,6 +4061,7 @@ type ChannelsStopCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Stop: Stop watching resources through this channel
@@ -3240,8 +4087,20 @@ func (c *ChannelsStopCall) Context(ctx context.Context) *ChannelsStopCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChannelsStopCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ChannelsStopCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
@@ -3254,11 +4113,7 @@ func (c *ChannelsStopCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "admin.channels.stop" call.
@@ -3292,6 +4147,121 @@ func (c *ChannelsStopCall) Do(opts ...googleapi.CallOption) error {
 
 }
 
+// method id "directory.chromeosdevices.action":
+
+type ChromeosdevicesActionCall struct {
+	s                    *Service
+	customerId           string
+	resourceId           string
+	chromeosdeviceaction *ChromeOsDeviceAction
+	urlParams_           gensupport.URLParams
+	ctx_                 context.Context
+	header_              http.Header
+}
+
+// Action: Take action on Chrome OS Device
+func (r *ChromeosdevicesService) Action(customerId string, resourceId string, chromeosdeviceaction *ChromeOsDeviceAction) *ChromeosdevicesActionCall {
+	c := &ChromeosdevicesActionCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.customerId = customerId
+	c.resourceId = resourceId
+	c.chromeosdeviceaction = chromeosdeviceaction
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ChromeosdevicesActionCall) Fields(s ...googleapi.Field) *ChromeosdevicesActionCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ChromeosdevicesActionCall) Context(ctx context.Context) *ChromeosdevicesActionCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesActionCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ChromeosdevicesActionCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.chromeosdeviceaction)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "customer/{customerId}/devices/chromeos/{resourceId}/action")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"customerId": c.customerId,
+		"resourceId": c.resourceId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "directory.chromeosdevices.action" call.
+func (c *ChromeosdevicesActionCall) Do(opts ...googleapi.CallOption) error {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if err != nil {
+		return err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return err
+	}
+	return nil
+	// {
+	//   "description": "Take action on Chrome OS Device",
+	//   "httpMethod": "POST",
+	//   "id": "directory.chromeosdevices.action",
+	//   "parameterOrder": [
+	//     "customerId",
+	//     "resourceId"
+	//   ],
+	//   "parameters": {
+	//     "customerId": {
+	//       "description": "Immutable ID of the G Suite account",
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "resourceId": {
+	//       "description": "Immutable ID of Chrome OS Device",
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "customer/{customerId}/devices/chromeos/{resourceId}/action",
+	//   "request": {
+	//     "$ref": "ChromeOsDeviceAction"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/admin.directory.device.chromeos"
+	//   ]
+	// }
+
+}
+
 // method id "directory.chromeosdevices.get":
 
 type ChromeosdevicesGetCall struct {
@@ -3301,6 +4271,7 @@ type ChromeosdevicesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve Chrome OS Device
@@ -3349,8 +4320,20 @@ func (c *ChromeosdevicesGetCall) Context(ctx context.Context) *ChromeosdevicesGe
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ChromeosdevicesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3365,10 +4348,7 @@ func (c *ChromeosdevicesGetCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"deviceId":   c.deviceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.chromeosdevices.get" call.
@@ -3418,13 +4398,13 @@ func (c *ChromeosdevicesGetCall) Do(opts ...googleapi.CallOption) (*ChromeOsDevi
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "deviceId": {
-	//       "description": "Immutable id of Chrome OS Device",
+	//       "description": "Immutable ID of Chrome OS Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3463,6 +4443,7 @@ type ChromeosdevicesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all Chrome OS Devices of a customer (paginated)
@@ -3493,6 +4474,13 @@ func (c *ChromeosdevicesListCall) MaxResults(maxResults int64) *ChromeosdevicesL
 //   "supportEndDate" - Chromebook support end date.
 func (c *ChromeosdevicesListCall) OrderBy(orderBy string) *ChromeosdevicesListCall {
 	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// OrgUnitPath sets the optional parameter "orgUnitPath": Full path of
+// the organization unit or its Id
+func (c *ChromeosdevicesListCall) OrgUnitPath(orgUnitPath string) *ChromeosdevicesListCall {
+	c.urlParams_.Set("orgUnitPath", orgUnitPath)
 	return c
 }
 
@@ -3561,8 +4549,20 @@ func (c *ChromeosdevicesListCall) Context(ctx context.Context) *ChromeosdevicesL
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ChromeosdevicesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -3576,10 +4576,7 @@ func (c *ChromeosdevicesListCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.chromeosdevices.list" call.
@@ -3628,7 +4625,7 @@ func (c *ChromeosdevicesListCall) Do(opts ...googleapi.CallOption) (*ChromeOsDev
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3660,6 +4657,11 @@ func (c *ChromeosdevicesListCall) Do(opts ...googleapi.CallOption) (*ChromeOsDev
 	//         "Chromebook status.",
 	//         "Chromebook support end date."
 	//       ],
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "orgUnitPath": {
+	//       "description": "Full path of the organization unit or its Id",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -3733,6 +4735,120 @@ func (c *ChromeosdevicesListCall) Pages(ctx context.Context, f func(*ChromeOsDev
 	}
 }
 
+// method id "directory.chromeosdevices.moveDevicesToOu":
+
+type ChromeosdevicesMoveDevicesToOuCall struct {
+	s                       *Service
+	customerId              string
+	chromeosmovedevicestoou *ChromeOsMoveDevicesToOu
+	urlParams_              gensupport.URLParams
+	ctx_                    context.Context
+	header_                 http.Header
+}
+
+// MoveDevicesToOu: Move or insert multiple Chrome OS Devices to
+// Organization Unit
+func (r *ChromeosdevicesService) MoveDevicesToOu(customerId string, orgUnitPath string, chromeosmovedevicestoou *ChromeOsMoveDevicesToOu) *ChromeosdevicesMoveDevicesToOuCall {
+	c := &ChromeosdevicesMoveDevicesToOuCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.customerId = customerId
+	c.urlParams_.Set("orgUnitPath", orgUnitPath)
+	c.chromeosmovedevicestoou = chromeosmovedevicestoou
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ChromeosdevicesMoveDevicesToOuCall) Fields(s ...googleapi.Field) *ChromeosdevicesMoveDevicesToOuCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ChromeosdevicesMoveDevicesToOuCall) Context(ctx context.Context) *ChromeosdevicesMoveDevicesToOuCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesMoveDevicesToOuCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ChromeosdevicesMoveDevicesToOuCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.chromeosmovedevicestoou)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "customer/{customerId}/devices/chromeos/moveDevicesToOu")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"customerId": c.customerId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "directory.chromeosdevices.moveDevicesToOu" call.
+func (c *ChromeosdevicesMoveDevicesToOuCall) Do(opts ...googleapi.CallOption) error {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if err != nil {
+		return err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return err
+	}
+	return nil
+	// {
+	//   "description": "Move or insert multiple Chrome OS Devices to Organization Unit",
+	//   "httpMethod": "POST",
+	//   "id": "directory.chromeosdevices.moveDevicesToOu",
+	//   "parameterOrder": [
+	//     "customerId",
+	//     "orgUnitPath"
+	//   ],
+	//   "parameters": {
+	//     "customerId": {
+	//       "description": "Immutable ID of the G Suite account",
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "orgUnitPath": {
+	//       "description": "Full path of the target organization unit or its Id",
+	//       "location": "query",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "customer/{customerId}/devices/chromeos/moveDevicesToOu",
+	//   "request": {
+	//     "$ref": "ChromeOsMoveDevicesToOu"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/admin.directory.device.chromeos"
+	//   ]
+	// }
+
+}
+
 // method id "directory.chromeosdevices.patch":
 
 type ChromeosdevicesPatchCall struct {
@@ -3742,6 +4858,7 @@ type ChromeosdevicesPatchCall struct {
 	chromeosdevice *ChromeOsDevice
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Patch: Update Chrome OS Device. This method supports patch semantics.
@@ -3781,8 +4898,20 @@ func (c *ChromeosdevicesPatchCall) Context(ctx context.Context) *Chromeosdevices
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ChromeosdevicesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.chromeosdevice)
@@ -3799,10 +4928,7 @@ func (c *ChromeosdevicesPatchCall) doRequest(alt string) (*http.Response, error)
 		"customerId": c.customerId,
 		"deviceId":   c.deviceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.chromeosdevices.patch" call.
@@ -3852,13 +4978,13 @@ func (c *ChromeosdevicesPatchCall) Do(opts ...googleapi.CallOption) (*ChromeOsDe
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "deviceId": {
-	//       "description": "Immutable id of Chrome OS Device",
+	//       "description": "Immutable ID of Chrome OS Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3900,6 +5026,7 @@ type ChromeosdevicesUpdateCall struct {
 	chromeosdevice *ChromeOsDevice
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Update: Update Chrome OS Device
@@ -3939,8 +5066,20 @@ func (c *ChromeosdevicesUpdateCall) Context(ctx context.Context) *Chromeosdevice
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ChromeosdevicesUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ChromeosdevicesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.chromeosdevice)
@@ -3957,10 +5096,7 @@ func (c *ChromeosdevicesUpdateCall) doRequest(alt string) (*http.Response, error
 		"customerId": c.customerId,
 		"deviceId":   c.deviceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.chromeosdevices.update" call.
@@ -4010,13 +5146,13 @@ func (c *ChromeosdevicesUpdateCall) Do(opts ...googleapi.CallOption) (*ChromeOsD
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "deviceId": {
-	//       "description": "Immutable id of Chrome OS Device",
+	//       "description": "Immutable ID of Chrome OS Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -4057,9 +5193,10 @@ type CustomersGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
-// Get: Retrives a customer.
+// Get: Retrieves a customer.
 func (r *CustomersService) Get(customerKey string) *CustomersGetCall {
 	c := &CustomersGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.customerKey = customerKey
@@ -4092,8 +5229,20 @@ func (c *CustomersGetCall) Context(ctx context.Context) *CustomersGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CustomersGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CustomersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -4107,10 +5256,7 @@ func (c *CustomersGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerKey": c.customerKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.customers.get" call.
@@ -4151,7 +5297,7 @@ func (c *CustomersGetCall) Do(opts ...googleapi.CallOption) (*Customer, error) {
 	}
 	return ret, nil
 	// {
-	//   "description": "Retrives a customer.",
+	//   "description": "Retrieves a customer.",
 	//   "httpMethod": "GET",
 	//   "id": "directory.customers.get",
 	//   "parameterOrder": [
@@ -4185,6 +5331,7 @@ type CustomersPatchCall struct {
 	customer    *Customer
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Patch: Updates a customer. This method supports patch semantics.
@@ -4211,8 +5358,20 @@ func (c *CustomersPatchCall) Context(ctx context.Context) *CustomersPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CustomersPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CustomersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.customer)
@@ -4228,10 +5387,7 @@ func (c *CustomersPatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerKey": c.customerKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.customers.patch" call.
@@ -4308,6 +5464,7 @@ type CustomersUpdateCall struct {
 	customer    *Customer
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Update: Updates a customer.
@@ -4334,8 +5491,20 @@ func (c *CustomersUpdateCall) Context(ctx context.Context) *CustomersUpdateCall 
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *CustomersUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *CustomersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.customer)
@@ -4351,10 +5520,7 @@ func (c *CustomersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerKey": c.customerKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.customers.update" call.
@@ -4431,6 +5597,7 @@ type DomainAliasesDeleteCall struct {
 	domainAliasName string
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
+	header_         http.Header
 }
 
 // Delete: Deletes a Domain Alias of the customer.
@@ -4457,8 +5624,20 @@ func (c *DomainAliasesDeleteCall) Context(ctx context.Context) *DomainAliasesDel
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainAliasesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainAliasesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -4470,10 +5649,7 @@ func (c *DomainAliasesDeleteCall) doRequest(alt string) (*http.Response, error) 
 		"customer":        c.customer,
 		"domainAliasName": c.domainAliasName,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domainAliases.delete" call.
@@ -4498,7 +5674,7 @@ func (c *DomainAliasesDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -4527,6 +5703,7 @@ type DomainAliasesGetCall struct {
 	urlParams_      gensupport.URLParams
 	ifNoneMatch_    string
 	ctx_            context.Context
+	header_         http.Header
 }
 
 // Get: Retrieves a domain alias of the customer.
@@ -4563,8 +5740,20 @@ func (c *DomainAliasesGetCall) Context(ctx context.Context) *DomainAliasesGetCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainAliasesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainAliasesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -4579,10 +5768,7 @@ func (c *DomainAliasesGetCall) doRequest(alt string) (*http.Response, error) {
 		"customer":        c.customer,
 		"domainAliasName": c.domainAliasName,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domainAliases.get" call.
@@ -4632,7 +5818,7 @@ func (c *DomainAliasesGetCall) Do(opts ...googleapi.CallOption) (*DomainAlias, e
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -4664,6 +5850,7 @@ type DomainAliasesInsertCall struct {
 	domainalias *DomainAlias
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Insert: Inserts a Domain alias of the customer.
@@ -4690,8 +5877,20 @@ func (c *DomainAliasesInsertCall) Context(ctx context.Context) *DomainAliasesIns
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainAliasesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainAliasesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.domainalias)
@@ -4707,10 +5906,7 @@ func (c *DomainAliasesInsertCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domainAliases.insert" call.
@@ -4759,7 +5955,7 @@ func (c *DomainAliasesInsertCall) Do(opts ...googleapi.CallOption) (*DomainAlias
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -4787,6 +5983,7 @@ type DomainAliasesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Lists the domain aliases of the customer.
@@ -4829,8 +6026,20 @@ func (c *DomainAliasesListCall) Context(ctx context.Context) *DomainAliasesListC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainAliasesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -4844,10 +6053,7 @@ func (c *DomainAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domainAliases.list" call.
@@ -4896,7 +6102,7 @@ func (c *DomainAliasesListCall) Do(opts ...googleapi.CallOption) (*DomainAliases
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -4927,6 +6133,7 @@ type DomainsDeleteCall struct {
 	domainName string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes a domain of the customer.
@@ -4953,8 +6160,20 @@ func (c *DomainsDeleteCall) Context(ctx context.Context) *DomainsDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -4966,10 +6185,7 @@ func (c *DomainsDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"customer":   c.customer,
 		"domainName": c.domainName,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domains.delete" call.
@@ -4994,7 +6210,7 @@ func (c *DomainsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5023,9 +6239,10 @@ type DomainsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
-// Get: Retrives a domain of the customer.
+// Get: Retrieves a domain of the customer.
 func (r *DomainsService) Get(customer string, domainName string) *DomainsGetCall {
 	c := &DomainsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.customer = customer
@@ -5059,8 +6276,20 @@ func (c *DomainsGetCall) Context(ctx context.Context) *DomainsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5075,10 +6304,7 @@ func (c *DomainsGetCall) doRequest(alt string) (*http.Response, error) {
 		"customer":   c.customer,
 		"domainName": c.domainName,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domains.get" call.
@@ -5119,7 +6345,7 @@ func (c *DomainsGetCall) Do(opts ...googleapi.CallOption) (*Domains, error) {
 	}
 	return ret, nil
 	// {
-	//   "description": "Retrives a domain of the customer.",
+	//   "description": "Retrieves a domain of the customer.",
 	//   "httpMethod": "GET",
 	//   "id": "directory.domains.get",
 	//   "parameterOrder": [
@@ -5128,7 +6354,7 @@ func (c *DomainsGetCall) Do(opts ...googleapi.CallOption) (*Domains, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5160,6 +6386,7 @@ type DomainsInsertCall struct {
 	domains    *Domains
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Inserts a domain of the customer.
@@ -5186,8 +6413,20 @@ func (c *DomainsInsertCall) Context(ctx context.Context) *DomainsInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.domains)
@@ -5203,10 +6442,7 @@ func (c *DomainsInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domains.insert" call.
@@ -5255,7 +6491,7 @@ func (c *DomainsInsertCall) Do(opts ...googleapi.CallOption) (*Domains, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5283,6 +6519,7 @@ type DomainsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Lists the domains of the customer.
@@ -5318,8 +6555,20 @@ func (c *DomainsListCall) Context(ctx context.Context) *DomainsListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *DomainsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *DomainsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5333,10 +6582,7 @@ func (c *DomainsListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.domains.list" call.
@@ -5385,7 +6631,7 @@ func (c *DomainsListCall) Do(opts ...googleapi.CallOption) (*Domains2, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -5410,6 +6656,7 @@ type GroupsDeleteCall struct {
 	groupKey   string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete Group
@@ -5435,8 +6682,20 @@ func (c *GroupsDeleteCall) Context(ctx context.Context) *GroupsDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -5447,10 +6706,7 @@ func (c *GroupsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.delete" call.
@@ -5496,6 +6752,7 @@ type GroupsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve Group
@@ -5531,8 +6788,20 @@ func (c *GroupsGetCall) Context(ctx context.Context) *GroupsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5546,10 +6815,7 @@ func (c *GroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.get" call.
@@ -5623,6 +6889,7 @@ type GroupsInsertCall struct {
 	group      *Group
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Create Group
@@ -5648,8 +6915,20 @@ func (c *GroupsInsertCall) Context(ctx context.Context) *GroupsInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.group)
@@ -5662,11 +6941,7 @@ func (c *GroupsInsertCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.insert" call.
@@ -5731,6 +7006,7 @@ type GroupsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all groups in a domain (paginated)
@@ -5739,9 +7015,9 @@ func (r *GroupsService) List() *GroupsListCall {
 	return c
 }
 
-// Customer sets the optional parameter "customer": Immutable id of the
-// Google Apps account. In case of multi-domain, to fetch all groups for
-// a customer, fill this field instead of domain.
+// Customer sets the optional parameter "customer": Immutable ID of the
+// G Suite account. In case of multi-domain, to fetch all groups for a
+// customer, fill this field instead of domain.
 func (c *GroupsListCall) Customer(customer string) *GroupsListCall {
 	c.urlParams_.Set("customer", customer)
 	return c
@@ -5803,8 +7079,20 @@ func (c *GroupsListCall) Context(ctx context.Context) *GroupsListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -5815,11 +7103,7 @@ func (c *GroupsListCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.list" call.
@@ -5865,7 +7149,7 @@ func (c *GroupsListCall) Do(opts ...googleapi.CallOption) (*Groups, error) {
 	//   "id": "directory.groups.list",
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account. In case of multi-domain, to fetch all groups for a customer, fill this field instead of domain.",
+	//       "description": "Immutable ID of the G Suite account. In case of multi-domain, to fetch all groups for a customer, fill this field instead of domain.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -5933,6 +7217,7 @@ type GroupsPatchCall struct {
 	group      *Group
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Update Group. This method supports patch semantics.
@@ -5959,8 +7244,20 @@ func (c *GroupsPatchCall) Context(ctx context.Context) *GroupsPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.group)
@@ -5976,10 +7273,7 @@ func (c *GroupsPatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.patch" call.
@@ -6056,6 +7350,7 @@ type GroupsUpdateCall struct {
 	group      *Group
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Update Group
@@ -6082,8 +7377,20 @@ func (c *GroupsUpdateCall) Context(ctx context.Context) *GroupsUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.group)
@@ -6099,10 +7406,7 @@ func (c *GroupsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.update" call.
@@ -6179,6 +7483,7 @@ type GroupsAliasesDeleteCall struct {
 	alias      string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Remove a alias for the group
@@ -6205,8 +7510,20 @@ func (c *GroupsAliasesDeleteCall) Context(ctx context.Context) *GroupsAliasesDel
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsAliasesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsAliasesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -6218,10 +7535,7 @@ func (c *GroupsAliasesDeleteCall) doRequest(alt string) (*http.Response, error) 
 		"groupKey": c.groupKey,
 		"alias":    c.alias,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.aliases.delete" call.
@@ -6274,6 +7588,7 @@ type GroupsAliasesInsertCall struct {
 	alias      *Alias
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Add a alias for the group
@@ -6300,8 +7615,20 @@ func (c *GroupsAliasesInsertCall) Context(ctx context.Context) *GroupsAliasesIns
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsAliasesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsAliasesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.alias)
@@ -6317,10 +7644,7 @@ func (c *GroupsAliasesInsertCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.aliases.insert" call.
@@ -6397,6 +7721,7 @@ type GroupsAliasesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List all aliases for a group
@@ -6432,8 +7757,20 @@ func (c *GroupsAliasesListCall) Context(ctx context.Context) *GroupsAliasesListC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupsAliasesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *GroupsAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6447,10 +7784,7 @@ func (c *GroupsAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.groups.aliases.list" call.
@@ -6526,6 +7860,7 @@ type MembersDeleteCall struct {
 	memberKey  string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Remove membership.
@@ -6552,8 +7887,20 @@ func (c *MembersDeleteCall) Context(ctx context.Context) *MembersDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -6565,10 +7912,7 @@ func (c *MembersDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"groupKey":  c.groupKey,
 		"memberKey": c.memberKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.delete" call.
@@ -6623,6 +7967,7 @@ type MembersGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve Group Member
@@ -6659,8 +8004,20 @@ func (c *MembersGetCall) Context(ctx context.Context) *MembersGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6675,10 +8032,7 @@ func (c *MembersGetCall) doRequest(alt string) (*http.Response, error) {
 		"groupKey":  c.groupKey,
 		"memberKey": c.memberKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.get" call.
@@ -6762,6 +8116,7 @@ type MembersInsertCall struct {
 	member     *Member
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Add user to the specified group.
@@ -6788,8 +8143,20 @@ func (c *MembersInsertCall) Context(ctx context.Context) *MembersInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.member)
@@ -6805,10 +8172,7 @@ func (c *MembersInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.insert" call.
@@ -6886,6 +8250,7 @@ type MembersListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all members in a group (paginated)
@@ -6942,8 +8307,20 @@ func (c *MembersListCall) Context(ctx context.Context) *MembersListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -6957,10 +8334,7 @@ func (c *MembersListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"groupKey": c.groupKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.list" call.
@@ -7076,6 +8450,7 @@ type MembersPatchCall struct {
 	member     *Member
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Update membership of a user in the specified group. This
@@ -7104,8 +8479,20 @@ func (c *MembersPatchCall) Context(ctx context.Context) *MembersPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.member)
@@ -7122,10 +8509,7 @@ func (c *MembersPatchCall) doRequest(alt string) (*http.Response, error) {
 		"groupKey":  c.groupKey,
 		"memberKey": c.memberKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.patch" call.
@@ -7211,6 +8595,7 @@ type MembersUpdateCall struct {
 	member     *Member
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Update membership of a user in the specified group.
@@ -7238,8 +8623,20 @@ func (c *MembersUpdateCall) Context(ctx context.Context) *MembersUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MembersUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MembersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.member)
@@ -7256,10 +8653,7 @@ func (c *MembersUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"groupKey":  c.groupKey,
 		"memberKey": c.memberKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.members.update" call.
@@ -7345,6 +8739,7 @@ type MobiledevicesActionCall struct {
 	mobiledeviceaction *MobileDeviceAction
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Action: Take action on Mobile Device
@@ -7372,8 +8767,20 @@ func (c *MobiledevicesActionCall) Context(ctx context.Context) *MobiledevicesAct
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MobiledevicesActionCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MobiledevicesActionCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.mobiledeviceaction)
@@ -7390,10 +8797,7 @@ func (c *MobiledevicesActionCall) doRequest(alt string) (*http.Response, error) 
 		"customerId": c.customerId,
 		"resourceId": c.resourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.mobiledevices.action" call.
@@ -7418,13 +8822,13 @@ func (c *MobiledevicesActionCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "resourceId": {
-	//       "description": "Immutable id of Mobile Device",
+	//       "description": "Immutable ID of Mobile Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -7450,6 +8854,7 @@ type MobiledevicesDeleteCall struct {
 	resourceId string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete Mobile Device
@@ -7476,8 +8881,20 @@ func (c *MobiledevicesDeleteCall) Context(ctx context.Context) *MobiledevicesDel
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MobiledevicesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MobiledevicesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -7489,10 +8906,7 @@ func (c *MobiledevicesDeleteCall) doRequest(alt string) (*http.Response, error) 
 		"customerId": c.customerId,
 		"resourceId": c.resourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.mobiledevices.delete" call.
@@ -7517,13 +8931,13 @@ func (c *MobiledevicesDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "resourceId": {
-	//       "description": "Immutable id of Mobile Device",
+	//       "description": "Immutable ID of Mobile Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -7546,6 +8960,7 @@ type MobiledevicesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve Mobile Device
@@ -7594,8 +9009,20 @@ func (c *MobiledevicesGetCall) Context(ctx context.Context) *MobiledevicesGetCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MobiledevicesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MobiledevicesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -7610,10 +9037,7 @@ func (c *MobiledevicesGetCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"resourceId": c.resourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.mobiledevices.get" call.
@@ -7663,7 +9087,7 @@ func (c *MobiledevicesGetCall) Do(opts ...googleapi.CallOption) (*MobileDevice, 
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -7682,7 +9106,7 @@ func (c *MobiledevicesGetCall) Do(opts ...googleapi.CallOption) (*MobileDevice, 
 	//       "type": "string"
 	//     },
 	//     "resourceId": {
-	//       "description": "Immutable id of Mobile Device",
+	//       "description": "Immutable ID of Mobile Device",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -7709,6 +9133,7 @@ type MobiledevicesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all Mobile Devices of a customer (paginated)
@@ -7807,8 +9232,20 @@ func (c *MobiledevicesListCall) Context(ctx context.Context) *MobiledevicesListC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *MobiledevicesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *MobiledevicesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -7822,10 +9259,7 @@ func (c *MobiledevicesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.mobiledevices.list" call.
@@ -7874,7 +9308,7 @@ func (c *MobiledevicesListCall) Do(opts ...googleapi.CallOption) (*MobileDevices
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -7990,6 +9424,7 @@ type NotificationsDeleteCall struct {
 	notificationId string
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Delete: Deletes a notification
@@ -8016,8 +9451,20 @@ func (c *NotificationsDeleteCall) Context(ctx context.Context) *NotificationsDel
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *NotificationsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *NotificationsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -8029,10 +9476,7 @@ func (c *NotificationsDeleteCall) doRequest(alt string) (*http.Response, error) 
 		"customer":       c.customer,
 		"notificationId": c.notificationId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.notifications.delete" call.
@@ -8057,7 +9501,7 @@ func (c *NotificationsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. The customerId is also returned as part of the Users resource.",
+	//       "description": "The unique ID for the customer's G Suite account. The customerId is also returned as part of the Users resource.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8086,6 +9530,7 @@ type NotificationsGetCall struct {
 	urlParams_     gensupport.URLParams
 	ifNoneMatch_   string
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Get: Retrieves a notification.
@@ -8122,8 +9567,20 @@ func (c *NotificationsGetCall) Context(ctx context.Context) *NotificationsGetCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *NotificationsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *NotificationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -8138,10 +9595,7 @@ func (c *NotificationsGetCall) doRequest(alt string) (*http.Response, error) {
 		"customer":       c.customer,
 		"notificationId": c.notificationId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.notifications.get" call.
@@ -8191,7 +9645,7 @@ func (c *NotificationsGetCall) Do(opts ...googleapi.CallOption) (*Notification, 
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. The customerId is also returned as part of the Users resource.",
+	//       "description": "The unique ID for the customer's G Suite account. The customerId is also returned as part of the Users resource.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8222,6 +9676,7 @@ type NotificationsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a list of notifications.
@@ -8279,8 +9734,20 @@ func (c *NotificationsListCall) Context(ctx context.Context) *NotificationsListC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *NotificationsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *NotificationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -8294,10 +9761,7 @@ func (c *NotificationsListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.notifications.list" call.
@@ -8346,7 +9810,7 @@ func (c *NotificationsListCall) Do(opts ...googleapi.CallOption) (*Notifications
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account.",
+	//       "description": "The unique ID for the customer's G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8409,6 +9873,7 @@ type NotificationsPatchCall struct {
 	notification   *Notification
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Patch: Updates a notification. This method supports patch semantics.
@@ -8436,8 +9901,20 @@ func (c *NotificationsPatchCall) Context(ctx context.Context) *NotificationsPatc
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *NotificationsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *NotificationsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.notification)
@@ -8454,10 +9931,7 @@ func (c *NotificationsPatchCall) doRequest(alt string) (*http.Response, error) {
 		"customer":       c.customer,
 		"notificationId": c.notificationId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.notifications.patch" call.
@@ -8507,7 +9981,7 @@ func (c *NotificationsPatchCall) Do(opts ...googleapi.CallOption) (*Notification
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account.",
+	//       "description": "The unique ID for the customer's G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8542,6 +10016,7 @@ type NotificationsUpdateCall struct {
 	notification   *Notification
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Update: Updates a notification.
@@ -8569,8 +10044,20 @@ func (c *NotificationsUpdateCall) Context(ctx context.Context) *NotificationsUpd
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *NotificationsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *NotificationsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.notification)
@@ -8587,10 +10074,7 @@ func (c *NotificationsUpdateCall) doRequest(alt string) (*http.Response, error) 
 		"customer":       c.customer,
 		"notificationId": c.notificationId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.notifications.update" call.
@@ -8640,7 +10124,7 @@ func (c *NotificationsUpdateCall) Do(opts ...googleapi.CallOption) (*Notificatio
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account.",
+	//       "description": "The unique ID for the customer's G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8674,6 +10158,7 @@ type OrgunitsDeleteCall struct {
 	orgUnitPath []string
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Delete: Remove Organization Unit
@@ -8700,8 +10185,20 @@ func (c *OrgunitsDeleteCall) Context(ctx context.Context) *OrgunitsDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -8713,10 +10210,7 @@ func (c *OrgunitsDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"customerId":  c.customerId,
 		"orgUnitPath": c.orgUnitPath[0],
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.delete" call.
@@ -8741,7 +10235,7 @@ func (c *OrgunitsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8771,6 +10265,7 @@ type OrgunitsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve Organization Unit
@@ -8807,8 +10302,20 @@ func (c *OrgunitsGetCall) Context(ctx context.Context) *OrgunitsGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -8823,10 +10330,7 @@ func (c *OrgunitsGetCall) doRequest(alt string) (*http.Response, error) {
 		"customerId":  c.customerId,
 		"orgUnitPath": c.orgUnitPath[0],
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.get" call.
@@ -8876,7 +10380,7 @@ func (c *OrgunitsGetCall) Do(opts ...googleapi.CallOption) (*OrgUnit, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -8909,6 +10413,7 @@ type OrgunitsInsertCall struct {
 	orgunit    *OrgUnit
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Add Organization Unit
@@ -8935,8 +10440,20 @@ func (c *OrgunitsInsertCall) Context(ctx context.Context) *OrgunitsInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.orgunit)
@@ -8952,10 +10469,7 @@ func (c *OrgunitsInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.insert" call.
@@ -9004,7 +10518,7 @@ func (c *OrgunitsInsertCall) Do(opts ...googleapi.CallOption) (*OrgUnit, error) 
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9032,6 +10546,7 @@ type OrgunitsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all Organization Units
@@ -9085,8 +10600,20 @@ func (c *OrgunitsListCall) Context(ctx context.Context) *OrgunitsListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -9100,10 +10627,7 @@ func (c *OrgunitsListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.list" call.
@@ -9152,7 +10676,7 @@ func (c *OrgunitsListCall) Do(opts ...googleapi.CallOption) (*OrgUnits, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9198,6 +10722,7 @@ type OrgunitsPatchCall struct {
 	orgunit     *OrgUnit
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Patch: Update Organization Unit. This method supports patch
@@ -9226,8 +10751,20 @@ func (c *OrgunitsPatchCall) Context(ctx context.Context) *OrgunitsPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.orgunit)
@@ -9244,10 +10781,7 @@ func (c *OrgunitsPatchCall) doRequest(alt string) (*http.Response, error) {
 		"customerId":  c.customerId,
 		"orgUnitPath": c.orgUnitPath[0],
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.patch" call.
@@ -9297,7 +10831,7 @@ func (c *OrgunitsPatchCall) Do(opts ...googleapi.CallOption) (*OrgUnit, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9333,6 +10867,7 @@ type OrgunitsUpdateCall struct {
 	orgunit     *OrgUnit
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
+	header_     http.Header
 }
 
 // Update: Update Organization Unit
@@ -9360,8 +10895,20 @@ func (c *OrgunitsUpdateCall) Context(ctx context.Context) *OrgunitsUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *OrgunitsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *OrgunitsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.orgunit)
@@ -9378,10 +10925,7 @@ func (c *OrgunitsUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"customerId":  c.customerId,
 		"orgUnitPath": c.orgUnitPath[0],
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.orgunits.update" call.
@@ -9431,7 +10975,7 @@ func (c *OrgunitsUpdateCall) Do(opts ...googleapi.CallOption) (*OrgUnit, error) 
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9466,6 +11010,7 @@ type PrivilegesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a paginated list of all privileges for a customer.
@@ -9501,8 +11046,20 @@ func (c *PrivilegesListCall) Context(ctx context.Context) *PrivilegesListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *PrivilegesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *PrivilegesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -9516,10 +11073,7 @@ func (c *PrivilegesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.privileges.list" call.
@@ -9568,7 +11122,7 @@ func (c *PrivilegesListCall) Do(opts ...googleapi.CallOption) (*Privileges, erro
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9594,6 +11148,7 @@ type ResourcesCalendarsDeleteCall struct {
 	calendarResourceId string
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Delete: Deletes a calendar resource.
@@ -9620,8 +11175,20 @@ func (c *ResourcesCalendarsDeleteCall) Context(ctx context.Context) *ResourcesCa
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -9633,10 +11200,7 @@ func (c *ResourcesCalendarsDeleteCall) doRequest(alt string) (*http.Response, er
 		"customer":           c.customer,
 		"calendarResourceId": c.calendarResourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.delete" call.
@@ -9667,7 +11231,7 @@ func (c *ResourcesCalendarsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9690,6 +11254,7 @@ type ResourcesCalendarsGetCall struct {
 	urlParams_         gensupport.URLParams
 	ifNoneMatch_       string
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Get: Retrieves a calendar resource.
@@ -9726,8 +11291,20 @@ func (c *ResourcesCalendarsGetCall) Context(ctx context.Context) *ResourcesCalen
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -9742,10 +11319,7 @@ func (c *ResourcesCalendarsGetCall) doRequest(alt string) (*http.Response, error
 		"customer":           c.customer,
 		"calendarResourceId": c.calendarResourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.get" call.
@@ -9801,7 +11375,7 @@ func (c *ResourcesCalendarsGetCall) Do(opts ...googleapi.CallOption) (*CalendarR
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9827,6 +11401,7 @@ type ResourcesCalendarsInsertCall struct {
 	calendarresource *CalendarResource
 	urlParams_       gensupport.URLParams
 	ctx_             context.Context
+	header_          http.Header
 }
 
 // Insert: Inserts a calendar resource.
@@ -9853,8 +11428,20 @@ func (c *ResourcesCalendarsInsertCall) Context(ctx context.Context) *ResourcesCa
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.calendarresource)
@@ -9870,10 +11457,7 @@ func (c *ResourcesCalendarsInsertCall) doRequest(alt string) (*http.Response, er
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.insert" call.
@@ -9922,7 +11506,7 @@ func (c *ResourcesCalendarsInsertCall) Do(opts ...googleapi.CallOption) (*Calend
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -9950,6 +11534,7 @@ type ResourcesCalendarsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a list of calendar resources for an account.
@@ -9999,8 +11584,20 @@ func (c *ResourcesCalendarsListCall) Context(ctx context.Context) *ResourcesCale
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -10014,10 +11611,7 @@ func (c *ResourcesCalendarsListCall) doRequest(alt string) (*http.Response, erro
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.list" call.
@@ -10066,7 +11660,7 @@ func (c *ResourcesCalendarsListCall) Do(opts ...googleapi.CallOption) (*Calendar
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10127,6 +11721,7 @@ type ResourcesCalendarsPatchCall struct {
 	calendarresource   *CalendarResource
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Patch: Updates a calendar resource. This method supports patch
@@ -10155,8 +11750,20 @@ func (c *ResourcesCalendarsPatchCall) Context(ctx context.Context) *ResourcesCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.calendarresource)
@@ -10173,10 +11780,7 @@ func (c *ResourcesCalendarsPatchCall) doRequest(alt string) (*http.Response, err
 		"customer":           c.customer,
 		"calendarResourceId": c.calendarResourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.patch" call.
@@ -10232,7 +11836,7 @@ func (c *ResourcesCalendarsPatchCall) Do(opts ...googleapi.CallOption) (*Calenda
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10261,6 +11865,7 @@ type ResourcesCalendarsUpdateCall struct {
 	calendarresource   *CalendarResource
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
+	header_            http.Header
 }
 
 // Update: Updates a calendar resource.
@@ -10288,8 +11893,20 @@ func (c *ResourcesCalendarsUpdateCall) Context(ctx context.Context) *ResourcesCa
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcesCalendarsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *ResourcesCalendarsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.calendarresource)
@@ -10306,10 +11923,7 @@ func (c *ResourcesCalendarsUpdateCall) doRequest(alt string) (*http.Response, er
 		"customer":           c.customer,
 		"calendarResourceId": c.calendarResourceId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.resources.calendars.update" call.
@@ -10365,7 +11979,7 @@ func (c *ResourcesCalendarsUpdateCall) Do(opts ...googleapi.CallOption) (*Calend
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "The unique ID for the customer's Google account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
+	//       "description": "The unique ID for the customer's G Suite account. As an account administrator, you can also use the my_customer alias to represent your account's customer ID.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10393,6 +12007,7 @@ type RoleAssignmentsDeleteCall struct {
 	roleAssignmentId string
 	urlParams_       gensupport.URLParams
 	ctx_             context.Context
+	header_          http.Header
 }
 
 // Delete: Deletes a role assignment.
@@ -10419,8 +12034,20 @@ func (c *RoleAssignmentsDeleteCall) Context(ctx context.Context) *RoleAssignment
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RoleAssignmentsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RoleAssignmentsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -10432,10 +12059,7 @@ func (c *RoleAssignmentsDeleteCall) doRequest(alt string) (*http.Response, error
 		"customer":         c.customer,
 		"roleAssignmentId": c.roleAssignmentId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roleAssignments.delete" call.
@@ -10460,7 +12084,7 @@ func (c *RoleAssignmentsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10489,6 +12113,7 @@ type RoleAssignmentsGetCall struct {
 	urlParams_       gensupport.URLParams
 	ifNoneMatch_     string
 	ctx_             context.Context
+	header_          http.Header
 }
 
 // Get: Retrieve a role assignment.
@@ -10525,8 +12150,20 @@ func (c *RoleAssignmentsGetCall) Context(ctx context.Context) *RoleAssignmentsGe
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RoleAssignmentsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RoleAssignmentsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -10541,10 +12178,7 @@ func (c *RoleAssignmentsGetCall) doRequest(alt string) (*http.Response, error) {
 		"customer":         c.customer,
 		"roleAssignmentId": c.roleAssignmentId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roleAssignments.get" call.
@@ -10594,7 +12228,7 @@ func (c *RoleAssignmentsGetCall) Do(opts ...googleapi.CallOption) (*RoleAssignme
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10626,6 +12260,7 @@ type RoleAssignmentsInsertCall struct {
 	roleassignment *RoleAssignment
 	urlParams_     gensupport.URLParams
 	ctx_           context.Context
+	header_        http.Header
 }
 
 // Insert: Creates a role assignment.
@@ -10652,8 +12287,20 @@ func (c *RoleAssignmentsInsertCall) Context(ctx context.Context) *RoleAssignment
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RoleAssignmentsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RoleAssignmentsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.roleassignment)
@@ -10669,10 +12316,7 @@ func (c *RoleAssignmentsInsertCall) doRequest(alt string) (*http.Response, error
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roleAssignments.insert" call.
@@ -10721,7 +12365,7 @@ func (c *RoleAssignmentsInsertCall) Do(opts ...googleapi.CallOption) (*RoleAssig
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10749,6 +12393,7 @@ type RoleAssignmentsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a paginated list of all roleAssignments.
@@ -10814,8 +12459,20 @@ func (c *RoleAssignmentsListCall) Context(ctx context.Context) *RoleAssignmentsL
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RoleAssignmentsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RoleAssignmentsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -10829,10 +12486,7 @@ func (c *RoleAssignmentsListCall) doRequest(alt string) (*http.Response, error) 
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roleAssignments.list" call.
@@ -10881,7 +12535,7 @@ func (c *RoleAssignmentsListCall) Do(opts ...googleapi.CallOption) (*RoleAssignm
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -10951,6 +12605,7 @@ type RolesDeleteCall struct {
 	roleId     string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Deletes a role.
@@ -10977,8 +12632,20 @@ func (c *RolesDeleteCall) Context(ctx context.Context) *RolesDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -10990,10 +12657,7 @@ func (c *RolesDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"customer": c.customer,
 		"roleId":   c.roleId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.delete" call.
@@ -11018,7 +12682,7 @@ func (c *RolesDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11047,6 +12711,7 @@ type RolesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieves a role.
@@ -11083,8 +12748,20 @@ func (c *RolesGetCall) Context(ctx context.Context) *RolesGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -11099,10 +12776,7 @@ func (c *RolesGetCall) doRequest(alt string) (*http.Response, error) {
 		"customer": c.customer,
 		"roleId":   c.roleId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.get" call.
@@ -11152,7 +12826,7 @@ func (c *RolesGetCall) Do(opts ...googleapi.CallOption) (*Role, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11184,6 +12858,7 @@ type RolesInsertCall struct {
 	role       *Role
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Creates a role.
@@ -11210,8 +12885,20 @@ func (c *RolesInsertCall) Context(ctx context.Context) *RolesInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.role)
@@ -11227,10 +12914,7 @@ func (c *RolesInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.insert" call.
@@ -11279,7 +12963,7 @@ func (c *RolesInsertCall) Do(opts ...googleapi.CallOption) (*Role, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11307,6 +12991,7 @@ type RolesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieves a paginated list of all the roles in a domain.
@@ -11356,8 +13041,20 @@ func (c *RolesListCall) Context(ctx context.Context) *RolesListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -11371,10 +13068,7 @@ func (c *RolesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customer": c.customer,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.list" call.
@@ -11423,7 +13117,7 @@ func (c *RolesListCall) Do(opts ...googleapi.CallOption) (*Roles, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11484,6 +13178,7 @@ type RolesPatchCall struct {
 	role       *Role
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Updates a role. This method supports patch semantics.
@@ -11511,8 +13206,20 @@ func (c *RolesPatchCall) Context(ctx context.Context) *RolesPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.role)
@@ -11529,10 +13236,7 @@ func (c *RolesPatchCall) doRequest(alt string) (*http.Response, error) {
 		"customer": c.customer,
 		"roleId":   c.roleId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.patch" call.
@@ -11582,7 +13286,7 @@ func (c *RolesPatchCall) Do(opts ...googleapi.CallOption) (*Role, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11617,6 +13321,7 @@ type RolesUpdateCall struct {
 	role       *Role
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Updates a role.
@@ -11644,8 +13349,20 @@ func (c *RolesUpdateCall) Context(ctx context.Context) *RolesUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RolesUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *RolesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.role)
@@ -11662,10 +13379,7 @@ func (c *RolesUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"customer": c.customer,
 		"roleId":   c.roleId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.roles.update" call.
@@ -11715,7 +13429,7 @@ func (c *RolesUpdateCall) Do(opts ...googleapi.CallOption) (*Role, error) {
 	//   ],
 	//   "parameters": {
 	//     "customer": {
-	//       "description": "Immutable ID of the Google Apps account.",
+	//       "description": "Immutable ID of the G Suite account.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11749,6 +13463,7 @@ type SchemasDeleteCall struct {
 	schemaKey  string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete schema
@@ -11775,8 +13490,20 @@ func (c *SchemasDeleteCall) Context(ctx context.Context) *SchemasDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -11788,10 +13515,7 @@ func (c *SchemasDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"schemaKey":  c.schemaKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.delete" call.
@@ -11816,7 +13540,7 @@ func (c *SchemasDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11845,6 +13569,7 @@ type SchemasGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve schema
@@ -11881,8 +13606,20 @@ func (c *SchemasGetCall) Context(ctx context.Context) *SchemasGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -11897,10 +13634,7 @@ func (c *SchemasGetCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"schemaKey":  c.schemaKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.get" call.
@@ -11950,7 +13684,7 @@ func (c *SchemasGetCall) Do(opts ...googleapi.CallOption) (*Schema, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -11982,6 +13716,7 @@ type SchemasInsertCall struct {
 	schema     *Schema
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Create schema.
@@ -12008,8 +13743,20 @@ func (c *SchemasInsertCall) Context(ctx context.Context) *SchemasInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.schema)
@@ -12025,10 +13772,7 @@ func (c *SchemasInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.insert" call.
@@ -12077,7 +13821,7 @@ func (c *SchemasInsertCall) Do(opts ...googleapi.CallOption) (*Schema, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -12105,6 +13849,7 @@ type SchemasListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve all schemas for a customer
@@ -12140,8 +13885,20 @@ func (c *SchemasListCall) Context(ctx context.Context) *SchemasListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -12155,10 +13912,7 @@ func (c *SchemasListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"customerId": c.customerId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.list" call.
@@ -12207,7 +13961,7 @@ func (c *SchemasListCall) Do(opts ...googleapi.CallOption) (*Schemas, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -12234,6 +13988,7 @@ type SchemasPatchCall struct {
 	schema     *Schema
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Update schema. This method supports patch semantics.
@@ -12261,8 +14016,20 @@ func (c *SchemasPatchCall) Context(ctx context.Context) *SchemasPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.schema)
@@ -12279,10 +14046,7 @@ func (c *SchemasPatchCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"schemaKey":  c.schemaKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.patch" call.
@@ -12332,7 +14096,7 @@ func (c *SchemasPatchCall) Do(opts ...googleapi.CallOption) (*Schema, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -12367,6 +14131,7 @@ type SchemasUpdateCall struct {
 	schema     *Schema
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Update schema
@@ -12394,8 +14159,20 @@ func (c *SchemasUpdateCall) Context(ctx context.Context) *SchemasUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SchemasUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *SchemasUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.schema)
@@ -12412,10 +14189,7 @@ func (c *SchemasUpdateCall) doRequest(alt string) (*http.Response, error) {
 		"customerId": c.customerId,
 		"schemaKey":  c.schemaKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.schemas.update" call.
@@ -12465,7 +14239,7 @@ func (c *SchemasUpdateCall) Do(opts ...googleapi.CallOption) (*Schema, error) {
 	//   ],
 	//   "parameters": {
 	//     "customerId": {
-	//       "description": "Immutable id of the Google Apps account",
+	//       "description": "Immutable ID of the G Suite account",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -12499,6 +14273,7 @@ type TokensDeleteCall struct {
 	clientId   string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete all access tokens issued by a user for an application.
@@ -12525,8 +14300,20 @@ func (c *TokensDeleteCall) Context(ctx context.Context) *TokensDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *TokensDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *TokensDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -12538,10 +14325,7 @@ func (c *TokensDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"userKey":  c.userKey,
 		"clientId": c.clientId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.tokens.delete" call.
@@ -12595,6 +14379,7 @@ type TokensGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Get information about an access token issued by a user.
@@ -12631,8 +14416,20 @@ func (c *TokensGetCall) Context(ctx context.Context) *TokensGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *TokensGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *TokensGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -12647,10 +14444,7 @@ func (c *TokensGetCall) doRequest(alt string) (*http.Response, error) {
 		"userKey":  c.userKey,
 		"clientId": c.clientId,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.tokens.get" call.
@@ -12731,6 +14525,7 @@ type TokensListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Returns the set of tokens specified user has issued to 3rd
@@ -12767,8 +14562,20 @@ func (c *TokensListCall) Context(ctx context.Context) *TokensListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *TokensListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *TokensListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -12782,10 +14589,7 @@ func (c *TokensListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.tokens.list" call.
@@ -12858,6 +14662,7 @@ type UsersDeleteCall struct {
 	userKey    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Delete user
@@ -12883,8 +14688,20 @@ func (c *UsersDeleteCall) Context(ctx context.Context) *UsersDeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -12895,10 +14712,7 @@ func (c *UsersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.delete" call.
@@ -12944,6 +14758,7 @@ type UsersGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: retrieve user
@@ -13011,8 +14826,20 @@ func (c *UsersGetCall) Context(ctx context.Context) *UsersGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -13026,10 +14853,7 @@ func (c *UsersGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.get" call.
@@ -13138,6 +14962,7 @@ type UsersInsertCall struct {
 	user       *User
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: create user.
@@ -13163,8 +14988,20 @@ func (c *UsersInsertCall) Context(ctx context.Context) *UsersInsertCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.user)
@@ -13177,11 +15014,7 @@ func (c *UsersInsertCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.insert" call.
@@ -13246,6 +15079,7 @@ type UsersListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Retrieve either deleted users or all users in a domain
@@ -13263,9 +15097,9 @@ func (c *UsersListCall) CustomFieldMask(customFieldMask string) *UsersListCall {
 	return c
 }
 
-// Customer sets the optional parameter "customer": Immutable id of the
-// Google Apps account. In case of multi-domain, to fetch all users for
-// a customer, fill this field instead of domain.
+// Customer sets the optional parameter "customer": Immutable ID of the
+// G Suite account. In case of multi-domain, to fetch all users for a
+// customer, fill this field instead of domain.
 func (c *UsersListCall) Customer(customer string) *UsersListCall {
 	c.urlParams_.Set("customer", customer)
 	return c
@@ -13395,8 +15229,20 @@ func (c *UsersListCall) Context(ctx context.Context) *UsersListCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -13407,11 +15253,7 @@ func (c *UsersListCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.list" call.
@@ -13462,7 +15304,7 @@ func (c *UsersListCall) Do(opts ...googleapi.CallOption) (*Users, error) {
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account. In case of multi-domain, to fetch all users for a customer, fill this field instead of domain.",
+	//       "description": "Immutable ID of the G Suite account. In case of multi-domain, to fetch all users for a customer, fill this field instead of domain.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -13614,6 +15456,7 @@ type UsersMakeAdminCall struct {
 	usermakeadmin *UserMakeAdmin
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
+	header_       http.Header
 }
 
 // MakeAdmin: change admin status of a user
@@ -13640,8 +15483,20 @@ func (c *UsersMakeAdminCall) Context(ctx context.Context) *UsersMakeAdminCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersMakeAdminCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersMakeAdminCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.usermakeadmin)
@@ -13657,10 +15512,7 @@ func (c *UsersMakeAdminCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.makeAdmin" call.
@@ -13709,6 +15561,7 @@ type UsersPatchCall struct {
 	user       *User
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: update user. This method supports patch semantics.
@@ -13735,8 +15588,20 @@ func (c *UsersPatchCall) Context(ctx context.Context) *UsersPatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.user)
@@ -13752,10 +15617,7 @@ func (c *UsersPatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.patch" call.
@@ -13832,6 +15694,7 @@ type UsersUndeleteCall struct {
 	userundelete *UserUndelete
 	urlParams_   gensupport.URLParams
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Undelete: Undelete a deleted user
@@ -13858,8 +15721,20 @@ func (c *UsersUndeleteCall) Context(ctx context.Context) *UsersUndeleteCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersUndeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersUndeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.userundelete)
@@ -13875,10 +15750,7 @@ func (c *UsersUndeleteCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.undelete" call.
@@ -13927,6 +15799,7 @@ type UsersUpdateCall struct {
 	user       *User
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: update user
@@ -13953,8 +15826,20 @@ func (c *UsersUpdateCall) Context(ctx context.Context) *UsersUpdateCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.user)
@@ -13970,10 +15855,7 @@ func (c *UsersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.update" call.
@@ -14049,6 +15931,7 @@ type UsersWatchCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Watch: Watch for changes in users list
@@ -14066,9 +15949,9 @@ func (c *UsersWatchCall) CustomFieldMask(customFieldMask string) *UsersWatchCall
 	return c
 }
 
-// Customer sets the optional parameter "customer": Immutable id of the
-// Google Apps account. In case of multi-domain, to fetch all users for
-// a customer, fill this field instead of domain.
+// Customer sets the optional parameter "customer": Immutable ID of the
+// G Suite account. In case of multi-domain, to fetch all users for a
+// customer, fill this field instead of domain.
 func (c *UsersWatchCall) Customer(customer string) *UsersWatchCall {
 	c.urlParams_.Set("customer", customer)
 	return c
@@ -14188,8 +16071,20 @@ func (c *UsersWatchCall) Context(ctx context.Context) *UsersWatchCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersWatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersWatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
@@ -14202,11 +16097,7 @@ func (c *UsersWatchCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	req.Header = reqHeaders
-	googleapi.SetOpaque(req.URL)
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.watch" call.
@@ -14257,7 +16148,7 @@ func (c *UsersWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 	//       "type": "string"
 	//     },
 	//     "customer": {
-	//       "description": "Immutable id of the Google Apps account. In case of multi-domain, to fetch all users for a customer, fill this field instead of domain.",
+	//       "description": "Immutable ID of the G Suite account. In case of multi-domain, to fetch all users for a customer, fill this field instead of domain.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -14392,6 +16283,7 @@ type UsersAliasesDeleteCall struct {
 	alias      string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Remove a alias for the user
@@ -14418,8 +16310,20 @@ func (c *UsersAliasesDeleteCall) Context(ctx context.Context) *UsersAliasesDelet
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersAliasesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersAliasesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -14431,10 +16335,7 @@ func (c *UsersAliasesDeleteCall) doRequest(alt string) (*http.Response, error) {
 		"userKey": c.userKey,
 		"alias":   c.alias,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.aliases.delete" call.
@@ -14488,6 +16389,7 @@ type UsersAliasesInsertCall struct {
 	alias      *Alias
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Insert: Add a alias for the user
@@ -14514,8 +16416,20 @@ func (c *UsersAliasesInsertCall) Context(ctx context.Context) *UsersAliasesInser
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersAliasesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersAliasesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.alias)
@@ -14531,10 +16445,7 @@ func (c *UsersAliasesInsertCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.aliases.insert" call.
@@ -14612,6 +16523,7 @@ type UsersAliasesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: List all aliases for a user
@@ -14658,8 +16570,20 @@ func (c *UsersAliasesListCall) Context(ctx context.Context) *UsersAliasesListCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersAliasesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -14673,10 +16597,7 @@ func (c *UsersAliasesListCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.aliases.list" call.
@@ -14767,6 +16688,7 @@ type UsersAliasesWatchCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Watch: Watch for changes in user aliases list
@@ -14804,8 +16726,20 @@ func (c *UsersAliasesWatchCall) Context(ctx context.Context) *UsersAliasesWatchC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersAliasesWatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersAliasesWatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
@@ -14821,10 +16755,7 @@ func (c *UsersAliasesWatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.aliases.watch" call.
@@ -14918,6 +16849,7 @@ type UsersPhotosDeleteCall struct {
 	userKey    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Delete: Remove photos for the user
@@ -14943,8 +16875,20 @@ func (c *UsersPhotosDeleteCall) Context(ctx context.Context) *UsersPhotosDeleteC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersPhotosDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersPhotosDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -14955,10 +16899,7 @@ func (c *UsersPhotosDeleteCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.photos.delete" call.
@@ -15004,6 +16945,7 @@ type UsersPhotosGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // Get: Retrieve photo of a user
@@ -15039,8 +16981,20 @@ func (c *UsersPhotosGetCall) Context(ctx context.Context) *UsersPhotosGetCall {
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersPhotosGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersPhotosGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -15054,10 +17008,7 @@ func (c *UsersPhotosGetCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.photos.get" call.
@@ -15132,6 +17083,7 @@ type UsersPhotosPatchCall struct {
 	userphoto  *UserPhoto
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Patch: Add a photo for the user. This method supports patch
@@ -15159,8 +17111,20 @@ func (c *UsersPhotosPatchCall) Context(ctx context.Context) *UsersPhotosPatchCal
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersPhotosPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersPhotosPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.userphoto)
@@ -15176,10 +17140,7 @@ func (c *UsersPhotosPatchCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.photos.patch" call.
@@ -15256,6 +17217,7 @@ type UsersPhotosUpdateCall struct {
 	userphoto  *UserPhoto
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Update: Add a photo for the user
@@ -15282,8 +17244,20 @@ func (c *UsersPhotosUpdateCall) Context(ctx context.Context) *UsersPhotosUpdateC
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UsersPhotosUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *UsersPhotosUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.userphoto)
@@ -15299,10 +17273,7 @@ func (c *UsersPhotosUpdateCall) doRequest(alt string) (*http.Response, error) {
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.users.photos.update" call.
@@ -15378,6 +17349,7 @@ type VerificationCodesGenerateCall struct {
 	userKey    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Generate: Generate new backup verification codes for the user.
@@ -15403,8 +17375,20 @@ func (c *VerificationCodesGenerateCall) Context(ctx context.Context) *Verificati
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *VerificationCodesGenerateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *VerificationCodesGenerateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -15415,10 +17399,7 @@ func (c *VerificationCodesGenerateCall) doRequest(alt string) (*http.Response, e
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.verificationCodes.generate" call.
@@ -15463,6 +17444,7 @@ type VerificationCodesInvalidateCall struct {
 	userKey    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
+	header_    http.Header
 }
 
 // Invalidate: Invalidate the current backup verification codes for the
@@ -15489,8 +17471,20 @@ func (c *VerificationCodesInvalidateCall) Context(ctx context.Context) *Verifica
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *VerificationCodesInvalidateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *VerificationCodesInvalidateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
@@ -15501,10 +17495,7 @@ func (c *VerificationCodesInvalidateCall) doRequest(alt string) (*http.Response,
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.verificationCodes.invalidate" call.
@@ -15550,6 +17541,7 @@ type VerificationCodesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
+	header_      http.Header
 }
 
 // List: Returns the current set of valid backup verification codes for
@@ -15586,8 +17578,20 @@ func (c *VerificationCodesListCall) Context(ctx context.Context) *VerificationCo
 	return c
 }
 
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *VerificationCodesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
 func (c *VerificationCodesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
@@ -15601,10 +17605,7 @@ func (c *VerificationCodesListCall) doRequest(alt string) (*http.Response, error
 	googleapi.Expand(req.URL, map[string]string{
 		"userKey": c.userKey,
 	})
-	if c.ctx_ != nil {
-		return ctxhttp.Do(c.ctx_, c.s.client, req)
-	}
-	return c.s.client.Do(req)
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "directory.verificationCodes.list" call.

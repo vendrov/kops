@@ -19,22 +19,18 @@ package types
 import (
 	"fmt"
 
-	"k8s.io/kubernetes/pkg/api/v1"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubeapi "k8s.io/kubernetes/pkg/api"
 )
 
-const ConfigSourceAnnotationKey = "kubernetes.io/config.source"
-const ConfigMirrorAnnotationKey = "kubernetes.io/config.mirror"
-const ConfigFirstSeenAnnotationKey = "kubernetes.io/config.seen"
-const ConfigHashAnnotationKey = "kubernetes.io/config.hash"
-
-// This key needs to sync with the key used by the rescheduler, which currently
-// lives in contrib. Its presence indicates 2 things, as far as the kubelet is
-// concerned:
-// 1. Resource related admission checks will prioritize the admission of
-//    pods bearing the key, over pods without the key, regardless of QoS.
-// 2. The OOM score of pods bearing the key will be <= pods without
-//    the key (where the <= part is determied by QoS).
-const CriticalPodAnnotationKey = "scheduler.alpha.kubernetes.io/critical-pod"
+const (
+	ConfigSourceAnnotationKey    = "kubernetes.io/config.source"
+	ConfigMirrorAnnotationKey    = v1.MirrorPodAnnotationKey
+	ConfigFirstSeenAnnotationKey = "kubernetes.io/config.seen"
+	ConfigHashAnnotationKey      = "kubernetes.io/config.hash"
+	CriticalPodAnnotationKey     = "scheduler.alpha.kubernetes.io/critical-pod"
+)
 
 // PodOperation defines what changes will be made on a pod configuration.
 type PodOperation int
@@ -64,7 +60,7 @@ const (
 	// Updates from all sources
 	AllSource = "*"
 
-	NamespaceDefault = v1.NamespaceDefault
+	NamespaceDefault = metav1.NamespaceDefault
 )
 
 // PodUpdate defines an operation sent on the channel. You can add or remove single services by
@@ -145,6 +141,19 @@ func (sp SyncPodType) String() string {
 // key. Both the rescheduler and the kubelet use this key to make admission
 // and scheduling decisions.
 func IsCriticalPod(pod *v1.Pod) bool {
-	_, ok := pod.Annotations[CriticalPodAnnotationKey]
-	return ok
+	return IsCritical(pod.Namespace, pod.Annotations)
+}
+
+// IsCritical returns true if parameters bear the critical pod annotation
+// key. The DaemonSetController use this key directly to make scheduling decisions.
+func IsCritical(ns string, annotations map[string]string) bool {
+	// Critical pods are restricted to "kube-system" namespace as of now.
+	if ns != kubeapi.NamespaceSystem {
+		return false
+	}
+	val, ok := annotations[CriticalPodAnnotationKey]
+	if ok && val == "" {
+		return true
+	}
+	return false
 }

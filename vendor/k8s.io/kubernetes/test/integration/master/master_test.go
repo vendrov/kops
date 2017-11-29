@@ -1,5 +1,3 @@
-// +build integration,!no-etcd
-
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -33,23 +31,43 @@ import (
 
 	"github.com/ghodss/yaml"
 
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apiserver/pkg/authentication/group"
+	"k8s.io/apiserver/pkg/authentication/request/bearertoken"
+	"k8s.io/apiserver/pkg/authentication/user"
+	"k8s.io/apiserver/pkg/authorization/authorizer"
+	"k8s.io/apiserver/pkg/authorization/authorizerfactory"
+	"k8s.io/apiserver/plugin/pkg/authenticator/token/tokentest"
+	clienttypedv1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/errors"
 	"k8s.io/kubernetes/pkg/api/testapi"
-	"k8s.io/kubernetes/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/apimachinery/registered"
-	metav1 "k8s.io/kubernetes/pkg/apis/meta/v1"
-	clienttypedv1 "k8s.io/kubernetes/pkg/client/clientset_generated/clientset/typed/core/v1"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/restclient"
-	"k8s.io/kubernetes/pkg/util/wait"
+	"k8s.io/kubernetes/pkg/master"
 	"k8s.io/kubernetes/test/integration"
 	"k8s.io/kubernetes/test/integration/framework"
 )
 
+const (
+	AliceToken string = "abc123" // username: alice.  Present in token file.
+	BobToken   string = "xyz987" // username: bob.  Present in token file.
+)
+
+type allowAliceAuthorizer struct{}
+
+func (allowAliceAuthorizer) Authorize(a authorizer.Attributes) (bool, string, error) {
+	if a.GetUser() != nil && a.GetUser().GetName() == "alice" {
+		return true, "", nil
+	}
+	return false, "I can't allow that.  Go ask alice.", nil
+}
+
 func testPrefix(t *testing.T, prefix string) {
-	_, s := framework.RunAMaster(nil)
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
 
 	resp, err := http.Get(s.URL + prefix)
 	if err != nil {
@@ -76,9 +94,140 @@ func TestExtensionsPrefix(t *testing.T) {
 	testPrefix(t, "/apis/extensions/")
 }
 
+func TestKubernetesService(t *testing.T) {
+	config := framework.NewMasterConfig()
+	_, _, closeFn := framework.RunAMaster(config)
+	defer closeFn()
+	coreClient := clientset.NewForConfigOrDie(config.GenericConfig.LoopbackClientConfig)
+	if _, err := coreClient.Core().Services(metav1.NamespaceDefault).Get("kubernetes", metav1.GetOptions{}); err != nil {
+		t.Fatalf("Expected kubernetes service to exists, got: %v", err)
+	}
+}
+
+func TestEmptyList(t *testing.T) {
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
+
+	u := s.URL + "/api/v1/namespaces/default/pods"
+	resp, err := http.Get(u)
+	if err != nil {
+		t.Fatalf("unexpected error getting %s: %v", u, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("got status %v instead of 200 OK", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+	data, _ := ioutil.ReadAll(resp.Body)
+	decodedData := map[string]interface{}{}
+	if err := json.Unmarshal(data, &decodedData); err != nil {
+		t.Logf("body: %s", string(data))
+		t.Fatalf("got error decoding data: %v", err)
+	}
+	if items, ok := decodedData["items"]; !ok {
+		t.Logf("body: %s", string(data))
+		t.Fatalf("missing items field in empty list (all lists should return an items field)")
+	} else if items == nil {
+		t.Logf("body: %s", string(data))
+		t.Fatalf("nil items field from empty list (all lists should return non-nil empty items lists)")
+	}
+}
+
+func initStatusForbiddenMasterCongfig() *master.Config {
+	masterConfig := framework.NewIntegrationTestMasterConfig()
+	masterConfig.GenericConfig.Authorizer = authorizerfactory.NewAlwaysDenyAuthorizer()
+	return masterConfig
+}
+
+func initUnauthorizedMasterCongfig() *master.Config {
+	masterConfig := framework.NewIntegrationTestMasterConfig()
+	tokenAuthenticator := tokentest.New()
+	tokenAuthenticator.Tokens[AliceToken] = &user.DefaultInfo{Name: "alice", UID: "1"}
+	tokenAuthenticator.Tokens[BobToken] = &user.DefaultInfo{Name: "bob", UID: "2"}
+	masterConfig.GenericConfig.Authenticator = group.NewGroupAdder(bearertoken.New(tokenAuthenticator), []string{user.AllAuthenticated})
+	masterConfig.GenericConfig.Authorizer = allowAliceAuthorizer{}
+	return masterConfig
+}
+
+func TestStatus(t *testing.T) {
+	testCases := []struct {
+		name         string
+		masterConfig *master.Config
+		statusCode   int
+		reqPath      string
+		reason       string
+		message      string
+	}{
+		{
+			name:         "404",
+			masterConfig: nil,
+			statusCode:   http.StatusNotFound,
+			reqPath:      "/apis/batch/v1/namespaces/default/jobs/foo",
+			reason:       "NotFound",
+			message:      `jobs.batch "foo" not found`,
+		},
+		{
+			name:         "403",
+			masterConfig: initStatusForbiddenMasterCongfig(),
+			statusCode:   http.StatusForbidden,
+			reqPath:      "/apis",
+			reason:       "Forbidden",
+			message:      `forbidden: User "" cannot get path "/apis": Everything is forbidden.`,
+		},
+		{
+			name:         "401",
+			masterConfig: initUnauthorizedMasterCongfig(),
+			statusCode:   http.StatusUnauthorized,
+			reqPath:      "/apis",
+			reason:       "Unauthorized",
+			message:      `Unauthorized`,
+		},
+	}
+
+	for _, tc := range testCases {
+		_, s, closeFn := framework.RunAMaster(tc.masterConfig)
+		defer closeFn()
+
+		u := s.URL + tc.reqPath
+		resp, err := http.Get(u)
+		if err != nil {
+			t.Fatalf("unexpected error getting %s: %v", u, err)
+		}
+		if resp.StatusCode != tc.statusCode {
+			t.Fatalf("got status %v instead of %s", resp.StatusCode, tc.name)
+		}
+		defer resp.Body.Close()
+		data, _ := ioutil.ReadAll(resp.Body)
+		decodedData := map[string]interface{}{}
+		if err := json.Unmarshal(data, &decodedData); err != nil {
+			t.Logf("body: %s", string(data))
+			t.Fatalf("got error decoding data: %v", err)
+		}
+		t.Logf("body: %s", string(data))
+
+		if got, expected := decodedData["apiVersion"], "v1"; got != expected {
+			t.Errorf("unexpected apiVersion %q, expected %q", got, expected)
+		}
+		if got, expected := decodedData["kind"], "Status"; got != expected {
+			t.Errorf("unexpected kind %q, expected %q", got, expected)
+		}
+		if got, expected := decodedData["status"], "Failure"; got != expected {
+			t.Errorf("unexpected status %q, expected %q", got, expected)
+		}
+		if got, expected := decodedData["code"], float64(tc.statusCode); got != expected {
+			t.Errorf("unexpected code %v, expected %v", got, expected)
+		}
+		if got, expected := decodedData["reason"], tc.reason; got != expected {
+			t.Errorf("unexpected reason %v, expected %v", got, expected)
+		}
+		if got, expected := decodedData["message"], tc.message; got != expected {
+			t.Errorf("unexpected message %v, expected %v", got, expected)
+		}
+	}
+}
+
 func TestWatchSucceedsWithoutArgs(t *testing.T) {
-	_, s := framework.RunAMaster(nil)
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
 
 	resp, err := http.Get(s.URL + "/api/v1/namespaces?watch=1")
 	if err != nil {
@@ -111,6 +260,60 @@ var hpaV1 string = `
 }
 `
 
+var deploymentExtensions string = `
+{
+  "apiVersion": "extensions/v1beta1",
+  "kind": "Deployment",
+  "metadata": {
+     "name": "test-deployment1",
+     "namespace": "default"
+  },
+  "spec": {
+    "replicas": 1,
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "nginx0"
+        }
+      },
+      "spec": {
+        "containers": [{
+          "name": "nginx",
+          "image": "gcr.io/google-containers/nginx:1.7.9"
+        }]
+      }
+    }
+  }
+}
+`
+
+var deploymentApps string = `
+{
+  "apiVersion": "apps/v1beta1",
+  "kind": "Deployment",
+  "metadata": {
+     "name": "test-deployment2",
+     "namespace": "default"
+  },
+  "spec": {
+    "replicas": 1,
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "nginx0"
+        }
+      },
+      "spec": {
+        "containers": [{
+          "name": "nginx",
+          "image": "gcr.io/google-containers/nginx:1.7.9"
+        }]
+      }
+    }
+  }
+}
+`
+
 func autoscalingPath(resource, namespace, name string) string {
 	return testapi.Autoscaling.ResourcePath(resource, namespace, name)
 }
@@ -123,9 +326,13 @@ func extensionsPath(resource, namespace, name string) string {
 	return testapi.Extensions.ResourcePath(resource, namespace, name)
 }
 
+func appsPath(resource, namespace, name string) string {
+	return testapi.Apps.ResourcePath(resource, namespace, name)
+}
+
 func TestAutoscalingGroupBackwardCompatibility(t *testing.T) {
-	_, s := framework.RunAMaster(nil)
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
 	transport := http.DefaultTransport
 
 	requests := []struct {
@@ -135,9 +342,61 @@ func TestAutoscalingGroupBackwardCompatibility(t *testing.T) {
 		expectedStatusCodes map[int]bool
 		expectedVersion     string
 	}{
-		{"POST", autoscalingPath("horizontalpodautoscalers", api.NamespaceDefault, ""), hpaV1, integration.Code201, ""},
-		{"GET", autoscalingPath("horizontalpodautoscalers", api.NamespaceDefault, ""), "", integration.Code200, testapi.Autoscaling.GroupVersion().String()},
-		{"GET", extensionsPath("horizontalpodautoscalers", api.NamespaceDefault, ""), "", integration.Code200, testapi.Extensions.GroupVersion().String()},
+		{"POST", autoscalingPath("horizontalpodautoscalers", metav1.NamespaceDefault, ""), hpaV1, integration.Code201, ""},
+		{"GET", autoscalingPath("horizontalpodautoscalers", metav1.NamespaceDefault, ""), "", integration.Code200, testapi.Autoscaling.GroupVersion().String()},
+	}
+
+	for _, r := range requests {
+		bodyBytes := bytes.NewReader([]byte(r.body))
+		req, err := http.NewRequest(r.verb, s.URL+r.URL, bodyBytes)
+		if err != nil {
+			t.Logf("case %v", r)
+			t.Fatalf("unexpected error: %v", err)
+		}
+		func() {
+			resp, err := transport.RoundTrip(req)
+			defer resp.Body.Close()
+			if err != nil {
+				t.Logf("case %v", r)
+				t.Fatalf("unexpected error: %v", err)
+			}
+			b, _ := ioutil.ReadAll(resp.Body)
+			body := string(b)
+			if _, ok := r.expectedStatusCodes[resp.StatusCode]; !ok {
+				t.Logf("case %v", r)
+				t.Errorf("Expected status one of %v, but got %v", r.expectedStatusCodes, resp.StatusCode)
+				t.Errorf("Body: %v", body)
+			}
+			if !strings.Contains(body, "\"apiVersion\":\""+r.expectedVersion) {
+				t.Logf("case %v", r)
+				t.Errorf("Expected version %v, got body %v", r.expectedVersion, body)
+			}
+		}()
+	}
+}
+
+func TestAppsGroupBackwardCompatibility(t *testing.T) {
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
+	transport := http.DefaultTransport
+
+	requests := []struct {
+		verb                string
+		URL                 string
+		body                string
+		expectedStatusCodes map[int]bool
+		expectedVersion     string
+	}{
+		// Post to extensions endpoint and get back from both: extensions and apps
+		{"POST", extensionsPath("deployments", metav1.NamespaceDefault, ""), deploymentExtensions, integration.Code201, ""},
+		{"GET", extensionsPath("deployments", metav1.NamespaceDefault, "test-deployment1"), "", integration.Code200, testapi.Extensions.GroupVersion().String()},
+		{"GET", appsPath("deployments", metav1.NamespaceDefault, "test-deployment1"), "", integration.Code200, testapi.Apps.GroupVersion().String()},
+		{"DELETE", extensionsPath("deployments", metav1.NamespaceDefault, "test-deployment1"), "", integration.Code200, testapi.Extensions.GroupVersion().String()},
+		// Post to apps endpoint and get back from both: apps and extensions
+		{"POST", appsPath("deployments", metav1.NamespaceDefault, ""), deploymentApps, integration.Code201, ""},
+		{"GET", appsPath("deployments", metav1.NamespaceDefault, "test-deployment2"), "", integration.Code200, testapi.Apps.GroupVersion().String()},
+		{"GET", extensionsPath("deployments", metav1.NamespaceDefault, "test-deployment2"), "", integration.Code200, testapi.Extensions.GroupVersion().String()},
+		{"DELETE", appsPath("deployments", metav1.NamespaceDefault, "test-deployment2"), "", integration.Code200, testapi.Apps.GroupVersion().String()},
 	}
 
 	for _, r := range requests {
@@ -170,8 +429,8 @@ func TestAutoscalingGroupBackwardCompatibility(t *testing.T) {
 }
 
 func TestAccept(t *testing.T) {
-	_, s := framework.RunAMaster(nil)
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(nil)
+	defer closeFn()
 
 	resp, err := http.Get(s.URL + "/api/")
 	if err != nil {
@@ -248,13 +507,13 @@ func countEndpoints(eps *api.Endpoints) int {
 }
 
 func TestMasterService(t *testing.T) {
-	_, s := framework.RunAMaster(framework.NewIntegrationTestMasterConfig())
-	defer s.Close()
+	_, s, closeFn := framework.RunAMaster(framework.NewIntegrationTestMasterConfig())
+	defer closeFn()
 
-	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: &registered.GroupOrDie(api.GroupName).GroupVersion}})
+	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: testapi.Groups[api.GroupName].GroupVersion()}})
 
 	err := wait.Poll(time.Second, time.Minute, func() (bool, error) {
-		svcList, err := client.Core().Services(api.NamespaceDefault).List(api.ListOptions{})
+		svcList, err := client.Core().Services(metav1.NamespaceDefault).List(metav1.ListOptions{})
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return false, nil
@@ -267,7 +526,7 @@ func TestMasterService(t *testing.T) {
 			}
 		}
 		if found {
-			ep, err := client.Core().Endpoints(api.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
+			ep, err := client.Core().Endpoints(metav1.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
 			if err != nil {
 				return false, nil
 			}
@@ -289,15 +548,15 @@ func TestServiceAlloc(t *testing.T) {
 	if err != nil {
 		t.Fatalf("bad cidr: %v", err)
 	}
-	cfg.ServiceIPRange = *cidr
-	_, s := framework.RunAMaster(cfg)
-	defer s.Close()
+	cfg.ExtraConfig.ServiceIPRange = *cidr
+	_, s, closeFn := framework.RunAMaster(cfg)
+	defer closeFn()
 
-	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: &registered.GroupOrDie(api.GroupName).GroupVersion}})
+	client := clientset.NewForConfigOrDie(&restclient.Config{Host: s.URL, ContentConfig: restclient.ContentConfig{GroupVersion: testapi.Groups[api.GroupName].GroupVersion()}})
 
 	svc := func(i int) *api.Service {
 		return &api.Service{
-			ObjectMeta: api.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: fmt.Sprintf("svc-%v", i),
 			},
 			Spec: api.ServiceSpec{
@@ -311,7 +570,7 @@ func TestServiceAlloc(t *testing.T) {
 
 	// Wait until the default "kubernetes" service is created.
 	if err = wait.Poll(250*time.Millisecond, time.Minute, func() (bool, error) {
-		_, err := client.Core().Services(api.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
+		_, err := client.Core().Services(metav1.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		}
@@ -322,18 +581,18 @@ func TestServiceAlloc(t *testing.T) {
 
 	// make 5 more services to take up all IPs
 	for i := 0; i < 5; i++ {
-		if _, err := client.Core().Services(api.NamespaceDefault).Create(svc(i)); err != nil {
+		if _, err := client.Core().Services(metav1.NamespaceDefault).Create(svc(i)); err != nil {
 			t.Error(err)
 		}
 	}
 
 	// Make another service. It will fail because we're out of cluster IPs
-	if _, err := client.Core().Services(api.NamespaceDefault).Create(svc(8)); err != nil {
+	if _, err := client.Core().Services(metav1.NamespaceDefault).Create(svc(8)); err != nil {
 		if !strings.Contains(err.Error(), "range is full") {
 			t.Errorf("unexpected error text: %v", err)
 		}
 	} else {
-		svcs, err := client.Core().Services(api.NamespaceAll).List(api.ListOptions{})
+		svcs, err := client.Core().Services(metav1.NamespaceAll).List(metav1.ListOptions{})
 		if err != nil {
 			t.Fatalf("unexpected success, and error getting the services: %v", err)
 		}
@@ -345,12 +604,12 @@ func TestServiceAlloc(t *testing.T) {
 	}
 
 	// Delete the first service.
-	if err := client.Core().Services(api.NamespaceDefault).Delete(svc(1).ObjectMeta.Name, nil); err != nil {
+	if err := client.Core().Services(metav1.NamespaceDefault).Delete(svc(1).ObjectMeta.Name, nil); err != nil {
 		t.Fatalf("got unexpected error: %v", err)
 	}
 
 	// This time creating the second service should work.
-	if _, err := client.Core().Services(api.NamespaceDefault).Create(svc(8)); err != nil {
+	if _, err := client.Core().Services(metav1.NamespaceDefault).Create(svc(8)); err != nil {
 		t.Fatalf("got unexpected error: %v", err)
 	}
 }
@@ -381,7 +640,7 @@ func TestUpdateNodeObjects(t *testing.T) {
 	for i := 0; i < nodes*6; i++ {
 		c.Nodes().Delete(fmt.Sprintf("node-%d", i), nil)
 		_, err := c.Nodes().Create(&v1.Node{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: fmt.Sprintf("node-%d", i),
 			},
 		})
@@ -393,7 +652,7 @@ func TestUpdateNodeObjects(t *testing.T) {
 	for k := 0; k < listers; k++ {
 		go func(lister int) {
 			for i := 0; i < iterations; i++ {
-				_, err := c.Nodes().List(v1.ListOptions{})
+				_, err := c.Nodes().List(metav1.ListOptions{})
 				if err != nil {
 					fmt.Printf("[list:%d] error after %d: %v\n", lister, i, err)
 					break
@@ -405,7 +664,7 @@ func TestUpdateNodeObjects(t *testing.T) {
 
 	for k := 0; k < watchers; k++ {
 		go func(lister int) {
-			w, err := c.Nodes().Watch(v1.ListOptions{})
+			w, err := c.Nodes().Watch(metav1.ListOptions{})
 			if err != nil {
 				fmt.Printf("[watch:%d] error: %v", k, err)
 				return
@@ -435,14 +694,14 @@ func TestUpdateNodeObjects(t *testing.T) {
 					fmt.Printf("[%d] iteration %d ...\n", node, i)
 				}
 				if i%20 == 0 {
-					_, err := c.Nodes().List(v1.ListOptions{})
+					_, err := c.Nodes().List(metav1.ListOptions{})
 					if err != nil {
 						fmt.Printf("[%d] error after %d: %v\n", node, i, err)
 						break
 					}
 				}
 
-				r, err := c.Nodes().List(v1.ListOptions{
+				r, err := c.Nodes().List(metav1.ListOptions{
 					FieldSelector:   fmt.Sprintf("metadata.name=node-%d", node),
 					ResourceVersion: "0",
 				})

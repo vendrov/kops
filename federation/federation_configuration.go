@@ -18,17 +18,18 @@ package federation
 
 import (
 	"fmt"
+
 	"github.com/golang/glog"
-	"k8s.io/kops/federation/targets/kubernetes"
+	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/kops/federation/targets/kubernetestarget"
 	kopsapi "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/kubeconfig"
+	"k8s.io/kops/pkg/pki"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/fitasks"
-	"k8s.io/kops/upup/pkg/kutil"
-	"k8s.io/kubernetes/pkg/api/errors"
-	"k8s.io/kubernetes/pkg/api/v1"
-	meta_v1 "k8s.io/kubernetes/pkg/apis/meta/v1"
-	k8s_clientset "k8s.io/kubernetes/pkg/client/clientset_generated/clientset"
 )
 
 const UserAdmin = "admin"
@@ -43,12 +44,12 @@ type FederationConfiguration struct {
 	KubeconfigSecretName string
 }
 
-func (o *FederationConfiguration) extractKubecfg(c *fi.Context, f *kopsapi.Federation) (*kutil.KubeconfigBuilder, error) {
+func (o *FederationConfiguration) extractKubecfg(c *fi.Context, f *kopsapi.Federation) (*kubeconfig.KubeconfigBuilder, error) {
 	// TODO: move this
 	masterName := "api." + f.Spec.DNSName
 
-	k := kutil.NewKubeconfigBuilder()
-	k.KubeMasterIP = masterName
+	k := kubeconfig.NewKubeconfigBuilder()
+	k.Server = "https://" + masterName
 	k.Context = "federation-" + f.ObjectMeta.Name
 
 	// CA Cert
@@ -65,7 +66,7 @@ func (o *FederationConfiguration) extractKubecfg(c *fi.Context, f *kopsapi.Feder
 		return nil, err
 	}
 
-	k8s := c.Target.(*kubernetes.KubernetesTarget).KubernetesClient
+	k8s := c.Target.(*kubernetestarget.KubernetesTarget).KubernetesClient
 
 	// Basic auth
 	secret, err := findSecret(k8s, o.Namespace, o.ApiserverSecretName)
@@ -168,7 +169,7 @@ func (o *FederationConfiguration) EnsureConfiguration(c *fi.Context) error {
 		return fmt.Errorf("cannot find server keypair")
 	}
 
-	k8s := c.Target.(*kubernetes.KubernetesTarget).KubernetesClient
+	k8s := c.Target.(*kubernetestarget.KubernetesTarget).KubernetesClient
 
 	adminPassword := ""
 	//adminToken := ""
@@ -259,7 +260,9 @@ func (o *FederationConfiguration) EnsureConfiguration(c *fi.Context) error {
 
 		return s, nil
 	})
-
+	if err != nil {
+		return fmt.Errorf("error mutating secret: %s", err)
+	}
 	// TODO: Prefer username / password or token?
 	user := kubeconfig.KubectlUser{
 		Username: UserAdmin,
@@ -274,8 +277,8 @@ func (o *FederationConfiguration) EnsureConfiguration(c *fi.Context) error {
 	return nil
 }
 
-func (o *FederationConfiguration) ensureSecretKubeconfig(c *fi.Context, caCert *fi.Certificate, user kubeconfig.KubectlUser) error {
-	k8s := c.Target.(*kubernetes.KubernetesTarget).KubernetesClient
+func (o *FederationConfiguration) ensureSecretKubeconfig(c *fi.Context, caCert *pki.Certificate, user kubeconfig.KubectlUser) error {
+	k8s := c.Target.(*kubernetestarget.KubernetesTarget).KubernetesClient
 
 	_, err := mutateSecret(k8s, o.Namespace, o.KubeconfigSecretName, func(s *v1.Secret) (*v1.Secret, error) {
 		var kubeconfigData []byte
@@ -341,11 +344,11 @@ func (o *FederationConfiguration) ensureSecretKubeconfig(c *fi.Context, caCert *
 	return err
 }
 
-func findSecret(k8s k8s_clientset.Interface, namespace, name string) (*v1.Secret, error) {
+func findSecret(k8s kubernetes.Interface, namespace, name string) (*v1.Secret, error) {
 	glog.V(2).Infof("querying k8s for secret %s/%s", namespace, name)
-	s, err := k8s.Core().Secrets(namespace).Get(name, meta_v1.GetOptions{})
+	s, err := k8s.CoreV1().Secrets(namespace).Get(name, meta_v1.GetOptions{})
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			return nil, nil
 		} else {
 			return nil, fmt.Errorf("error reading secret %s/%s: %v", namespace, name, err)
@@ -354,7 +357,7 @@ func findSecret(k8s k8s_clientset.Interface, namespace, name string) (*v1.Secret
 	return s, nil
 }
 
-func mutateSecret(k8s k8s_clientset.Interface, namespace string, name string, fn func(s *v1.Secret) (*v1.Secret, error)) (*v1.Secret, error) {
+func mutateSecret(k8s kubernetes.Interface, namespace string, name string, fn func(s *v1.Secret) (*v1.Secret, error)) (*v1.Secret, error) {
 	existing, err := findSecret(k8s, namespace, name)
 	if err != nil {
 		return nil, err
@@ -370,7 +373,7 @@ func mutateSecret(k8s k8s_clientset.Interface, namespace string, name string, fn
 
 	if createObject {
 		glog.V(2).Infof("creating k8s secret %s/%s", namespace, name)
-		created, err := k8s.Core().Secrets(namespace).Create(updated)
+		created, err := k8s.CoreV1().Secrets(namespace).Create(updated)
 		if err != nil {
 			return nil, fmt.Errorf("error creating secret %s/%s: %v", namespace, name, err)
 		}

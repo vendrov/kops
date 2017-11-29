@@ -19,18 +19,20 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/blang/semver"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kops"
 	api "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/apis/kops/util"
 	"k8s.io/kops/pkg/apis/kops/validation"
+	"k8s.io/kops/pkg/assets"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup"
 	"k8s.io/kops/util/pkg/tables"
-	k8sapi "k8s.io/kubernetes/pkg/api"
 )
 
 type UpgradeClusterCmd struct {
@@ -43,9 +45,10 @@ var upgradeCluster UpgradeClusterCmd
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "cluster",
-		Short: "Upgrade cluster",
-		Long:  `Upgrades a k8s cluster.`,
+		Use:     "cluster",
+		Short:   upgrade_short,
+		Long:    upgrade_long,
+		Example: upgrade_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := upgradeCluster.Run(args)
 			if err != nil {
@@ -85,7 +88,7 @@ func (c *UpgradeClusterCmd) Run(args []string) error {
 		return err
 	}
 
-	list, err := clientset.InstanceGroups(cluster.ObjectMeta.Name).List(k8sapi.ListOptions{})
+	list, err := clientset.InstanceGroupsFor(cluster).List(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -202,17 +205,21 @@ func (c *UpgradeClusterCmd) Run(args []string) error {
 			glog.Warningf("No matching images specified in channel; cannot prompt for upgrade")
 		} else {
 			for _, ig := range instanceGroups {
-				if ig.Spec.Image != image.Name {
-					target := ig
-					actions = append(actions, &upgradeAction{
-						Item:     "InstanceGroup/" + target.ObjectMeta.Name,
-						Property: "Image",
-						Old:      target.Spec.Image,
-						New:      image.Name,
-						apply: func() {
-							target.Spec.Image = image.Name
-						},
-					})
+				if strings.Contains(ig.Spec.Image, "kope.io") {
+					if ig.Spec.Image != image.Name {
+						target := ig
+						actions = append(actions, &upgradeAction{
+							Item:     "InstanceGroup/" + target.ObjectMeta.Name,
+							Property: "Image",
+							Old:      target.Spec.Image,
+							New:      image.Name,
+							apply: func() {
+								target.Spec.Image = image.Name
+							},
+						})
+					}
+				} else {
+					glog.Infof("Custom image (%s) has been provided for Instance Group %q; not updating image", ig.Spec.Image, ig.GetName())
 				}
 			}
 		}
@@ -282,7 +289,8 @@ func (c *UpgradeClusterCmd) Run(args []string) error {
 			return fmt.Errorf("error populating configuration: %v", err)
 		}
 
-		fullCluster, err := cloudup.PopulateClusterSpec(cluster)
+		assetBuilder := assets.NewAssetBuilder(cluster.Spec.Assets)
+		fullCluster, err := cloudup.PopulateClusterSpec(clientset, cluster, assetBuilder)
 		if err != nil {
 			return err
 		}
@@ -292,14 +300,21 @@ func (c *UpgradeClusterCmd) Run(args []string) error {
 			return err
 		}
 
+		// Retrieve the current status of the cluster.  This will eventually be part of the cluster object.
+		statusDiscovery := &cloudDiscoveryStatusStore{}
+		status, err := statusDiscovery.FindClusterStatus(cluster)
+		if err != nil {
+			return err
+		}
+
 		// Note we perform as much validation as we can, before writing a bad config
-		_, err = clientset.Clusters().Update(cluster)
+		_, err = clientset.UpdateCluster(cluster, status)
 		if err != nil {
 			return err
 		}
 
 		for _, g := range instanceGroups {
-			_, err := clientset.InstanceGroups(cluster.ObjectMeta.Name).Update(g)
+			_, err := clientset.InstanceGroupsFor(cluster).Update(g)
 			if err != nil {
 				return fmt.Errorf("error writing InstanceGroup %q: %v", g.ObjectMeta.Name, err)
 			}
