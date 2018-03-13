@@ -39,10 +39,10 @@ var _ fi.ModelBuilder = &NetworkModelBuilder{}
 func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 	sharedVPC := b.Cluster.SharedVPC()
 	vpcName := b.ClusterName()
+	tags := b.CloudTags(vpcName, sharedVPC)
 
 	// VPC that holds everything for the cluster
 	{
-		tags := b.CloudTags(vpcName, sharedVPC)
 
 		t := &awstasks.VPC{
 			Name:             s(vpcName),
@@ -78,6 +78,9 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Name:              s(b.ClusterName()),
 			Lifecycle:         b.Lifecycle,
 			DomainNameServers: s("AmazonProvidedDNS"),
+
+			Tags:   tags,
+			Shared: fi.Bool(sharedVPC),
 		}
 		if b.Region == "us-east-1" {
 			dhcp.DomainName = s("ec2.internal")
@@ -114,6 +117,8 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Lifecycle: b.Lifecycle,
 			VPC:       b.LinkToVPC(),
 			Shared:    fi.Bool(sharedVPC),
+
+			Tags: tags,
 		}
 		c.AddTask(igw)
 
@@ -123,6 +128,9 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 				Lifecycle: b.Lifecycle,
 
 				VPC: b.LinkToVPC(),
+
+				Tags:   tags,
+				Shared: fi.Bool(sharedVPC),
 			}
 			c.AddTask(publicRouteTable)
 
@@ -156,6 +164,8 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 		default:
 			glog.V(2).Infof("unable to properly tag subnet %q because it has unknown type %q. Load balancers may be created in incorrect subnets", subnetSpec.Name, subnetSpec.Type)
 		}
+
+		tags["SubnetType"] = string(subnetSpec.Type)
 
 		subnet := &awstasks.Subnet{
 			Name:             s(subnetName),
@@ -225,6 +235,7 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 					AssociatedRouteTable: b.LinkToPrivateRouteTableInZone(zone),
 					// If we're here, it means this NatGateway was specified, so we are Shared
 					Shared: fi.Bool(true),
+					Tags:   b.CloudTags(zone+"."+b.ClusterName(), true),
 				}
 
 				c.AddTask(ngw)
@@ -239,11 +250,15 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			// subnet needs a NGW, lets create it. We tie it to a subnet
 			// so we can track it in AWS
 			var eip = &awstasks.ElasticIP{}
-
 			eip = &awstasks.ElasticIP{
 				Name:                           s(zone + "." + b.ClusterName()),
 				Lifecycle:                      b.Lifecycle,
 				AssociatedNatGatewayRouteTable: b.LinkToPrivateRouteTableInZone(zone),
+			}
+
+			if b.Cluster.Spec.Subnets[i].PublicIP != "" {
+				eip.PublicIP = s(b.Cluster.Spec.Subnets[i].PublicIP)
+				eip.Tags = b.CloudTags(*eip.Name, true)
 			}
 
 			c.AddTask(eip)
@@ -262,8 +277,27 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 				Subnet:               utilitySubnet,
 				ElasticIP:            eip,
 				AssociatedRouteTable: b.LinkToPrivateRouteTableInZone(zone),
+				Tags:                 b.CloudTags(zone+"."+b.ClusterName(), false),
 			}
 			c.AddTask(ngw)
+		}
+
+		// kops needs to have the correct shared or owned tag on private route tables,
+		// but the 'Name' tag  for the private route table does not match the standard
+		// 'Name' tag value.
+		// Making a copy of the map to use for private route tables, and maintaining the 'Name'
+		// tag with a value like "private-us-test-1a.privatedns1.example.com" instead of using
+		// the usual value like "privatedns1.example.com".
+		privateTags := make(map[string]string)
+		for k, v := range tags {
+			privateTags[k] = v
+		}
+		// We do not set the Name on shared resources remove it if it exists
+		// otherwise set it.
+		if sharedVPC {
+			delete(privateTags, "Name")
+		} else {
+			privateTags["Name"] = b.NamePrivateRouteTableInZone(zone)
 		}
 
 		// Private Route Table
@@ -273,6 +307,9 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Name:      s(b.NamePrivateRouteTableInZone(zone)),
 			VPC:       b.LinkToVPC(),
 			Lifecycle: b.Lifecycle,
+
+			Shared: fi.Bool(sharedVPC),
+			Tags:   privateTags,
 		}
 		c.AddTask(rt)
 

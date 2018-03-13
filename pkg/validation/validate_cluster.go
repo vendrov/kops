@@ -29,10 +29,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/apis/kops/util"
-	"k8s.io/kops/upup/pkg/fi"
 )
 
-// A cluster to validate
+// ValidationCluster a cluster to validate.
 type ValidationCluster struct {
 	MastersReady         bool              `json:"mastersReady,omitempty"`
 	MastersReadyArray    []*ValidationNode `json:"mastersReadyArray,omitempty"`
@@ -46,11 +45,15 @@ type ValidationCluster struct {
 
 	NodeList *v1.NodeList `json:"nodeList,omitempty"`
 
-	ComponentFailures []string `json:"componentFailures,omitempty"`
-	PodFailures       []string `json:"podFailures,omitempty"`
+	ComponentFailures []string              `json:"componentFailures,omitempty"`
+	PodFailures       []string              `json:"podFailures,omitempty"`
+	ErrorMessage      string                `json:"errorMessage,omitempty"`
+	Status            string                `json:"status"`
+	ClusterName       string                `json:"clusterName"`
+	InstanceGroups    []*kops.InstanceGroup `json:"instanceGroups,omitempty"`
 }
 
-// A K8s node to be validated
+// ValidationNode is A K8s node to be validated.
 type ValidationNode struct {
 	Zone     string             `json:"zone,omitempty"`
 	Role     string             `json:"role,omitempty"`
@@ -58,7 +61,12 @@ type ValidationNode struct {
 	Status   v1.ConditionStatus `json:"status,omitempty"`
 }
 
-// HasPlaceHolderIP checks if the API DNS has been updated
+const (
+	ClusterValidationFailed = "FAILED"
+	ClusterValidationPassed = "PASSED"
+)
+
+// HasPlaceHolderIP checks if the API DNS has been updated.
 func HasPlaceHolderIP(clusterName string) (bool, error) {
 
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -87,20 +95,14 @@ func HasPlaceHolderIP(clusterName string) (bool, error) {
 // ValidateCluster validate a k8s cluster with a provided instance group list
 func ValidateCluster(clusterName string, instanceGroupList *kops.InstanceGroupList, clusterKubernetesClient kubernetes.Interface) (*ValidationCluster, error) {
 	var instanceGroups []*kops.InstanceGroup
-	validationCluster := &ValidationCluster{}
 
 	for i := range instanceGroupList.Items {
 		ig := &instanceGroupList.Items[i]
 		instanceGroups = append(instanceGroups, ig)
-		if ig.Spec.Role == kops.InstanceGroupRoleMaster {
-			validationCluster.MastersCount += int(fi.Int32Value(ig.Spec.MinSize))
-		} else if ig.Spec.Role == kops.InstanceGroupRoleNode {
-			validationCluster.NodesCount += int(fi.Int32Value(ig.Spec.MinSize))
-		}
 	}
 
 	if len(instanceGroups) == 0 {
-		return validationCluster, fmt.Errorf("no InstanceGroup objects found")
+		return nil, fmt.Errorf("no InstanceGroup objects found")
 	}
 
 	timeout, err := time.ParseDuration("10s")
@@ -111,6 +113,12 @@ func ValidateCluster(clusterName string, instanceGroupList *kops.InstanceGroupLi
 	nodeAA, err := NewNodeAPIAdapter(clusterKubernetesClient, timeout)
 	if err != nil {
 		return nil, fmt.Errorf("error building node adapter for %q: %v", clusterName, err)
+	}
+
+	validationCluster := &ValidationCluster{
+		ClusterName:    clusterName,
+		ErrorMessage:   ClusterValidationPassed,
+		InstanceGroups: instanceGroups,
 	}
 
 	validationCluster.NodeList, err = nodeAA.GetAllNodes()
@@ -167,9 +175,11 @@ func validateTheNodes(clusterName string, validationCluster *ValidationCluster) 
 	nodes := validationCluster.NodeList
 
 	if nodes == nil || len(nodes.Items) == 0 {
-		return validationCluster, fmt.Errorf("No nodes found in validationCluster")
+		return nil, fmt.Errorf("No nodes found in validationCluster")
 	}
-
+	// Needed for when NodesCount and MastersCounts are predefined, i.e tests
+	presetNodeCount := validationCluster.NodesCount == 0
+	presetMasterCount := validationCluster.MastersCount == 0
 	for i := range nodes.Items {
 		node := &nodes.Items[i]
 
@@ -189,12 +199,18 @@ func validateTheNodes(clusterName string, validationCluster *ValidationCluster) 
 
 		// TODO: Use instance group role instead...
 		if n.Role == "master" {
+			if presetMasterCount {
+				validationCluster.MastersCount++
+			}
 			if ready {
 				validationCluster.MastersReadyArray = append(validationCluster.MastersReadyArray, n)
 			} else {
 				validationCluster.MastersNotReadyArray = append(validationCluster.MastersNotReadyArray, n)
 			}
 		} else if n.Role == "node" {
+			if presetNodeCount {
+				validationCluster.NodesCount++
+			}
 			if ready {
 				validationCluster.NodesReadyArray = append(validationCluster.NodesReadyArray, n)
 			} else {
@@ -215,19 +231,27 @@ func validateTheNodes(clusterName string, validationCluster *ValidationCluster) 
 	}
 
 	if !validationCluster.MastersReady {
-		return validationCluster, fmt.Errorf("your masters are NOT ready %s", clusterName)
+		validationCluster.Status = ClusterValidationFailed
+		validationCluster.ErrorMessage = fmt.Sprintf("your masters are NOT ready %s", clusterName)
+		return validationCluster, fmt.Errorf(validationCluster.ErrorMessage)
 	}
 
 	if !validationCluster.NodesReady {
-		return validationCluster, fmt.Errorf("your nodes are NOT ready %s", clusterName)
+		validationCluster.Status = ClusterValidationFailed
+		validationCluster.ErrorMessage = fmt.Sprintf("your nodes are NOT ready %s", clusterName)
+		return validationCluster, fmt.Errorf(validationCluster.ErrorMessage)
 	}
 
 	if len(validationCluster.ComponentFailures) != 0 {
-		return validationCluster, fmt.Errorf("your components are NOT healthy %s", clusterName)
+		validationCluster.Status = ClusterValidationFailed
+		validationCluster.ErrorMessage = fmt.Sprintf("your components are NOT healthy %s", clusterName)
+		return validationCluster, fmt.Errorf(validationCluster.ErrorMessage)
 	}
 
 	if len(validationCluster.PodFailures) != 0 {
-		return validationCluster, fmt.Errorf("your kube-system pods are NOT healthy %s", clusterName)
+		validationCluster.Status = ClusterValidationFailed
+		validationCluster.ErrorMessage = fmt.Sprintf("your kube-system pods are NOT healthy %s", clusterName)
+		return validationCluster, fmt.Errorf(validationCluster.ErrorMessage)
 	}
 
 	return validationCluster, nil

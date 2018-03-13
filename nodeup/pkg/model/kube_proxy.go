@@ -18,12 +18,12 @@ package model
 
 import (
 	"fmt"
-	"strings"
 
 	"k8s.io/kops/pkg/dns"
 	"k8s.io/kops/pkg/flagbuilder"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
+	"k8s.io/kops/util/pkg/exec"
 
 	"github.com/golang/glog"
 	"k8s.io/api/core/v1"
@@ -124,9 +124,38 @@ func (b *KubeProxyBuilder) buildPod() (*v1.Pod, error) {
 		}
 	}
 
+	resourceRequests := v1.ResourceList{}
+	resourceLimits := v1.ResourceList{}
+
 	cpuRequest, err := resource.ParseQuantity(c.CPURequest)
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing CPURequest=%q", c.CPURequest)
+	}
+
+	resourceRequests["cpu"] = cpuRequest
+
+	if c.CPULimit != "" {
+		cpuLimit, err := resource.ParseQuantity(c.CPULimit)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing CPULimit=%q", c.CPULimit)
+		}
+		resourceLimits["cpu"] = cpuLimit
+	}
+
+	if c.MemoryRequest != "" {
+		memoryRequest, err := resource.ParseQuantity(c.MemoryRequest)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing MemoryRequest=%q", c.MemoryRequest)
+		}
+		resourceRequests["memory"] = memoryRequest
+	}
+
+	if c.MemoryLimit != "" {
+		memoryLimit, err := resource.ParseQuantity(c.MemoryLimit)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing MemoryLimit=%q", c.MemoryLimit)
+		}
+		resourceLimits["memory"] = memoryLimit
 	}
 
 	flags, err := flagbuilder.BuildFlagsList(c)
@@ -144,14 +173,13 @@ func (b *KubeProxyBuilder) buildPod() (*v1.Pod, error) {
 	container := &v1.Container{
 		Name:  "kube-proxy",
 		Image: image,
-		Command: []string{
-			"/bin/sh", "-c",
-			"/usr/local/bin/kube-proxy " + strings.Join(sortedStrings(flags), " ") + " 2>&1 | /usr/bin/tee -a /var/log/kube-proxy.log",
-		},
+		Command: exec.WithTee(
+			"/usr/local/bin/kube-proxy",
+			sortedStrings(flags),
+			"/var/log/kube-proxy.log"),
 		Resources: v1.ResourceRequirements{
-			Requests: v1.ResourceList{
-				"cpu": cpuRequest,
-			},
+			Requests: resourceRequests,
+			Limits:   resourceLimits,
 		},
 		SecurityContext: &v1.SecurityContext{
 			Privileged: fi.Bool(true),
@@ -176,6 +204,8 @@ func (b *KubeProxyBuilder) buildPod() (*v1.Pod, error) {
 	{
 		addHostPathMapping(pod, container, "kubeconfig", "/var/lib/kube-proxy/kubeconfig")
 		addHostPathMapping(pod, container, "logfile", "/var/log/kube-proxy.log").ReadOnly = false
+		// @note: mapping the host modules directory to fix the missing ipvs kernel module
+		addHostPathMapping(pod, container, "modules", "/lib/modules")
 
 		// Map SSL certs from host: /usr/share/ca-certificates -> /etc/ssl/certs
 		sslCertsHost := addHostPathMapping(pod, container, "ssl-certs-hosts", "/usr/share/ca-certificates")

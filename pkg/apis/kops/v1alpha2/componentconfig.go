@@ -46,6 +46,9 @@ type KubeletConfigSpec struct {
 	EnableDebuggingHandlers *bool `json:"enableDebuggingHandlers,omitempty" flag:"enable-debugging-handlers"`
 	// RegisterNode enables automatic registration with the apiserver.
 	RegisterNode *bool `json:"registerNode,omitempty" flag:"register-node"`
+	// NodeStatusUpdateFrequency Specifies how often kubelet posts node status to master (default 10s)
+	// must work with nodeMonitorGracePeriod in KubeControllerManagerConfig.
+	NodeStatusUpdateFrequency *metav1.Duration `json:"nodeStatusUpdateFrequency,omitempty" flag:"node-status-update-frequency"`
 	// ClusterDomain is the DNS domain for this cluster
 	ClusterDomain string `json:"clusterDomain,omitempty" flag:"cluster-domain"`
 	// ClusterDNS is the IP address for a cluster DNS server
@@ -116,6 +119,9 @@ type KubeletConfigSpec struct {
 	// image garbage collection is never run. Lowest disk usage to garbage
 	// collect to.
 	ImageGCLowThresholdPercent *int32 `json:"imageGCLowThresholdPercent,omitempty" flag:"image-gc-low-threshold"`
+	// ImagePullProgressDeadline is the timeout for image pulls
+	// If no pulling progress is made before this deadline, the image pulling will be cancelled. (default 1m0s)
+	ImagePullProgressDeadline *metav1.Duration `json:"imagePullProgressDeadline,omitempty" flag:"image-pull-progress-deadline"`
 	// Comma-delimited list of hard eviction expressions.  For example, 'memory.available<300Mi'.
 	EvictionHard *string `json:"evictionHard,omitempty" flag:"eviction-hard"`
 	// Comma-delimited list of soft eviction expressions.  For example, 'memory.available<300Mi'.
@@ -148,13 +154,22 @@ type KubeletConfigSpec struct {
 	RuntimeRequestTimeout *metav1.Duration `json:"runtimeRequestTimeout,omitempty" flag:"runtime-request-timeout"`
 	// VolumeStatsAggPeriod is the interval for kubelet to calculate and cache the volume disk usage for all pods and volumes
 	VolumeStatsAggPeriod *metav1.Duration `json:"volumeStatsAggPeriod,omitempty" flag:"volume-stats-agg-period"`
+	// Tells the Kubelet to fail to start if swap is enabled on the node.
+	FailSwapOn *bool `json:"failSwapOn,omitempty" flag:"fail-swap-on"`
 }
 
 // KubeProxyConfig defined the configuration for a proxy
 type KubeProxyConfig struct {
 	Image string `json:"image,omitempty"`
 	// TODO: Better type ?
-	CPURequest string `json:"cpuRequest,omitempty"` // e.g. "20m"
+	// CPURequest, cpu request compute resource for kube proxy e.g. "20m"
+	CPURequest string `json:"cpuRequest,omitempty"`
+	// CPULimit, cpu limit compute resource for kube proxy e.g. "30m"
+	CPULimit string `json:"cpuLimit,omitempty"`
+	// MemoryRequest, memory request compute resource for kube proxy e.g. "30Mi"
+	MemoryRequest string `json:"memoryRequest,omitempty"`
+	// MemoryLimit, memory limit compute resource for kube proxy e.g. "30Mi"
+	MemoryLimit string `json:"memoryLimit,omitempty"`
 	// LogLevel is the logging level of the proxy
 	LogLevel int32 `json:"logLevel,omitempty" flag:"v"`
 	// ClusterCIDR is the CIDR range of the pods in the cluster
@@ -166,7 +181,7 @@ type KubeProxyConfig struct {
 	// Enabled allows enabling or disabling kube-proxy
 	Enabled *bool `json:"enabled,omitempty"`
 	// FeatureGates is a series of key pairs used to switch on features for the proxy
-	FeatureGates map[string]string `json:"featureGates" flag:"feature-gates"`
+	FeatureGates map[string]string `json:"featureGates,omitempty" flag:"feature-gates"`
 }
 
 // KubeAPIServerConfig defines the configuration for the kube api
@@ -225,23 +240,36 @@ type KubeAPIServerConfig struct {
 	KubeletPreferredAddressTypes []string `json:"kubeletPreferredAddressTypes,omitempty" flag:"kubelet-preferred-address-types"`
 	// StorageBackend is the backend storage
 	StorageBackend *string `json:"storageBackend,omitempty" flag:"storage-backend"`
-	// The OpenID claim to use as the user name.
-	// Note that claims other than the default ('sub') is not guaranteed to be unique and immutable.
+	// OIDCUsernameClaim is the OpenID claim to use as the user name.
+	// Note that claims other than the default ('sub') is not guaranteed to be
+	// unique and immutable.
 	OIDCUsernameClaim *string `json:"oidcUsernameClaim,omitempty" flag:"oidc-username-claim"`
-	// If provided, the name of a custom OpenID Connect claim for specifying user groups.
+	// OIDCUsernamePrefix is the prefix prepended to username claims to prevent
+	// clashes with existing names (such as 'system:' users).
+	OIDCUsernamePrefix *string `json:"oidcUsernamePrefix,omitempty" flag:"oidc-username-prefix"`
+	// OIDCGroupsClaim if provided, the name of a custom OpenID Connect claim for
+	// specifying user groups.
 	// The claim value is expected to be a string or array of strings.
 	OIDCGroupsClaim *string `json:"oidcGroupsClaim,omitempty" flag:"oidc-groups-claim"`
-	// The URL of the OpenID issuer, only HTTPS scheme will be accepted.
+	// OIDCGroupsPrefix is the prefix prepended to group claims to prevent
+	// clashes with existing names (such as 'system:' groups)
+	OIDCGroupsPrefix *string `json:"oidcGroupsPrefix,omitempty" flag:"oidc-groups-prefix"`
+	// OIDCIssuerURL is the URL of the OpenID issuer, only HTTPS scheme will
+	// be accepted.
 	// If set, it will be used to verify the OIDC JSON Web Token (JWT).
 	OIDCIssuerURL *string `json:"oidcIssuerURL,omitempty" flag:"oidc-issuer-url"`
-	// The client ID for the OpenID Connect client, must be set if oidc-issuer-url is set.
+	// OIDCClientID is the client ID for the OpenID Connect client, must be set
+	// if oidc-issuer-url is set.
 	OIDCClientID *string `json:"oidcClientID,omitempty" flag:"oidc-client-id"`
-	// If set, the OpenID server's certificate will be verified by one of the authorities in the oidc-ca-file
+	// OIDCCAFile if set, the OpenID server's certificate will be verified by one
+	// of the authorities in the oidc-ca-file
 	OIDCCAFile *string `json:"oidcCAFile,omitempty" flag:"oidc-ca-file"`
 	// The apiserver's client certificate used for outbound requests.
 	ProxyClientCertFile *string `json:"proxyClientCertFile,omitempty" flag:"proxy-client-cert-file"`
 	// The apiserver's client key used for outbound requests.
 	ProxyClientKeyFile *string `json:"proxyClientKeyFile,omitempty" flag:"proxy-client-key-file"`
+	// AuditLogFormat flag specifies the format type for audit log files.
+	AuditLogFormat *string `json:"auditLogFormat,omitempty" flag:"audit-log-format"`
 	// If set, all requests coming to the apiserver will be logged to this file.
 	AuditLogPath *string `json:"auditLogPath,omitempty" flag:"audit-log-path"`
 	// The maximum number of days to retain old audit log files based on the timestamp encoded in their filename.
@@ -275,6 +303,8 @@ type KubeAPIServerConfig struct {
 	RequestheaderAllowedNames []string `json:"requestheaderAllowedNames,omitempty" flag:"requestheader-allowed-names"`
 	// FeatureGates is set of key=value pairs that describe feature gates for alpha/experimental features.
 	FeatureGates map[string]string `json:"featureGates,omitempty" flag:"feature-gates"`
+	// MaxRequestsInflight The maximum number of non-mutating requests in flight at a given time.
+	MaxRequestsInflight int32 `json:"maxRequestsInflight,omitempty" flag:"max-requests-inflight" flag-empty:"0"`
 }
 
 // KubeControllerManagerConfig is the configuration for the controller
@@ -298,6 +328,8 @@ type KubeControllerManagerConfig struct {
 	AllocateNodeCIDRs *bool `json:"allocateNodeCIDRs,omitempty" flag:"allocate-node-cidrs"`
 	// ConfigureCloudRoutes enables CIDRs allocated with to be configured on the cloud provider.
 	ConfigureCloudRoutes *bool `json:"configureCloudRoutes,omitempty" flag:"configure-cloud-routes"`
+	// CIDRAllocatorType specifies the type of CIDR allocator to use.
+	CIDRAllocatorType *string `json:"cidrAllocatorType,omitempty" flag:"cidr-allocator-type"`
 	// rootCAFile is the root certificate authority will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
 	RootCAFile string `json:"rootCAFile,omitempty" flag:"root-ca-file"`
 	// LeaderElection defines the configuration of leader election client.
@@ -309,6 +341,13 @@ type KubeControllerManagerConfig struct {
 	// before the terminated pod garbage collector starts deleting terminated pods.
 	// If <= 0, the terminated pod garbage collector is disabled.
 	TerminatedPodGCThreshold *int32 `json:"terminatedPodGCThreshold,omitempty" flag:"terminated-pod-gc-threshold"`
+	// NodeMonitorPeriod is the period for syncing NodeStatus in NodeController. (default 5s)
+	NodeMonitorPeriod *metav1.Duration `json:"nodeMonitorPeriod,omitempty" flag:"node-monitor-period"`
+	// NodeMonitorGracePeriod is the amount of time which we allow running Node to be unresponsive before marking it unhealthy. (default 40s)
+	// Must be N-1 times more than kubelet's nodeStatusUpdateFrequency, where N means number of retries allowed for kubelet to post node status.
+	NodeMonitorGracePeriod *metav1.Duration `json:"nodeMonitorGracePeriod,omitempty" flag:"node-monitor-grace-period"`
+	// PodEvictionTimeout is the grace period for deleting pods on failed nodes. (default 5m0s)
+	PodEvictionTimeout *metav1.Duration `json:"podEvictionTimeout,omitempty" flag:"pod-eviction-timeout"`
 	// UseServiceAccountCredentials controls whether we use individual service account credentials for each controller.
 	UseServiceAccountCredentials *bool `json:"useServiceAccountCredentials,omitempty" flag:"use-service-account-credentials"`
 	// HorizontalPodAutoscalerSyncPeriod is the amount of time between syncs
@@ -348,6 +387,8 @@ type CloudControllerManagerConfig struct {
 	AllocateNodeCIDRs *bool `json:"allocateNodeCIDRs,omitempty" flag:"allocate-node-cidrs"`
 	// ConfigureCloudRoutes enables CIDRs allocated with to be configured on the cloud provider.
 	ConfigureCloudRoutes *bool `json:"configureCloudRoutes,omitempty" flag:"configure-cloud-routes"`
+	// CIDRAllocatorType specifies the type of CIDR allocator to use.
+	CIDRAllocatorType *string `json:"cidrAllocatorType,omitempty" flag:"cidr-allocator-type"`
 	// LeaderElection defines the configuration of leader election client.
 	LeaderElection *LeaderElectionConfiguration `json:"leaderElection,omitempty"`
 	// UseServiceAccountCredentials controls whether we use individual service account credentials for each controller.

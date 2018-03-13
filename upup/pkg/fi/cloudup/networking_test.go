@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	api "k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/assets"
 )
 
 func Test_FindCNIAssetFromEnvironmentVariable(t *testing.T) {
@@ -32,13 +33,16 @@ func Test_FindCNIAssetFromEnvironmentVariable(t *testing.T) {
 	}()
 
 	cluster := &api.Cluster{}
-	cniAsset, cniAssetHashString, err := findCNIAssets(cluster)
+	cluster.Spec.KubernetesVersion = "v1.9.0"
+
+	assetBuilder := assets.NewAssetBuilder(cluster, "")
+	cniAsset, cniAssetHashString, err := findCNIAssets(cluster, assetBuilder)
 
 	if err != nil {
 		t.Errorf("Unable to parse k8s version %s", err)
 	}
 
-	if cniAsset != desiredCNIVersion {
+	if cniAsset.String() != desiredCNIVersion {
 		t.Errorf("Expected CNI version from Environment variable %q, but got %q instead", desiredCNIVersion, cniAsset)
 	}
 
@@ -49,15 +53,16 @@ func Test_FindCNIAssetFromEnvironmentVariable(t *testing.T) {
 
 func Test_FindCNIAssetDefaultValue1_6(t *testing.T) {
 
-	cluster := &api.Cluster{Spec: api.ClusterSpec{}}
+	cluster := &api.Cluster{}
 	cluster.Spec.KubernetesVersion = "v1.7.0"
-	cniAsset, cniAssetHashString, err := findCNIAssets(cluster)
+	assetBuilder := assets.NewAssetBuilder(cluster, "")
+	cniAsset, cniAssetHashString, err := findCNIAssets(cluster, assetBuilder)
 
 	if err != nil {
 		t.Errorf("Unable to parse k8s version %s", err)
 	}
 
-	if cniAsset != defaultCNIAssetK8s1_6 {
+	if cniAsset.String() != defaultCNIAssetK8s1_6 {
 		t.Errorf("Expected default CNI version %q and got %q", defaultCNIAssetK8s1_5, cniAsset)
 	}
 
@@ -69,15 +74,16 @@ func Test_FindCNIAssetDefaultValue1_6(t *testing.T) {
 
 func Test_FindCNIAssetDefaultValue1_5(t *testing.T) {
 
-	cluster := &api.Cluster{Spec: api.ClusterSpec{}}
+	cluster := &api.Cluster{}
 	cluster.Spec.KubernetesVersion = "v1.5.12"
-	cniAsset, cniAssetHashString, err := findCNIAssets(cluster)
+	assetBuilder := assets.NewAssetBuilder(cluster, "")
+	cniAsset, cniAssetHashString, err := findCNIAssets(cluster, assetBuilder)
 
 	if err != nil {
 		t.Errorf("Unable to parse k8s version %s", err)
 	}
 
-	if cniAsset != defaultCNIAssetK8s1_5 {
+	if cniAsset.String() != defaultCNIAssetK8s1_5 {
 		t.Errorf("Expected default CNI version %q and got %q", defaultCNIAssetK8s1_5, cniAsset)
 	}
 

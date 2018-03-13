@@ -66,6 +66,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-minimal-example-com"
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-minimal-example-com" {
@@ -92,6 +95,9 @@ resource "aws_autoscaling_group" "nodes-minimal-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-minimal-example-com" {
@@ -158,8 +164,9 @@ resource "aws_internet_gateway" "minimal-example-com" {
   vpc_id = "${aws_vpc.minimal-example-com.id}"
 
   tags = {
-    KubernetesCluster = "minimal.example.com"
-    Name              = "minimal.example.com"
+    KubernetesCluster                           = "minimal.example.com"
+    Name                                        = "minimal.example.com"
+    "kubernetes.io/cluster/minimal.example.com" = "owned"
   }
 }
 
@@ -225,8 +232,9 @@ resource "aws_route_table" "minimal-example-com" {
   vpc_id = "${aws_vpc.minimal-example-com.id}"
 
   tags = {
-    KubernetesCluster = "minimal.example.com"
-    Name              = "minimal.example.com"
+    KubernetesCluster                           = "minimal.example.com"
+    Name                                        = "minimal.example.com"
+    "kubernetes.io/cluster/minimal.example.com" = "owned"
   }
 }
 
@@ -373,6 +381,7 @@ resource "aws_subnet" "us-test-1a-minimal-example-com" {
   tags = {
     KubernetesCluster                           = "minimal.example.com"
     Name                                        = "us-test-1a.minimal.example.com"
+    SubnetType                                  = "Public"
     "kubernetes.io/cluster/minimal.example.com" = "owned"
     "kubernetes.io/role/elb"                    = "1"
   }
@@ -395,8 +404,9 @@ resource "aws_vpc_dhcp_options" "minimal-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "minimal.example.com"
-    Name              = "minimal.example.com"
+    KubernetesCluster                           = "minimal.example.com"
+    Name                                        = "minimal.example.com"
+    "kubernetes.io/cluster/minimal.example.com" = "owned"
   }
 }
 

@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
 	"k8s.io/kops/upup/pkg/fi/cloudup/cloudformation"
@@ -41,6 +42,9 @@ type NatGateway struct {
 
 	// Shared is set if this is a shared NatGateway
 	Shared *bool
+
+	// Tags is a map of aws tags that are added to the NatGateway
+	Tags map[string]string
 
 	// We can't tag NatGateways, so we have to find through a surrogate
 	AssociatedRouteTable *RouteTable
@@ -75,14 +79,13 @@ func (e *NatGateway) Find(c *fi.Context) (*NatGateway, error) {
 		}
 
 		if len(response.NatGateways) != 1 {
-			return nil, fmt.Errorf("found %d Nat Gateways, expected 1", len(response.NatGateways))
+			return nil, fmt.Errorf("found %d Nat Gateways with ID %q, expected 1", len(response.NatGateways), fi.StringValue(e.ID))
 		}
 		ngw = response.NatGateways[0]
 
 		if len(ngw.NatGatewayAddresses) != 1 {
 			return nil, fmt.Errorf("found %d EIP Addresses for 1 NATGateway, expected 1", len(ngw.NatGatewayAddresses))
 		}
-		actual.ElasticIP = &ElasticIP{ID: ngw.NatGatewayAddresses[0].AllocationId}
 	} else {
 		// This is the normal/default path
 		var err error
@@ -107,10 +110,13 @@ func (e *NatGateway) Find(c *fi.Context) (*NatGateway, error) {
 		return nil, fmt.Errorf("found multiple elastic IPs attached to NatGateway %q", aws.StringValue(ngw.NatGatewayId))
 	}
 
-	// NATGateways don't have a Name (no tags), so we set the name to avoid spurious changes
-	actual.Name = e.Name
-	actual.Lifecycle = e.Lifecycle
+	// NATGateways now have names and tags so lets pull from there instead.
+	actual.Name = findNameTag(ngw.Tags)
+	actual.Tags = intersectTags(ngw.Tags, e.Tags)
 
+	// Avoid spurious changes
+	actual.Lifecycle = e.Lifecycle
+	actual.Shared = e.Shared
 	actual.AssociatedRouteTable = e.AssociatedRouteTable
 
 	e.ID = actual.ID
@@ -225,7 +231,7 @@ func (s *NatGateway) CheckChanges(a, e, changes *NatGateway) error {
 	if a == nil {
 		if !fi.BoolValue(e.Shared) {
 			if e.ElasticIP == nil {
-				return fi.RequiredField("ElasticIp")
+				return fi.RequiredField("ElasticIP")
 			}
 			if e.Subnet == nil {
 				return fi.RequiredField("Subnet")
@@ -239,7 +245,15 @@ func (s *NatGateway) CheckChanges(a, e, changes *NatGateway) error {
 	// Delta
 	if a != nil {
 		if changes.ElasticIP != nil {
-			return fi.CannotChangeField("ElasticIp")
+			eID := ""
+			if e.ElasticIP != nil {
+				eID = fi.StringValue(e.ElasticIP.ID)
+			}
+			aID := ""
+			if a.ElasticIP != nil {
+				aID = fi.StringValue(a.ElasticIP.ID)
+			}
+			return fi.FieldIsImmutable(eID, aID, field.NewPath("ElasticIP"))
 		}
 		if changes.Subnet != nil {
 			return fi.CannotChangeField("Subnet")
@@ -303,6 +317,11 @@ func (_ *NatGateway) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *NatGateway)
 		id = a.ID
 	}
 
+	err := t.AddAWSTags(*e.ID, e.Tags)
+	if err != nil {
+		return fmt.Errorf("unable to tag NatGateway")
+	}
+
 	// Tag the associated subnet
 	if e.Subnet == nil {
 		return fmt.Errorf("Subnet not set")
@@ -313,7 +332,7 @@ func (_ *NatGateway) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *NatGateway)
 	// TODO: AssociatedNatgateway tag is obsolete - we can get from the route table instead
 	tags := make(map[string]string)
 	tags["AssociatedNatgateway"] = *id
-	err := t.AddAWSTags(*e.Subnet.ID, tags)
+	err = t.AddAWSTags(*e.Subnet.ID, tags)
 	if err != nil {
 		return fmt.Errorf("unable to tag subnet %v", err)
 	}
@@ -340,6 +359,7 @@ func (_ *NatGateway) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *NatGateway)
 type terraformNATGateway struct {
 	AllocationID *terraform.Literal `json:"allocation_id,omitempty"`
 	SubnetID     *terraform.Literal `json:"subnet_id,omitempty"`
+	Tag          map[string]string  `json:"tags,omitempty"`
 }
 
 func (_ *NatGateway) RenderTerraform(t *terraform.TerraformTarget, a, e, changes *NatGateway) error {
@@ -355,6 +375,7 @@ func (_ *NatGateway) RenderTerraform(t *terraform.TerraformTarget, a, e, changes
 	tf := &terraformNATGateway{
 		AllocationID: e.ElasticIP.TerraformLink(),
 		SubnetID:     e.Subnet.TerraformLink(),
+		Tag:          e.Tags,
 	}
 
 	return t.RenderResource("aws_nat_gateway", *e.Name, tf)
@@ -375,6 +396,7 @@ func (e *NatGateway) TerraformLink() *terraform.Literal {
 type cloudformationNATGateway struct {
 	AllocationID *cloudformation.Literal `json:"AllocationId,omitempty"`
 	SubnetID     *cloudformation.Literal `json:"SubnetId,omitempty"`
+	Tag          map[string]string       `json:"tags,omitempty"`
 }
 
 func (_ *NatGateway) RenderCloudformation(t *cloudformation.CloudformationTarget, a, e, changes *NatGateway) error {
@@ -390,6 +412,7 @@ func (_ *NatGateway) RenderCloudformation(t *cloudformation.CloudformationTarget
 	tf := &cloudformationNATGateway{
 		AllocationID: e.ElasticIP.CloudformationAllocationID(),
 		SubnetID:     e.Subnet.CloudformationLink(),
+		Tag:          e.Tags,
 	}
 
 	return t.RenderResource("AWS::EC2::NatGateway", *e.Name, tf)

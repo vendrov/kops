@@ -32,19 +32,21 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/route53/route53iface"
 	"github.com/golang/glog"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/kops/dnsprovider/pkg/dnsprovider"
+	dnsproviderroute53 "k8s.io/kops/dnsprovider/pkg/dnsprovider/providers/aws/route53"
 	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/apis/kops/model"
 	"k8s.io/kops/pkg/cloudinstances"
 	"k8s.io/kops/upup/pkg/fi"
-	"k8s.io/kubernetes/federation/pkg/dnsprovider"
-	dnsproviderroute53 "k8s.io/kubernetes/federation/pkg/dnsprovider/providers/aws/route53"
 	k8s_aws "k8s.io/kubernetes/pkg/cloudprovider/providers/aws"
 )
 
@@ -85,8 +87,8 @@ type AWSCloud interface {
 
 	CloudFormation() *cloudformation.CloudFormation
 	EC2() ec2iface.EC2API
-	IAM() *iam.IAM
-	ELB() *elb.ELB
+	IAM() iamiface.IAMAPI
+	ELB() elbiface.ELBAPI
 	Autoscaling() autoscalingiface.AutoScalingAPI
 	Route53() route53iface.Route53API
 
@@ -735,6 +737,10 @@ func addAWSTags(c AWSCloud, id string, expected map[string]string) error {
 }
 
 func (c *awsCloudImplementation) GetELBTags(loadBalancerName string) (map[string]string, error) {
+	return getELBTags(c, loadBalancerName)
+}
+
+func getELBTags(c AWSCloud, loadBalancerName string) (map[string]string, error) {
 	tags := map[string]string{}
 
 	request := &elb.DescribeTagsInput{
@@ -762,6 +768,10 @@ func (c *awsCloudImplementation) GetELBTags(loadBalancerName string) (map[string
 
 // CreateELBTags will add tags to the specified loadBalancer, retrying up to MaxCreateTagsAttempts times if it hits an eventual-consistency type error
 func (c *awsCloudImplementation) CreateELBTags(loadBalancerName string, tags map[string]string) error {
+	return createELBTags(c, loadBalancerName, tags)
+}
+
+func createELBTags(c AWSCloud, loadBalancerName string, tags map[string]string) error {
 	if len(tags) == 0 {
 		return nil
 	}
@@ -872,6 +882,10 @@ func (c *awsCloudImplementation) DescribeInstance(instanceID string) (*ec2.Insta
 
 // DescribeVPC is a helper that queries for the specified vpc by id
 func (c *awsCloudImplementation) DescribeVPC(vpcID string) (*ec2.Vpc, error) {
+	return describeVPC(c, vpcID)
+}
+
+func describeVPC(c AWSCloud, vpcID string) (*ec2.Vpc, error) {
 	glog.V(2).Infof("Calling DescribeVPC for VPC %q", vpcID)
 	request := &ec2.DescribeVpcsInput{
 		VpcIds: []*string{&vpcID},
@@ -943,11 +957,16 @@ func resolveImage(ec2Client ec2iface.EC2API, name string) (*ec2.Image, error) {
 	if response == nil || len(response.Images) == 0 {
 		return nil, fmt.Errorf("could not find Image for %q", name)
 	}
-	if len(response.Images) != 1 {
-		return nil, fmt.Errorf("found multiple Images for %q", name)
-	}
 
 	image := response.Images[0]
+	for _, v := range response.Images {
+		itime, _ := time.Parse(time.RFC3339, *image.CreationDate)
+		vtime, _ := time.Parse(time.RFC3339, *v.CreationDate)
+		if vtime.After(itime) {
+			image = v
+		}
+	}
+
 	glog.V(4).Infof("Resolved image %q", aws.StringValue(image.ImageId))
 	return image, nil
 }
@@ -1017,11 +1036,11 @@ func (c *awsCloudImplementation) EC2() ec2iface.EC2API {
 	return c.ec2
 }
 
-func (c *awsCloudImplementation) IAM() *iam.IAM {
+func (c *awsCloudImplementation) IAM() iamiface.IAMAPI {
 	return c.iam
 }
 
-func (c *awsCloudImplementation) ELB() *elb.ELB {
+func (c *awsCloudImplementation) ELB() elbiface.ELBAPI {
 	return c.elb
 }
 
@@ -1034,6 +1053,10 @@ func (c *awsCloudImplementation) Route53() route53iface.Route53API {
 }
 
 func (c *awsCloudImplementation) FindVPCInfo(vpcID string) (*fi.VPCInfo, error) {
+	return findVPCInfo(c, vpcID)
+}
+
+func findVPCInfo(c AWSCloud, vpcID string) (*fi.VPCInfo, error) {
 	vpc, err := c.DescribeVPC(vpcID)
 	if err != nil {
 		return nil, err
@@ -1053,7 +1076,7 @@ func (c *awsCloudImplementation) FindVPCInfo(vpcID string) (*fi.VPCInfo, error) 
 			Filters: []*ec2.Filter{NewEC2Filter("vpc-id", vpcID)},
 		}
 
-		response, err := c.ec2.DescribeSubnets(request)
+		response, err := c.EC2().DescribeSubnets(request)
 		if err != nil {
 			return nil, fmt.Errorf("error listing subnets in VPC %q: %v", vpcID, err)
 		}

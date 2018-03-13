@@ -17,13 +17,12 @@ limitations under the License.
 package awstasks
 
 import (
-	//"fmt"
-	//
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
+
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
 	"k8s.io/kops/upup/pkg/fi/cloudup/cloudformation"
@@ -32,8 +31,7 @@ import (
 
 //go:generate fitask -type=ElasticIP
 
-// Elastic IP
-// Representation the EIP AWS task
+// ElasticIP manages an AWS Address (ElasticIP)
 type ElasticIP struct {
 	Name      *string
 	Lifecycle *fi.Lifecycle
@@ -45,6 +43,8 @@ type ElasticIP struct {
 
 	// TagOnSubnet tags a subnet with the ElasticIP.  Deprecated: doesn't round-trip with terraform.
 	TagOnSubnet *Subnet
+
+	Tags map[string]string
 
 	// AssociatedNatGatewayRouteTable follows the RouteTable -> NatGateway -> ElasticIP
 	AssociatedNatGatewayRouteTable *RouteTable
@@ -69,7 +69,7 @@ func (e *ElasticIP) FindIPAddress(context *fi.Context) (*string, error) {
 	return actual.PublicIP, nil
 }
 
-// Find is a public wrapper for find()
+// Find returns the actual ElasticIP state, or nil if not found
 func (e *ElasticIP) Find(context *fi.Context) (*ElasticIP, error) {
 	return e.find(context.Cloud.(awsup.AWSCloud))
 }
@@ -173,7 +173,7 @@ func (e *ElasticIP) find(cloud awsup.AWSCloud) (*ElasticIP, error) {
 	return nil, nil
 }
 
-// The Run() function is called to execute this task.
+// Run is called to execute this task.
 // This is the main entry point of the task, and will actually
 // connect our internal resource representation to an actual
 // resource in AWS
@@ -229,6 +229,10 @@ func (_ *ElasticIP) RenderAWS(t *awsup.AWSAPITarget, a, e, changes *ElasticIP) e
 	} else {
 		publicIp = a.PublicIP
 		eipId = a.ID
+		err := t.AddAWSTags(*a.ID, changes.Tags)
+		if err != nil {
+			return fmt.Errorf("unable to tag ElasticIP: %v", err)
+		}
 	}
 
 	// Tag the associated subnet

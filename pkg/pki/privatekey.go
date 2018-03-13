@@ -27,6 +27,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"os"
+	"strconv"
 
 	"github.com/golang/glog"
 )
@@ -43,7 +45,17 @@ func ParsePEMPrivateKey(data []byte) (*PrivateKey, error) {
 }
 
 func GeneratePrivateKey() (*PrivateKey, error) {
-	rsaKey, err := rsa.GenerateKey(crypto_rand.Reader, 2048)
+	var rsaKeySize int64 = 2048
+
+	if os.Getenv("KOPS_RSA_PRIVATE_KEY_SIZE") != "" {
+		var intErr error
+		rsaKeySize, intErr = strconv.ParseInt(os.Getenv("KOPS_RSA_PRIVATE_KEY_SIZE"), 0, 0)
+		if intErr != nil {
+			return nil, fmt.Errorf("error getting RSA private key size: %v", intErr)
+		}
+	}
+
+	rsaKey, err := rsa.GenerateKey(crypto_rand.Reader, int(rsaKeySize))
 	if err != nil {
 		return nil, fmt.Errorf("error generating RSA private key: %v", err)
 	}
@@ -154,10 +166,10 @@ func parsePEMPrivateKey(pemData []byte) (crypto.PrivateKey, error) {
 		}
 
 		if block.Type == "RSA PRIVATE KEY" {
-			glog.V(8).Infof("Parsing pem block: %q", block.Type)
+			glog.V(10).Infof("Parsing pem block: %q", block.Type)
 			return x509.ParsePKCS1PrivateKey(block.Bytes)
 		} else if block.Type == "PRIVATE KEY" {
-			glog.V(8).Infof("Parsing pem block: %q", block.Type)
+			glog.V(10).Infof("Parsing pem block: %q", block.Type)
 			k, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 			if err != nil {
 				return nil, err

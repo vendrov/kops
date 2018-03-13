@@ -35,7 +35,9 @@ func BuildKubecfg(cluster *kops.Cluster, keyStore fi.Keystore, secretStore fi.Se
 	}
 
 	server := "https://" + master
-	if dns.IsGossipHostname(master) {
+	topology := cluster.Spec.Topology
+
+	if dns.IsGossipHostname(master) || topology.DNS.Type == kops.DNSTypePrivate {
 		ingresses, err := status.GetApiIngressStatus(cluster)
 		if err != nil {
 			return nil, fmt.Errorf("error getting ingress status: %v", err)
@@ -67,7 +69,7 @@ func BuildKubecfg(cluster *kops.Cluster, keyStore fi.Keystore, secretStore fi.Se
 	b.Context = clusterName
 
 	{
-		cert, _, err := keyStore.FindKeypair(fi.CertificateId_CA)
+		cert, _, _, err := keyStore.FindKeypair(fi.CertificateId_CA)
 		if err != nil {
 			return nil, fmt.Errorf("error fetching CA keypair: %v", err)
 		}
@@ -82,7 +84,7 @@ func BuildKubecfg(cluster *kops.Cluster, keyStore fi.Keystore, secretStore fi.Se
 	}
 
 	{
-		cert, key, err := keyStore.FindKeypair("kubecfg")
+		cert, key, _, err := keyStore.FindKeypair("kubecfg")
 		if err != nil {
 			return nil, fmt.Errorf("error fetching kubecfg keypair: %v", err)
 		}

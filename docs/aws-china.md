@@ -80,15 +80,15 @@ cd ${GOPATH}/src/k8s.io/kube-deploy/imagebuilder
 sed -i '' "s|publicIP := aws.StringValue(instance.PublicIpAddress)|publicIP := aws.StringValue(instance.PrivateIpAddress)|" pkg/imagebuilder/aws.go
 make
 
-# If the keypair specified is not `$HOME/.ssh/id_rsa`, `aws.yml` need to be modified to add the full path to the private key.
-echo 'SSHPrivateKey: "/absolute/path/to/the/private/key"' >> aws.yml
+# If the keypair specified is not `$HOME/.ssh/id_rsa`, `aws.yaml` need to be modified to add the full path to the private key.
+echo 'SSHPrivateKey: "/absolute/path/to/the/private/key"' >> aws.yaml
 
-${GOPATH}/bin/imagebuilder --config aws.yaml --v=8 --publish false --replicate false --up false --down false
+${GOPATH}/bin/imagebuilder --config aws.yaml --v=8 --publish=false --replicate=false --up=false --down=false
 ```
 
 *NOTE*
 
-`imagebuilder` may complain `image not found after build` and the execution failes. But from the logs ahead the exception, we can find the AMI has been registered actually. It seems that the AMI newly created not available yet despite `bootstrap-vz` claims so. [kubernetes/kube-deploy#293](https://github.com/kubernetes/kube-deploy/issues/293).
+`imagebuilder` may complain `image not found after build` and the execution fails. But from the logs ahead the exception, we can find the AMI has been registered actually. It seems that the AMI newly created not available yet despite `bootstrap-vz` claims so. [kubernetes/kube-deploy#293](https://github.com/kubernetes/kube-deploy/issues/293).
 
 Wait one minute or so, the AMI should be available finally.
 
@@ -254,10 +254,25 @@ done
 
 ## Upload assets
 
+## Get default S3 multipart_threshold
+
+AWS_S3_DEFAULT_MULTIPART_THRESHOLD=$(aws configure get default.s3.multipart_threshold)
+
+if [ ! -n "$AWS_S3_DEFAULT_MULTIPART_THRESHOLD" ]; then
+  AWS_S3_DEFAULT_MULTIPART_THRESHOLD=8MB
+fi
+
+## Set multipart_threshold to 1024MB to prevent Etag not returns MD5 when upload multipart
+
+aws configure set default.s3.multipart_threshold 1024MB
+
 aws s3api create-bucket --bucket $ASSET_BUCKET --create-bucket-configuration LocationConstraint=$AWS_REGION
 for dir in "kubernetes" "kops"; do
   aws s3 sync --acl public-read "$dir" "s3://$ASSET_BUCKET/$ASSET_PREFIX$dir"
 done
+
+aws configure set default.s3.multipart_threshold $AWS_S3_DEFAULT_MULTIPART_THRESHOLD
+
 ```
 
 When create the cluster, add these parameters to the command line.

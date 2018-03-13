@@ -31,7 +31,8 @@ import (
 )
 
 type VFSClientset struct {
-	basePath vfs.Path
+	basePath  vfs.Path
+	allowList bool
 }
 
 var _ simple.Clientset = &VFSClientset{}
@@ -73,25 +74,6 @@ func (c *VFSClientset) InstanceGroupsFor(cluster *kops.Cluster) kopsinternalvers
 	return newInstanceGroupVFS(c, cluster)
 }
 
-func (c *VFSClientset) federations() kopsinternalversion.FederationInterface {
-	return newFederationVFS(c)
-}
-
-// FederationsFor implements the FederationsFor method of simple.Clientset for a VFS-backed state store
-func (c *VFSClientset) FederationsFor(federation *kops.Federation) kopsinternalversion.FederationInterface {
-	return c.federations()
-}
-
-// ListFederations implements the ListFederations method of simple.Clientset for a VFS-backed state store
-func (c *VFSClientset) ListFederations(options metav1.ListOptions) (*kops.FederationList, error) {
-	return c.federations().List(options)
-}
-
-// GetFederation implements the GetFederation method of simple.Clientset for a VFS-backed state store
-func (c *VFSClientset) GetFederation(name string) (*kops.Federation, error) {
-	return c.federations().Get(name, metav1.GetOptions{})
-}
-
 func (c *VFSClientset) SecretStore(cluster *kops.Cluster) (fi.SecretStore, error) {
 	configBase, err := registry.ConfigBase(cluster)
 	if err != nil {
@@ -107,7 +89,16 @@ func (c *VFSClientset) KeyStore(cluster *kops.Cluster) (fi.CAStore, error) {
 		return nil, err
 	}
 	basedir := configBase.Join("pki")
-	return fi.NewVFSCAStore(cluster, basedir), nil
+	return fi.NewVFSCAStore(cluster, basedir, c.allowList), nil
+}
+
+func (c *VFSClientset) SSHCredentialStore(cluster *kops.Cluster) (fi.SSHCredentialStore, error) {
+	configBase, err := registry.ConfigBase(cluster)
+	if err != nil {
+		return nil, err
+	}
+	basedir := configBase.Join("pki")
+	return fi.NewVFSSSHCredentialStore(cluster, basedir), nil
 }
 
 func DeleteAllClusterState(basePath vfs.Path) error {
@@ -159,9 +150,10 @@ func (c *VFSClientset) DeleteCluster(cluster *kops.Cluster) error {
 	return DeleteAllClusterState(configBase)
 }
 
-func NewVFSClientset(basePath vfs.Path) simple.Clientset {
+func NewVFSClientset(basePath vfs.Path, allowList bool) simple.Clientset {
 	vfsClientset := &VFSClientset{
-		basePath: basePath,
+		basePath:  basePath,
+		allowList: allowList,
 	}
 	return vfsClientset
 }

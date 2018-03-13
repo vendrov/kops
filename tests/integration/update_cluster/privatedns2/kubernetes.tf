@@ -47,7 +47,7 @@ output "region" {
 }
 
 output "vpc_id" {
-  value = "vpc-123"
+  value = "vpc-12345678"
 }
 
 provider "aws" {
@@ -88,6 +88,9 @@ resource "aws_autoscaling_group" "bastion-privatedns2-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1a-masters-privatedns2-example-com" {
@@ -114,6 +117,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-privatedns2-example-
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-privatedns2-example-com" {
@@ -140,6 +146,9 @@ resource "aws_autoscaling_group" "nodes-privatedns2-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-privatedns2-example-com" {
@@ -355,12 +364,18 @@ resource "aws_launch_configuration" "nodes-privatedns2-example-com" {
 resource "aws_nat_gateway" "us-test-1a-privatedns2-example-com" {
   allocation_id = "${aws_eip.us-test-1a-privatedns2-example-com.id}"
   subnet_id     = "${aws_subnet.utility-us-test-1a-privatedns2-example-com.id}"
+
+  tags = {
+    KubernetesCluster                               = "privatedns2.example.com"
+    Name                                            = "us-test-1a.privatedns2.example.com"
+    "kubernetes.io/cluster/privatedns2.example.com" = "owned"
+  }
 }
 
 resource "aws_route" "0-0-0-0--0" {
   route_table_id         = "${aws_route_table.privatedns2-example-com.id}"
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "fake-ig"
+  gateway_id             = "igw-1"
 }
 
 resource "aws_route" "private-us-test-1a-0-0-0-0--0" {
@@ -383,20 +398,20 @@ resource "aws_route53_record" "api-privatedns2-example-com" {
 }
 
 resource "aws_route_table" "private-us-test-1a-privatedns2-example-com" {
-  vpc_id = "vpc-123"
+  vpc_id = "vpc-12345678"
 
   tags = {
-    KubernetesCluster = "privatedns2.example.com"
-    Name              = "private-us-test-1a.privatedns2.example.com"
+    KubernetesCluster                               = "privatedns2.example.com"
+    "kubernetes.io/cluster/privatedns2.example.com" = "shared"
   }
 }
 
 resource "aws_route_table" "privatedns2-example-com" {
-  vpc_id = "vpc-123"
+  vpc_id = "vpc-12345678"
 
   tags = {
-    KubernetesCluster = "privatedns2.example.com"
-    Name              = "privatedns2.example.com"
+    KubernetesCluster                               = "privatedns2.example.com"
+    "kubernetes.io/cluster/privatedns2.example.com" = "shared"
   }
 }
 
@@ -412,7 +427,7 @@ resource "aws_route_table_association" "utility-us-test-1a-privatedns2-example-c
 
 resource "aws_security_group" "api-elb-privatedns2-example-com" {
   name        = "api-elb.privatedns2.example.com"
-  vpc_id      = "vpc-123"
+  vpc_id      = "vpc-12345678"
   description = "Security group for api ELB"
 
   tags = {
@@ -423,7 +438,7 @@ resource "aws_security_group" "api-elb-privatedns2-example-com" {
 
 resource "aws_security_group" "bastion-elb-privatedns2-example-com" {
   name        = "bastion-elb.privatedns2.example.com"
-  vpc_id      = "vpc-123"
+  vpc_id      = "vpc-12345678"
   description = "Security group for bastion ELB"
 
   tags = {
@@ -434,7 +449,7 @@ resource "aws_security_group" "bastion-elb-privatedns2-example-com" {
 
 resource "aws_security_group" "bastion-privatedns2-example-com" {
   name        = "bastion.privatedns2.example.com"
-  vpc_id      = "vpc-123"
+  vpc_id      = "vpc-12345678"
   description = "Security group for bastion"
 
   tags = {
@@ -445,7 +460,7 @@ resource "aws_security_group" "bastion-privatedns2-example-com" {
 
 resource "aws_security_group" "masters-privatedns2-example-com" {
   name        = "masters.privatedns2.example.com"
-  vpc_id      = "vpc-123"
+  vpc_id      = "vpc-12345678"
   description = "Security group for masters"
 
   tags = {
@@ -456,7 +471,7 @@ resource "aws_security_group" "masters-privatedns2-example-com" {
 
 resource "aws_security_group" "nodes-privatedns2-example-com" {
   name        = "nodes.privatedns2.example.com"
-  vpc_id      = "vpc-123"
+  vpc_id      = "vpc-12345678"
   description = "Security group for nodes"
 
   tags = {
@@ -628,26 +643,28 @@ resource "aws_security_group_rule" "ssh-external-to-bastion-elb-0-0-0-0--0" {
 }
 
 resource "aws_subnet" "us-test-1a-privatedns2-example-com" {
-  vpc_id            = "vpc-123"
+  vpc_id            = "vpc-12345678"
   cidr_block        = "172.20.32.0/19"
   availability_zone = "us-test-1a"
 
   tags = {
     KubernetesCluster                               = "privatedns2.example.com"
     Name                                            = "us-test-1a.privatedns2.example.com"
+    SubnetType                                      = "Private"
     "kubernetes.io/cluster/privatedns2.example.com" = "owned"
     "kubernetes.io/role/internal-elb"               = "1"
   }
 }
 
 resource "aws_subnet" "utility-us-test-1a-privatedns2-example-com" {
-  vpc_id            = "vpc-123"
+  vpc_id            = "vpc-12345678"
   cidr_block        = "172.20.4.0/22"
   availability_zone = "us-test-1a"
 
   tags = {
     KubernetesCluster                               = "privatedns2.example.com"
     Name                                            = "utility-us-test-1a.privatedns2.example.com"
+    SubnetType                                      = "Utility"
     "kubernetes.io/cluster/privatedns2.example.com" = "owned"
     "kubernetes.io/role/elb"                        = "1"
   }

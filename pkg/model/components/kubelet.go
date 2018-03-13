@@ -114,16 +114,21 @@ func (b *KubeletOptionsBuilder) BuildOptions(o interface{}) error {
 		}
 	}
 
-	if kubernetesVersion.Major == 1 && kubernetesVersion.Minor <= 5 {
-		clusterSpec.Kubelet.APIServers = "https://" + clusterSpec.MasterInternalName
-		clusterSpec.MasterKubelet.APIServers = "http://127.0.0.1:8080"
-	} else if kubernetesVersion.Major == 1 { // for 1.6+ use kubeconfig instead of api-servers
+	if b.Context.IsKubernetesGTE("1.6") {
+		// for 1.6+ use kubeconfig instead of api-servers
 		const kubeconfigPath = "/var/lib/kubelet/kubeconfig"
 		clusterSpec.Kubelet.KubeconfigPath = kubeconfigPath
-		clusterSpec.Kubelet.RequireKubeconfig = fi.Bool(true)
-
 		clusterSpec.MasterKubelet.KubeconfigPath = kubeconfigPath
-		clusterSpec.MasterKubelet.RequireKubeconfig = fi.Bool(true)
+
+		// Only pass require-kubeconfig to versions prior to 1.9; deprecated & being removed
+		if b.Context.IsKubernetesLT("1.9") {
+			clusterSpec.Kubelet.RequireKubeconfig = fi.Bool(true)
+			clusterSpec.MasterKubelet.RequireKubeconfig = fi.Bool(true)
+		}
+	} else {
+		// Legacy behaviour for <= 1.5
+		clusterSpec.Kubelet.APIServers = "https://" + clusterSpec.MasterInternalName
+		clusterSpec.MasterKubelet.APIServers = "http://127.0.0.1:8080"
 	}
 
 	// IsolateMasters enables the legacy behaviour, where master pods on a separate network
@@ -149,7 +154,10 @@ func (b *KubeletOptionsBuilder) BuildOptions(o interface{}) error {
 		}
 
 		// Use the hostname from the AWS metadata service
-		clusterSpec.Kubelet.HostnameOverride = "@aws"
+		// if hostnameOverride is not set.
+		if clusterSpec.Kubelet.HostnameOverride == "" {
+			clusterSpec.Kubelet.HostnameOverride = "@aws"
+		}
 	}
 
 	if cloudProvider == kops.CloudProviderDO {
@@ -194,7 +202,7 @@ func (b *KubeletOptionsBuilder) BuildOptions(o interface{}) error {
 	}
 
 	// Specify our pause image
-	image := "gcr.io/google_containers/pause-amd64:3.0"
+	image := "k8s.gcr.io/pause-amd64:3.0"
 	if image, err = b.Context.AssetBuilder.RemapImage(image); err != nil {
 		return err
 	}

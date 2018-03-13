@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@ type FakeKopsV1alpha1 struct {
 
 func (c *FakeKopsV1alpha1) Clusters(namespace string) v1alpha1.ClusterInterface {
 	return &FakeClusters{c, namespace}
-}
-
-func (c *FakeKopsV1alpha1) Federations(namespace string) v1alpha1.FederationInterface {
-	return &FakeFederations{c, namespace}
 }
 
 func (c *FakeKopsV1alpha1) InstanceGroups(namespace string) v1alpha1.InstanceGroupInterface {

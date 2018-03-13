@@ -21,6 +21,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
+	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/pki"
 	"k8s.io/kops/util/pkg/vfs"
 )
@@ -28,16 +29,12 @@ import (
 const CertificateId_CA = "ca"
 
 const (
-	SecretTypeSSHPublicKey = "SSHPublicKey"
-	SecretTypeKeypair      = "Keypair"
-	SecretTypeSecret       = "Secret"
-
-	// Name for the primary SSH key
+	// SecretNameSSHPrimary is the Name for the primary SSH key
 	SecretNameSSHPrimary = "admin"
 )
 
 type KeystoreItem struct {
-	Type string
+	Type kops.KeysetType
 	Name string
 	Id   string
 	Data []byte
@@ -46,8 +43,11 @@ type KeystoreItem struct {
 // Keystore contains just the functions we need to issue keypairs, not to list / manage them
 type Keystore interface {
 	// FindKeypair finds a cert & private key, returning nil where either is not found
-	// (if the certificate is found but not keypair, that is not an error: only the cert will be returned)
-	FindKeypair(name string) (*pki.Certificate, *pki.PrivateKey, error)
+	// (if the certificate is found but not keypair, that is not an error: only the cert will be returned).
+	// This func returns a cert, private key and a string.  The string value is the Format of the keystore which is either
+	// an empty string, which denotes a Legacy Keypair, or a value of "Keypair".  This string is used by a keypair
+	// task convert a Legacy Keypair to the new Keypair API format.
+	FindKeypair(name string) (*pki.Certificate, *pki.PrivateKey, string, error)
 
 	CreateKeypair(signer string, name string, template *x509.Certificate, privateKey *pki.PrivateKey) (*pki.Certificate, error)
 
@@ -66,36 +66,65 @@ type HasVFSPath interface {
 type CAStore interface {
 	Keystore
 
-	// Cert returns the primary specified certificate
-	// For createIfMissing=false, using FindCert is preferred
-	Cert(name string, createIfMissing bool) (*pki.Certificate, error)
 	// CertificatePool returns all active certificates with the specified id
+	// Deprecated: prefer FindCertificatePool
 	CertificatePool(name string, createIfMissing bool) (*CertificatePool, error)
-	PrivateKey(name string, createIfMissing bool) (*pki.PrivateKey, error)
+
+	// FindCertificatePool returns the named CertificatePool, or (nil,nil) if not found
+	FindCertificatePool(name string) (*CertificatePool, error)
+
+	// FindCertificateKeyset will return the keyset for a certificate
+	FindCertificateKeyset(name string) (*kops.Keyset, error)
+
+	// FindPrivateKey returns the named private key, or (nil,nil) if not found
+	FindPrivateKey(name string) (*pki.PrivateKey, error)
+
+	// FindPrivateKeyset will return the keyset for a private key
+	FindPrivateKeyset(name string) (*kops.Keyset, error)
 
 	// FindCert returns the specified certificate, if it exists, or nil if not found
 	FindCert(name string) (*pki.Certificate, error)
-	FindPrivateKey(name string) (*pki.PrivateKey, error)
 
-	// List will list all the items, but will not fetch the data
-	List() ([]*KeystoreItem, error)
+	// ListKeysets will return all the KeySets
+	// The key material is not guaranteed to be populated - metadata like the name will be.
+	ListKeysets() ([]*kops.Keyset, error)
 
 	// AddCert adds an alternative certificate to the pool (primarily useful for CAs)
 	AddCert(name string, cert *pki.Certificate) error
+
+	// DeleteKeysetItem will delete the specified item from the Keyset
+	DeleteKeysetItem(item *kops.Keyset, id string) error
+}
+
+// SSHCredentialStore holds SSHCredential objects
+type SSHCredentialStore interface {
+	// DeleteSSHCredential deletes the specified SSH credential
+	DeleteSSHCredential(item *kops.SSHCredential) error
+
+	// ListSSHCredentials will list all the SSH credentials
+	ListSSHCredentials() ([]*kops.SSHCredential, error)
 
 	// AddSSHPublicKey adds an SSH public key
 	AddSSHPublicKey(name string, data []byte) error
 
 	// FindSSHPublicKeys retrieves the SSH public keys with the specific name
-	FindSSHPublicKeys(name string) ([]*KeystoreItem, error)
-
-	// DeleteSecret will delete the specified item
-	DeleteSecret(item *KeystoreItem) error
+	FindSSHPublicKeys(name string) ([]*kops.SSHCredential, error)
 }
 
 type CertificatePool struct {
 	Secondary []*pki.Certificate
 	Primary   *pki.Certificate
+}
+
+func (c *CertificatePool) All() []*pki.Certificate {
+	var certs []*pki.Certificate
+	if c.Primary != nil {
+		certs = append(certs, c.Primary)
+	}
+	if len(c.Secondary) != 0 {
+		certs = append(certs, c.Secondary...)
+	}
+	return certs
 }
 
 func (c *CertificatePool) AsString() (string, error) {

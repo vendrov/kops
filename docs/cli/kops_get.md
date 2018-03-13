@@ -12,8 +12,7 @@ Display one or many resources.
 
   * cluster  
   * instancegroup  
-  * secret  
-  * federation
+  * secret
 
 ```
 kops get
@@ -55,8 +54,8 @@ kops get
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory
       --logtostderr                      log to standard error instead of files (default false)
-      --name string                      Name of cluster
-      --state string                     Location of state storage
+      --name string                      Name of cluster. Overrides KOPS_CLUSTER_NAME environment variable
+      --state string                     Location of state storage. Overrides KOPS_STATE_STORE environment variable
       --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
   -v, --v Level                          log level for V logs
       --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
@@ -65,7 +64,6 @@ kops get
 ### SEE ALSO
 * [kops](kops.md)	 - kops is Kubernetes ops.
 * [kops get clusters](kops_get_clusters.md)	 - Get one or many clusters.
-* [kops get federations](kops_get_federations.md)	 - Get federation.
 * [kops get instancegroups](kops_get_instancegroups.md)	 - Get one or many instancegroups
 * [kops get secrets](kops_get_secrets.md)	 - Get one or many secrets.
 

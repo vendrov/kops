@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -244,10 +245,14 @@ func (p *SwiftPath) Join(relativePath ...string) Path {
 	}
 }
 
-func (p *SwiftPath) WriteFile(data []byte, acl ACL) error {
+func (p *SwiftPath) WriteFile(data io.ReadSeeker, acl ACL) error {
 	done, err := RetryWithBackoff(swiftWriteBackoff, func() (bool, error) {
 		glog.V(4).Infof("Writing file %q", p)
-		createOpts := swiftobject.CreateOpts{Content: bytes.NewReader(data)}
+		if _, err := data.Seek(0, 0); err != nil {
+			return false, fmt.Errorf("error seeking to start of data stream for %s: %v", p, err)
+		}
+
+		createOpts := swiftobject.CreateOpts{Content: data}
 		_, err := swiftobject.Create(p.client, p.bucket, p.key, createOpts).Extract()
 		if err != nil {
 			return false, fmt.Errorf("error writing %s: %v", p, err)
@@ -271,7 +276,7 @@ func (p *SwiftPath) WriteFile(data []byte, acl ACL) error {
 // TODO: should we enable versioning?
 var createFileLockSwift sync.Mutex
 
-func (p *SwiftPath) CreateFile(data []byte, acl ACL) error {
+func (p *SwiftPath) CreateFile(data io.ReadSeeker, acl ACL) error {
 	createFileLockSwift.Lock()
 	defer createFileLockSwift.Unlock()
 
@@ -325,31 +330,47 @@ func (p *SwiftPath) createBucket() error {
 	}
 }
 
-// ReadFile implements Path::ReadFile.
+// ReadFile implements Path::ReadFile
 func (p *SwiftPath) ReadFile() ([]byte, error) {
-	var ret []byte
+	var b bytes.Buffer
 	done, err := RetryWithBackoff(swiftReadBackoff, func() (bool, error) {
-		glog.V(4).Infof("Reading file %q", p)
-
-		opt := swiftobject.DownloadOpts{}
-		result := swiftobject.Download(p.client, p.bucket, p.key, opt)
-		data, err := (&result).ExtractContent()
-		if err == nil {
-			ret = data
-			return true, nil
-		} else if isSwiftNotFound(err) {
-			return true, os.ErrNotExist
-		} else {
-			return false, fmt.Errorf("error reading %s: %v", p, err)
+		b.Reset()
+		_, err := p.WriteTo(&b)
+		if err != nil {
+			if os.IsNotExist(err) {
+				// Not recoverable
+				return true, err
+			}
+			return false, err
 		}
+		// Success!
+		return true, nil
 	})
 	if err != nil {
 		return nil, err
 	} else if done {
-		return ret, nil
+		return b.Bytes(), nil
 	} else {
+		// Shouldn't happen - we always return a non-nil error with false
 		return nil, wait.ErrWaitTimeout
 	}
+}
+
+// WriteTo implements io.WriterTo
+func (p *SwiftPath) WriteTo(out io.Writer) (int64, error) {
+	glog.V(4).Infof("Reading file %q", p)
+
+	opt := swiftobject.DownloadOpts{}
+	result := swiftobject.Download(p.client, p.bucket, p.key, opt)
+	if result.Err != nil {
+		if isSwiftNotFound(result.Err) {
+			return 0, os.ErrNotExist
+		}
+		return 0, fmt.Errorf("error reading %s: %v", p, result.Err)
+	}
+	defer result.Body.Close()
+
+	return io.Copy(out, result.Body)
 }
 
 func (p *SwiftPath) readPath(opt swiftobject.ListOpts) ([]Path, error) {

@@ -149,7 +149,7 @@ func ignoreHandler(i *loader.TreeWalkItem) error {
 	return nil
 }
 
-func (l *Loader) BuildTasks(modelStore vfs.Path, models []string, assetBuilder *assets.AssetBuilder, lifecycle *fi.Lifecycle) (map[string]fi.Task, error) {
+func (l *Loader) BuildTasks(modelStore vfs.Path, models []string, assetBuilder *assets.AssetBuilder, lifecycle *fi.Lifecycle, lifecycleOverrides map[string]fi.Lifecycle) (map[string]fi.Task, error) {
 	// Second pass: load everything else
 	tw := &loader.TreeWalker{
 		DefaultHandler: l.objectHandler,
@@ -172,7 +172,8 @@ func (l *Loader) BuildTasks(modelStore vfs.Path, models []string, assetBuilder *
 
 	for _, builder := range l.Builders {
 		context := &fi.ModelBuilderContext{
-			Tasks: l.tasks,
+			Tasks:              l.tasks,
+			LifecycleOverrides: lifecycleOverrides,
 		}
 		err := builder.Build(context)
 		if err != nil {
@@ -185,6 +186,9 @@ func (l *Loader) BuildTasks(modelStore vfs.Path, models []string, assetBuilder *
 		return nil, err
 	}
 
+	if err := l.addAssetFileCopyTasks(assetBuilder.FileAssets, lifecycle); err != nil {
+		return nil, err
+	}
 	err := l.processDeferrals()
 	if err != nil {
 		return nil, err
@@ -214,6 +218,41 @@ func (l *Loader) addAssetCopyTasks(assets []*assets.ContainerAsset, lifecycle *f
 
 		}
 	}
+
+	return nil
+}
+
+// addAssetFileCopyTasks creates the new tasks for copying files.
+func (l *Loader) addAssetFileCopyTasks(assets []*assets.FileAsset, lifecycle *fi.Lifecycle) error {
+	for _, asset := range assets {
+
+		if asset.FileURL == nil {
+			return fmt.Errorf("asset file url cannot be nil")
+		}
+
+		// test if the asset needs to be copied
+		if asset.CanonicalFileURL != nil && asset.FileURL.String() != asset.CanonicalFileURL.String() {
+			glog.V(10).Infof("processing asset: %q, %q", asset.FileURL.String(), asset.CanonicalFileURL.String())
+			context := &fi.ModelBuilderContext{
+				Tasks: l.tasks,
+			}
+
+			glog.V(10).Infof("adding task: %q", asset.FileURL.String())
+
+			copyFileTask := &assettasks.CopyFile{
+				Name:       fi.String(asset.CanonicalFileURL.String()),
+				TargetFile: fi.String(asset.FileURL.String()),
+				SourceFile: fi.String(asset.CanonicalFileURL.String()),
+				SHA:        fi.String(asset.SHAValue),
+				Lifecycle:  lifecycle,
+			}
+
+			context.AddTask(copyFileTask)
+			l.tasks = context.Tasks
+
+		}
+	}
+
 	return nil
 }
 

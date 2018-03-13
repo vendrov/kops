@@ -88,6 +88,9 @@ resource "aws_autoscaling_group" "bastion-privateweave-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1a-masters-privateweave-example-com" {
@@ -114,6 +117,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-privateweave-example
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-privateweave-example-com" {
@@ -140,6 +146,9 @@ resource "aws_autoscaling_group" "nodes-privateweave-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-privateweave-example-com" {
@@ -284,8 +293,9 @@ resource "aws_internet_gateway" "privateweave-example-com" {
   vpc_id = "${aws_vpc.privateweave-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privateweave.example.com"
-    Name              = "privateweave.example.com"
+    KubernetesCluster                                = "privateweave.example.com"
+    Name                                             = "privateweave.example.com"
+    "kubernetes.io/cluster/privateweave.example.com" = "owned"
   }
 }
 
@@ -364,6 +374,12 @@ resource "aws_launch_configuration" "nodes-privateweave-example-com" {
 resource "aws_nat_gateway" "us-test-1a-privateweave-example-com" {
   allocation_id = "${aws_eip.us-test-1a-privateweave-example-com.id}"
   subnet_id     = "${aws_subnet.utility-us-test-1a-privateweave-example-com.id}"
+
+  tags = {
+    KubernetesCluster                                = "privateweave.example.com"
+    Name                                             = "us-test-1a.privateweave.example.com"
+    "kubernetes.io/cluster/privateweave.example.com" = "owned"
+  }
 }
 
 resource "aws_route" "0-0-0-0--0" {
@@ -395,8 +411,9 @@ resource "aws_route_table" "private-us-test-1a-privateweave-example-com" {
   vpc_id = "${aws_vpc.privateweave-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privateweave.example.com"
-    Name              = "private-us-test-1a.privateweave.example.com"
+    KubernetesCluster                                = "privateweave.example.com"
+    Name                                             = "private-us-test-1a.privateweave.example.com"
+    "kubernetes.io/cluster/privateweave.example.com" = "owned"
   }
 }
 
@@ -404,8 +421,9 @@ resource "aws_route_table" "privateweave-example-com" {
   vpc_id = "${aws_vpc.privateweave-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privateweave.example.com"
-    Name              = "privateweave.example.com"
+    KubernetesCluster                                = "privateweave.example.com"
+    Name                                             = "privateweave.example.com"
+    "kubernetes.io/cluster/privateweave.example.com" = "owned"
   }
 }
 
@@ -644,6 +662,7 @@ resource "aws_subnet" "us-test-1a-privateweave-example-com" {
   tags = {
     KubernetesCluster                                = "privateweave.example.com"
     Name                                             = "us-test-1a.privateweave.example.com"
+    SubnetType                                       = "Private"
     "kubernetes.io/cluster/privateweave.example.com" = "owned"
     "kubernetes.io/role/internal-elb"                = "1"
   }
@@ -657,6 +676,7 @@ resource "aws_subnet" "utility-us-test-1a-privateweave-example-com" {
   tags = {
     KubernetesCluster                                = "privateweave.example.com"
     Name                                             = "utility-us-test-1a.privateweave.example.com"
+    SubnetType                                       = "Utility"
     "kubernetes.io/cluster/privateweave.example.com" = "owned"
     "kubernetes.io/role/elb"                         = "1"
   }
@@ -679,8 +699,9 @@ resource "aws_vpc_dhcp_options" "privateweave-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "privateweave.example.com"
-    Name              = "privateweave.example.com"
+    KubernetesCluster                                = "privateweave.example.com"
+    Name                                             = "privateweave.example.com"
+    "kubernetes.io/cluster/privateweave.example.com" = "owned"
   }
 }
 

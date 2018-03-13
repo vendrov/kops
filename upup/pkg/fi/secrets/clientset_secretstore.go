@@ -17,6 +17,7 @@ limitations under the License.
 package secrets
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -89,7 +90,7 @@ func (c *ClientsetSecretStore) MirrorTo(basedir vfs.Path) error {
 			return err
 		}
 
-		if err := p.WriteFile(data, acl); err != nil {
+		if err := p.WriteFile(bytes.NewReader(data), acl); err != nil {
 			return fmt.Errorf("error writing secret to %q: %v", p, err)
 		}
 	}
@@ -140,9 +141,27 @@ func (c *ClientsetSecretStore) Secret(name string) (*fi.Secret, error) {
 }
 
 // DeleteSecret implements fi.SecretStore::DeleteSecret
-func (c *ClientsetSecretStore) DeleteSecret(item *fi.KeystoreItem) error {
+func (c *ClientsetSecretStore) DeleteSecret(name string) error {
 	client := c.clientset.Keysets(c.namespace)
-	return fi.DeleteKeysetItem(client, item.Name, kops.SecretTypeKeypair, item.Id)
+
+	keyset, err := client.Get(name, v1.GetOptions{})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		} else {
+			return fmt.Errorf("error reading Keyset %q: %v", name, err)
+		}
+	}
+
+	if keyset.Spec.Type != kops.SecretTypeSecret {
+		return fmt.Errorf("mismatch on Keyset type on %q", name)
+	}
+
+	if err := client.Delete(name, &v1.DeleteOptions{}); err != nil {
+		return fmt.Errorf("error deleting Keyset %q: %v", name, err)
+	}
+
+	return nil
 }
 
 // GetOrCreateSecret implements fi.SecretStore::GetOrCreateSecret

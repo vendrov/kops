@@ -18,6 +18,7 @@ package vfs
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/golang/glog"
@@ -42,12 +43,18 @@ type ACLOracle func(Path) (ACL, error)
 
 // Path is a path in the VFS space, which we can read, write, list etc
 type Path interface {
+	io.WriterTo
+
 	Join(relativePath ...string) Path
+
+	// ReadFile returns the contents of the file, or an error if the file could not be read.
+	// If the file did not exist, err = os.ErrNotExist
+	// As this reads the entire file into memory, consider using WriteTo for bigger files
 	ReadFile() ([]byte, error)
 
-	WriteFile(data []byte, acl ACL) error
+	WriteFile(data io.ReadSeeker, acl ACL) error
 	// CreateFile writes the file contents, but only if the file does not already exist
-	CreateFile(data []byte, acl ACL) error
+	CreateFile(data io.ReadSeeker, acl ACL) error
 
 	// Remove deletes the file
 	Remove() error
@@ -62,6 +69,7 @@ type Path interface {
 	ReadDir() ([]Path, error)
 
 	// ReadTree lists all files (recursively) in the subtree rooted at the current Path
+	/// Note: returns only files, not directories
 	ReadTree() ([]Path, error)
 }
 

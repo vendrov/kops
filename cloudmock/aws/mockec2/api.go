@@ -17,26 +17,32 @@ limitations under the License.
 package mockec2
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
 
 type MockEC2 struct {
+	mutex sync.Mutex
+
 	addressNumber int
 	Addresses     []*ec2.Address
 
-	RouteTables []*ec2.RouteTable
+	RouteTables map[string]*ec2.RouteTable
+
+	DhcpOptions map[string]*ec2.DhcpOptions
 
 	Images []*ec2.Image
 
 	securityGroupNumber int
-	SecurityGroups      []*ec2.SecurityGroup
+	SecurityGroups      map[string]*ec2.SecurityGroup
 
 	subnetNumber int
 	subnets      map[string]*subnetInfo
 
-	volumeNumber int
-	Volumes      []*ec2.Volume
+	Volumes map[string]*ec2.Volume
 
 	KeyPairs []*ec2.KeyPairInfo
 
@@ -44,6 +50,31 @@ type MockEC2 struct {
 
 	vpcNumber int
 	Vpcs      map[string]*vpcInfo
+
+	internetGatewayNumber int
+	InternetGateways      map[string]*internetGatewayInfo
+
+	NatGateways map[string]*ec2.NatGateway
+
+	ids map[string]*idAllocator
 }
 
 var _ ec2iface.EC2API = &MockEC2{}
+
+type idAllocator struct {
+	NextId int
+}
+
+func (m *MockEC2) allocateId(prefix string) string {
+	ids := m.ids[prefix]
+	if ids == nil {
+		if m.ids == nil {
+			m.ids = make(map[string]*idAllocator)
+		}
+		ids = &idAllocator{NextId: 1}
+		m.ids[prefix] = ids
+	}
+	id := ids.NextId
+	ids.NextId++
+	return fmt.Sprintf("%s-%d", prefix, id)
+}

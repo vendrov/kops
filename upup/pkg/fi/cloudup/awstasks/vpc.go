@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/kops/pkg/featureflag"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
@@ -36,6 +37,7 @@ type VPC struct {
 
 	ID                 *string
 	CIDR               *string
+	AdditionalCIDR     *[]string
 	EnableDNSHostnames *bool
 	EnableDNSSupport   *bool
 
@@ -75,10 +77,11 @@ func (e *VPC) Find(c *fi.Context) (*VPC, error) {
 	}
 	vpc := response.Vpcs[0]
 	actual := &VPC{
-		ID:   vpc.VpcId,
-		CIDR: vpc.CidrBlock,
-		Name: findNameTag(vpc.Tags),
-		Tags: intersectTags(vpc.Tags, e.Tags),
+		ID:             vpc.VpcId,
+		CIDR:           vpc.CidrBlock,
+		AdditionalCIDR: getAdditionalCIDR(vpc.CidrBlock, vpc.CidrBlockAssociationSet),
+		Name:           findNameTag(vpc.Tags),
+		Tags:           intersectTags(vpc.Tags, e.Tags),
 	}
 
 	glog.V(4).Infof("found matching VPC %v", actual)
@@ -122,7 +125,7 @@ func (s *VPC) CheckChanges(a, e, changes *VPC) error {
 	if a != nil {
 		if changes.CIDR != nil {
 			// TODO: Do we want to destroy & recreate the VPC?
-			return fi.CannotChangeField("CIDR")
+			return fi.FieldIsImmutable(e.CIDR, a.CIDR, field.NewPath("CIDR"))
 		}
 	}
 	return nil
@@ -272,4 +275,16 @@ func (e *VPC) CloudformationLink() *cloudformation.Literal {
 	}
 
 	return cloudformation.Ref("AWS::EC2::VPC", *e.Name)
+}
+
+func getAdditionalCIDR(CIDR *string, additionalCIDRSet []*ec2.VpcCidrBlockAssociation) *[]string {
+	var additionalCIDRs []string
+
+	for _, CIDRSet := range additionalCIDRSet {
+		if *CIDRSet.CidrBlock != *CIDR {
+			additionalCIDRs = append(additionalCIDRs, *CIDRSet.CidrBlock)
+		}
+	}
+
+	return &additionalCIDRs
 }

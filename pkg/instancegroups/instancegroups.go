@@ -17,12 +17,13 @@ limitations under the License.
 package instancegroups
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/spf13/cobra"
 	api "k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/cloudinstances"
 	"k8s.io/kops/pkg/featureflag"
@@ -63,6 +64,32 @@ func NewRollingUpdateInstanceGroup(cloud fi.Cloud, cloudGroup *cloudinstances.Cl
 		Cloud:      cloud,
 		CloudGroup: cloudGroup,
 	}, nil
+}
+
+// promptInteractive asks the user to continue, mostly copied from vendor/google.golang.org/api/examples/gmail.go.
+func promptInteractive(upgradedHost string) (stopPrompting bool, err error) {
+	stopPrompting = false
+	scanner := bufio.NewScanner(os.Stdin)
+	glog.Infof("Pausing after finished %q", upgradedHost)
+	fmt.Print("Continue? (Y)es, (N)o, (A)lwaysYes: [Y] ")
+	scanner.Scan()
+	err = scanner.Err()
+	if err != nil {
+		glog.Infof("unable to interpret input: %v", err)
+		return stopPrompting, err
+	}
+	val := scanner.Text()
+	val = strings.TrimSpace(val)
+	val = strings.ToLower(val)
+	switch val {
+	case "n":
+		glog.Infof("User signaled to stop")
+		os.Exit(3)
+	case "a":
+		glog.Infof("Always Yes, stop prompting for rest of hosts")
+		stopPrompting = true
+	}
+	return stopPrompting, err
 }
 
 // TODO: Temporarily increase size of ASG?
@@ -169,6 +196,16 @@ func (r *RollingUpdateInstanceGroup) RollingUpdate(rollingUpdateData *RollingUpd
 
 				glog.Warningf("Cluster validation failed after removing instance, proceeding since fail-on-validate is set to false: %v", err)
 			}
+			if rollingUpdateData.Interactive {
+				stopPrompting, err := promptInteractive(nodeName)
+				if err != nil {
+					return err
+				}
+				if stopPrompting {
+					// Is a pointer to a struct, changes here push back into the original
+					rollingUpdateData.Interactive = false
+				}
+			}
 		}
 	}
 
@@ -206,7 +243,7 @@ func (r *RollingUpdateInstanceGroup) ValidateClusterWithDuration(rollingUpdateDa
 
 func (r *RollingUpdateInstanceGroup) tryValidateCluster(rollingUpdateData *RollingUpdateCluster, instanceGroupList *api.InstanceGroupList, duration time.Duration, tickDuration time.Duration) bool {
 	if _, err := validation.ValidateCluster(rollingUpdateData.ClusterName, instanceGroupList, rollingUpdateData.K8sClient); err != nil {
-		glog.Infof("Cluster did not validate, will try again in %q util duration %q expires: %v.", tickDuration, duration, err)
+		glog.Infof("Cluster did not validate, will try again in %q until duration %q expires: %v.", tickDuration, duration, err)
 		return false
 	} else {
 		glog.Infof("Cluster validated.")
@@ -275,9 +312,7 @@ func (r *RollingUpdateInstanceGroup) DrainNode(u *cloudinstances.CloudInstanceGr
 		ErrOut:           errOut,
 	}
 
-	cmd := &cobra.Command{
-		Use: "cordon NODE",
-	}
+	cmd := cmd.NewCmdDrain(f, out, errOut)
 	args := []string{u.Node.Name}
 	err := options.SetupDrain(cmd, args)
 	if err != nil {

@@ -24,6 +24,7 @@ import (
 	"k8s.io/kops/pkg/flagbuilder"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
+	"k8s.io/kops/util/pkg/exec"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -49,9 +50,13 @@ func (b *KubeControllerManagerBuilder) Build(c *fi.ModelBuilderContext) error {
 	// If we're using the CertificateSigner, include the CA Key
 	// @TODO: use a per-machine key?  use KMS?
 	if b.useCertificateSigner() {
-		ca, err := b.KeyStore.PrivateKey(fi.CertificateId_CA, false)
+		ca, err := b.KeyStore.FindPrivateKey(fi.CertificateId_CA)
 		if err != nil {
 			return err
+		}
+
+		if ca == nil {
+			return fmt.Errorf("CA private key %q not found", fi.CertificateId_CA)
 		}
 
 		serialized, err := ca.AsString()
@@ -163,10 +168,10 @@ func (b *KubeControllerManagerBuilder) buildPod() (*v1.Pod, error) {
 	container := &v1.Container{
 		Name:  "kube-controller-manager",
 		Image: b.Cluster.Spec.KubeControllerManager.Image,
-		Command: []string{
-			"/bin/sh", "-c",
-			"/usr/local/bin/kube-controller-manager " + strings.Join(sortedStrings(flags), " ") + " 2>&1 | /bin/tee -a /var/log/kube-controller-manager.log",
-		},
+		Command: exec.WithTee(
+			"/usr/local/bin/kube-controller-manager",
+			sortedStrings(flags),
+			"/var/log/kube-controller-manager.log"),
 		Env: getProxyEnvVars(b.Cluster.Spec.EgressProxy),
 		LivenessProbe: &v1.Probe{
 			Handler: v1.Handler{

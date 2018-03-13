@@ -26,6 +26,7 @@ import (
 	"k8s.io/kops/pkg/kubeconfig"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
+	"k8s.io/kops/util/pkg/exec"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -247,10 +248,10 @@ func (b *KubeAPIServerBuilder) buildPod() (*v1.Pod, error) {
 	container := &v1.Container{
 		Name:  "kube-apiserver",
 		Image: b.Cluster.Spec.KubeAPIServer.Image,
-		Command: []string{
-			"/bin/sh", "-c",
-			"/usr/local/bin/kube-apiserver " + strings.Join(sortedStrings(flags), " ") + " 2>&1 | /bin/tee -a /var/log/kube-apiserver.log",
-		},
+		Command: exec.WithTee(
+			"/usr/local/bin/kube-apiserver",
+			sortedStrings(flags),
+			"/var/log/kube-apiserver.log"),
 		Env: getProxyEnvVars(b.Cluster.Spec.EgressProxy),
 		LivenessProbe: &v1.Probe{
 			Handler: v1.Handler{

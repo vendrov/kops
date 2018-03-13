@@ -20,6 +20,8 @@ import (
 	"fmt"
 
 	"k8s.io/apiserver/pkg/authentication/user"
+	"k8s.io/kops/pkg/apis/kops"
+	"k8s.io/kops/pkg/tokens"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/fitasks"
 	"k8s.io/kops/util/pkg/vfs"
@@ -33,8 +35,12 @@ type PKIModelBuilder struct {
 
 var _ fi.ModelBuilder = &PKIModelBuilder{}
 
-// Build is responsible for generating the various pki assets
+// Build is responsible for generating the various pki assets.
 func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
+
+	// Note: the fitasks.Keypair structs are created with a Format that == 	fitasks.KeypairType
+	// to denote that these tasks are using the newer Keypar API Type.  This value is used
+	// to upgrade a legacy Keypair to the newer Keypair API object.
 
 	// TODO: Only create the CA via this task
 	defaultCA := &fitasks.Keypair{
@@ -42,6 +48,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 		Lifecycle: b.Lifecycle,
 		Subject:   "cn=kubernetes",
 		Type:      "ca",
+
+		Format: string(kops.SecretTypeKeypair),
 	}
 	c.AddTask(defaultCA)
 
@@ -54,6 +62,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject: "o=" + user.NodesGroup + ",cn=kubelet",
 			Type:    "client",
 			Signer:  defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -67,6 +77,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "cn=kubelet-api",
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		})
 	}
 	{
@@ -76,6 +88,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "cn=" + user.KubeScheduler,
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -87,6 +101,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "cn=" + user.KubeProxy,
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -98,6 +114,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "cn=" + user.KubeControllerManager,
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -108,25 +126,38 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 	// For clients assuming we are using etcdv3 is can switch on user authentication and map the common names for auth.
 	if b.UseEtcdTLS() {
 		alternativeNames := []string{fmt.Sprintf("*.internal.%s", b.ClusterName()), "localhost", "127.0.0.1"}
-		{
-			// @question should wildcard's be here instead of generating per node. If we ever provide the
-			// ability to resize the master, this will become a blocker
+		// @question should wildcard's be here instead of generating per node. If we ever provide the
+		// ability to resize the master, this will become a blocker
+		c.AddTask(&fitasks.Keypair{
+			AlternateNames: alternativeNames,
+			Lifecycle:      b.Lifecycle,
+			Name:           fi.String("etcd"),
+			Subject:        "cn=etcd",
+			Type:           "clientServer",
+			Signer:         defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
+		})
+		c.AddTask(&fitasks.Keypair{
+			Name:      fi.String("etcd-client"),
+			Lifecycle: b.Lifecycle,
+			Subject:   "cn=etcd-client",
+			Type:      "client",
+			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
+		})
+
+		// @check if calico is enabled as the CNI provider
+		if b.KopsModelContext.Cluster.Spec.Networking.Calico != nil {
 			c.AddTask(&fitasks.Keypair{
-				AlternateNames: alternativeNames,
-				Lifecycle:      b.Lifecycle,
-				Name:           fi.String("etcd"),
-				Subject:        "cn=etcd",
-				Type:           "server",
-				Signer:         defaultCA,
-			})
-		}
-		{
-			c.AddTask(&fitasks.Keypair{
-				Name:      fi.String("etcd-client"),
+				Name:      fi.String("calico-client"),
 				Lifecycle: b.Lifecycle,
-				Subject:   "cn=etcd-client",
+				Subject:   "cn=calico-client",
 				Type:      "client",
 				Signer:    defaultCA,
+
+				Format: string(kops.SecretTypeKeypair),
 			})
 		}
 	}
@@ -137,6 +168,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject: "cn=" + "system:kube-router",
 			Type:    "client",
 			Signer:  defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -148,6 +181,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "o=" + user.SystemPrivilegedGroup + ",cn=kubecfg",
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -159,6 +194,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "cn=apiserver-proxy-client",
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -169,6 +206,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Lifecycle: b.Lifecycle,
 			Subject:   "cn=apiserver-aggregator-ca",
 			Type:      "ca",
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(aggregatorCA)
 
@@ -179,6 +218,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject: "cn=aggregator",
 			Type:    "client",
 			Signer:  aggregatorCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(aggregator)
 	}
@@ -191,6 +232,8 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Subject:   "o=" + user.SystemPrivilegedGroup + ",cn=kops",
 			Type:      "client",
 			Signer:    defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
@@ -228,16 +271,14 @@ func (b *PKIModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Type:           "server",
 			AlternateNames: alternateNames,
 			Signer:         defaultCA,
+
+			Format: string(kops.SecretTypeKeypair),
 		}
 		c.AddTask(t)
 	}
 
-	// @@ The following are deprecated for > 1.6 and should be dropped at the appropreciate time
-	deprecated := []string{
-		"kubelet", "kube-proxy", "system:scheduler", "system:controller_manager",
-		"system:logging", "system:monitoring", "system:dns", "kube", "admin"}
-
-	for _, x := range deprecated {
+	// Create auth tokens (though this is deprecated)
+	for _, x := range tokens.GetKubernetesAuthTokens_Deprecated() {
 		t := &fitasks.Secret{Name: fi.String(x), Lifecycle: b.Lifecycle}
 		c.AddTask(t)
 	}

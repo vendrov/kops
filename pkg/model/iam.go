@@ -143,7 +143,6 @@ func (b *IAMModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			if b.Cluster.Spec.AdditionalPolicies != nil {
 				roleAsString := reflect.ValueOf(role).String()
 				additionalPolicies := *(b.Cluster.Spec.AdditionalPolicies)
-
 				additionalPolicy = additionalPolicies[strings.ToLower(roleAsString)]
 			}
 
@@ -190,6 +189,8 @@ func (b *IAMModelBuilder) buildAWSIAMRolePolicy() (fi.Resource, error) {
 			// it is ec2.amazonaws.com everywhere but in cn-north, where it is ec2.amazonaws.com.cn
 			switch b.Region {
 			case "cn-north-1":
+				return "ec2.amazonaws.com.cn"
+			case "cn-northwest-1":
 				return "ec2.amazonaws.com.cn"
 			default:
 				return "ec2.amazonaws.com"

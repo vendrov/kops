@@ -88,25 +88,6 @@ func (c *RESTClientset) InstanceGroupsFor(cluster *kops.Cluster) kopsinternalver
 	return c.KopsClient.InstanceGroups(namespace)
 }
 
-// FederationsFor implements the FederationsFor method of Clientset for a kubernetes-API state store
-func (c *RESTClientset) FederationsFor(federation *kops.Federation) kopsinternalversion.FederationInterface {
-	// Unsure if this should be namespaced or not - probably, so that we can RBAC it...
-	panic("Federations are currently not supported by the server API")
-	//namespace := restNamespaceForFederationName(federation.Name)
-	//return c.KopsClient.Federations(namespace)
-}
-
-// ListFederations implements the ListFederations method of Clientset for a kubernetes-API state store
-func (c *RESTClientset) ListFederations(options metav1.ListOptions) (*kops.FederationList, error) {
-	return c.KopsClient.Federations(metav1.NamespaceAll).List(options)
-}
-
-// GetFederation implements the GetFederation method of Clientset for a kubernetes-API state store
-func (c *RESTClientset) GetFederation(name string) (*kops.Federation, error) {
-	namespace := restNamespaceForFederationName(name)
-	return c.KopsClient.Federations(namespace).Get(name, metav1.GetOptions{})
-}
-
 func (c *RESTClientset) SecretStore(cluster *kops.Cluster) (fi.SecretStore, error) {
 	namespace := restNamespaceForClusterName(cluster.Name)
 	return secrets.NewClientsetSecretStore(cluster, c.KopsClient, namespace), nil
@@ -115,6 +96,11 @@ func (c *RESTClientset) SecretStore(cluster *kops.Cluster) (fi.SecretStore, erro
 func (c *RESTClientset) KeyStore(cluster *kops.Cluster) (fi.CAStore, error) {
 	namespace := restNamespaceForClusterName(cluster.Name)
 	return fi.NewClientsetCAStore(cluster, c.KopsClient, namespace), nil
+}
+
+func (c *RESTClientset) SSHCredentialStore(cluster *kops.Cluster) (fi.SSHCredentialStore, error) {
+	namespace := restNamespaceForClusterName(cluster.Name)
+	return fi.NewClientsetSSHCredentialStore(cluster, c.KopsClient, namespace), nil
 }
 
 func (c *RESTClientset) DeleteCluster(cluster *kops.Cluster) error {

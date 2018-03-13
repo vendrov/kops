@@ -42,6 +42,11 @@ provider "aws" {
   region = "us-test-1"
 }
 
+resource "aws_autoscaling_attachment" "master-us-test-1a-masters-complex-example-com" {
+  elb                    = "${aws_elb.api-complex-example-com.id}"
+  autoscaling_group_name = "${aws_autoscaling_group.master-us-test-1a-masters-complex-example-com.id}"
+}
+
 resource "aws_autoscaling_group" "master-us-test-1a-masters-complex-example-com" {
   name                 = "master-us-test-1a.masters.complex.example.com"
   launch_configuration = "${aws_launch_configuration.master-us-test-1a-masters-complex-example-com.id}"
@@ -78,6 +83,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-complex-example-com"
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-complex-example-com" {
@@ -116,6 +124,10 @@ resource "aws_autoscaling_group" "nodes-complex-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
+  suspended_processes = ["AZRebalance"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-complex-example-com" {
@@ -147,6 +159,35 @@ resource "aws_ebs_volume" "us-test-1a-etcd-main-complex-example-com" {
     "foo/bar"            = "fib+baz"
     "k8s.io/etcd/main"   = "us-test-1a/us-test-1a"
     "k8s.io/role/master" = "1"
+  }
+}
+
+resource "aws_elb" "api-complex-example-com" {
+  name = "api-complex-example-com-vd3t5n"
+
+  listener = {
+    instance_port     = 443
+    instance_protocol = "TCP"
+    lb_port           = 443
+    lb_protocol       = "TCP"
+  }
+
+  security_groups = ["${aws_security_group.api-elb-complex-example-com.id}", "sg-exampleid3", "sg-exampleid4"]
+  subnets         = ["${aws_subnet.us-test-1a-complex-example-com.id}"]
+
+  health_check = {
+    target              = "SSL:443"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 10
+    timeout             = 5
+  }
+
+  idle_timeout = 300
+
+  tags = {
+    KubernetesCluster = "complex.example.com"
+    Name              = "api.complex.example.com"
   }
 }
 
@@ -186,8 +227,9 @@ resource "aws_internet_gateway" "complex-example-com" {
   vpc_id = "${aws_vpc.complex-example-com.id}"
 
   tags = {
-    KubernetesCluster = "complex.example.com"
-    Name              = "complex.example.com"
+    KubernetesCluster                           = "complex.example.com"
+    Name                                        = "complex.example.com"
+    "kubernetes.io/cluster/complex.example.com" = "owned"
   }
 }
 
@@ -249,18 +291,43 @@ resource "aws_route" "0-0-0-0--0" {
   gateway_id             = "${aws_internet_gateway.complex-example-com.id}"
 }
 
+resource "aws_route53_record" "api-complex-example-com" {
+  name = "api.complex.example.com"
+  type = "A"
+
+  alias = {
+    name                   = "${aws_elb.api-complex-example-com.dns_name}"
+    zone_id                = "${aws_elb.api-complex-example-com.zone_id}"
+    evaluate_target_health = false
+  }
+
+  zone_id = "/hostedzone/Z1AFAKE1ZON3YO"
+}
+
 resource "aws_route_table" "complex-example-com" {
   vpc_id = "${aws_vpc.complex-example-com.id}"
 
   tags = {
-    KubernetesCluster = "complex.example.com"
-    Name              = "complex.example.com"
+    KubernetesCluster                           = "complex.example.com"
+    Name                                        = "complex.example.com"
+    "kubernetes.io/cluster/complex.example.com" = "owned"
   }
 }
 
 resource "aws_route_table_association" "us-test-1a-complex-example-com" {
   subnet_id      = "${aws_subnet.us-test-1a-complex-example-com.id}"
   route_table_id = "${aws_route_table.complex-example-com.id}"
+}
+
+resource "aws_security_group" "api-elb-complex-example-com" {
+  name        = "api-elb.complex.example.com"
+  vpc_id      = "${aws_vpc.complex-example-com.id}"
+  description = "Security group for api ELB"
+
+  tags = {
+    KubernetesCluster = "complex.example.com"
+    Name              = "api-elb.complex.example.com"
+  }
 }
 
 resource "aws_security_group" "masters-complex-example-com" {
@@ -312,13 +379,31 @@ resource "aws_security_group_rule" "all-node-to-node" {
   protocol                 = "-1"
 }
 
-resource "aws_security_group_rule" "https-external-to-master-0-0-0-0--0" {
+resource "aws_security_group_rule" "api-elb-egress" {
+  type              = "egress"
+  security_group_id = "${aws_security_group.api-elb-complex-example-com.id}"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "https-api-elb-0-0-0-0--0" {
   type              = "ingress"
-  security_group_id = "${aws_security_group.masters-complex-example-com.id}"
+  security_group_id = "${aws_security_group.api-elb-complex-example-com.id}"
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "https-elb-to-master" {
+  type                     = "ingress"
+  security_group_id        = "${aws_security_group.masters-complex-example-com.id}"
+  source_security_group_id = "${aws_security_group.api-elb-complex-example-com.id}"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
 }
 
 resource "aws_security_group_rule" "master-egress" {
@@ -437,6 +522,7 @@ resource "aws_subnet" "us-test-1a-complex-example-com" {
   tags = {
     KubernetesCluster                           = "complex.example.com"
     Name                                        = "us-test-1a.complex.example.com"
+    SubnetType                                  = "Public"
     "kubernetes.io/cluster/complex.example.com" = "owned"
     "kubernetes.io/role/elb"                    = "1"
   }
@@ -459,8 +545,9 @@ resource "aws_vpc_dhcp_options" "complex-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "complex.example.com"
-    Name              = "complex.example.com"
+    KubernetesCluster                           = "complex.example.com"
+    Name                                        = "complex.example.com"
+    "kubernetes.io/cluster/complex.example.com" = "owned"
   }
 }
 

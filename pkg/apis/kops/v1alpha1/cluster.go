@@ -46,6 +46,8 @@ type ClusterList struct {
 type ClusterSpec struct {
 	// Channel we are following
 	Channel string `json:"channel,omitempty"`
+	// Additional addons that should be installed on the cluster
+	Addons []AddonSpec `json:"addons,omitempty"`
 	// ConfigBase is the path where we store configuration for the cluster
 	// This might be different that the location when the cluster spec itself is stored,
 	// both because this must be accessible to the cluster,
@@ -67,6 +69,10 @@ type ClusterSpec struct {
 	// This is a real CIDR, not the internal k8s network
 	// On AWS, it maps to the VPC CIDR.  It is not required on GCE.
 	NetworkCIDR string `json:"networkCIDR,omitempty"`
+	// AdditionalNetworkCIDRs is a list of aditional CIDR used for the AWS VPC
+	// or otherwise allocated to k8s. This is a real CIDR, not the internal k8s network
+	// On AWS, it maps to any aditional CIDRs added to a VPC.
+	AdditionalNetworkCIDRs []string `json:"additionalNetworkCIDRs,omitempty"`
 	// NetworkID is an identifier of a network, if we want to reuse/share an existing network (e.g. an AWS VPC)
 	NetworkID string `json:"networkID,omitempty"`
 	// Topology defines the type of network topology to use on the cluster - default public
@@ -155,6 +161,14 @@ type ClusterSpec struct {
 	IAM *IAMSpec `json:"iam,omitempty"`
 	// EncryptionConfig holds the encryption config
 	EncryptionConfig *bool `json:"encryptionConfig,omitempty"`
+	// Target allows for us to nest extra config for targets such as terraform
+	Target *TargetSpec `json:"target,omitempty"`
+}
+
+// AddonSpec defines an addon that we want to install in the cluster
+type AddonSpec struct {
+	// Manifest is a path to the manifest that defines the addon
+	Manifest string `json:"manifest,omitempty"`
 }
 
 // FileAssetSpec defines the structure for a file asset
@@ -262,9 +276,11 @@ const (
 	LoadBalancerTypeInternal LoadBalancerType = "Internal"
 )
 
+// LoadBalancerAccessSpec provides configuration details related to API LoadBalancer and its access
 type LoadBalancerAccessSpec struct {
-	Type               LoadBalancerType `json:"type,omitempty"`
-	IdleTimeoutSeconds *int64           `json:"idleTimeoutSeconds,omitempty"`
+	Type                     LoadBalancerType `json:"type,omitempty"`
+	IdleTimeoutSeconds       *int64           `json:"idleTimeoutSeconds,omitempty"`
+	AdditionalSecurityGroups []string         `json:"additionalSecurityGroups,omitempty"`
 }
 
 // KubeDNSConfig defines the kube dns configuration
@@ -297,6 +313,8 @@ type EtcdClusterSpec struct {
 	Name string `json:"name,omitempty"`
 	// Members stores the configurations for each member of the cluster (including the data volume)
 	Members []*EtcdMemberSpec `json:"etcdMembers,omitempty"`
+	// EnableTLSAuth indicats client and peer TLS auth should be enforced
+	EnableTLSAuth bool `json:"enableTLSAuth,omitempty"`
 	// EnableEtcdTLS indicates the etcd service should use TLS between peers and clients
 	EnableEtcdTLS bool `json:"enableEtcdTLS,omitempty"`
 	// Version is the version of etcd to run i.e. 2.1.2, 3.0.17 etcd
@@ -305,6 +323,18 @@ type EtcdClusterSpec struct {
 	LeaderElectionTimeout *metav1.Duration `json:"leaderElectionTimeout,omitempty"`
 	// HeartbeatInterval is the time (in milliseconds) for an etcd heartbeat interval
 	HeartbeatInterval *metav1.Duration `json:"heartbeatInterval,omitempty"`
+	// Image is the etcd docker image to use. Setting this will ignore the Version specified.
+	Image string `json:"image,omitempty"`
+	// Backups describes how we do backups of etcd
+	Backups *EtcdBackupSpec `json:"backups,omitempty"`
+}
+
+// EtcdBackupSpec describes how we want to do backups of etcd
+type EtcdBackupSpec struct {
+	// BackupStore is the VFS path where we will read/write backup data
+	BackupStore string `json:"backupStore,omitempty"`
+	// Image is the etcd backup manager image to use.  Setting this will create a sidecar container in the etcd pod with the specified image.
+	Image string `json:"image,omitempty"`
 }
 
 // EtcdMemberSpec is a specification for a etcd member
@@ -352,4 +382,23 @@ type HTTPProxy struct {
 	// TODO #3070
 	// User     string `json:"user,omitempty"`
 	// Password string `json:"password,omitempty"`
+}
+
+// TargetSpec allows for specifying target config in an extensible way
+type TargetSpec struct {
+	Terraform *TerraformSpec `json:"terraform,omitempty"`
+}
+
+func (t *TargetSpec) IsEmpty() bool {
+	return t.Terraform == nil
+}
+
+// TerraformSpec allows us to specify terraform config in an extensible way
+type TerraformSpec struct {
+	// ProviderExtraConfig contains key/value pairs to add to the rendered terraform "provider" block
+	ProviderExtraConfig *map[string]string `json:"providerExtraConfig,omitempty"`
+}
+
+func (t *TerraformSpec) IsEmpty() bool {
+	return t.ProviderExtraConfig == nil
 }

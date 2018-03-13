@@ -33,6 +33,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/util/stringorslice"
@@ -183,7 +184,11 @@ func (b *PolicyBuilder) BuildAWSPolicyMaster() (*Policy, error) {
 	}
 
 	if b.Cluster.Spec.Networking != nil && b.Cluster.Spec.Networking.Romana != nil {
-		addRomanaCNIPermissions(p, resource, b.Cluster.Spec.IAM.Legacy)
+		addRomanaCNIPermissions(p, resource, b.Cluster.Spec.IAM.Legacy, b.Cluster.GetName())
+	}
+
+	if b.Cluster.Spec.Networking != nil && b.Cluster.Spec.Networking.AmazonVPC != nil {
+		addAmazonVPCCNIPermissions(p, resource, b.Cluster.Spec.IAM.Legacy, b.Cluster.GetName())
 	}
 
 	return p, nil
@@ -215,6 +220,10 @@ func (b *PolicyBuilder) BuildAWSPolicyNode() (*Policy, error) {
 		addECRPermissions(p)
 	}
 
+	if b.Cluster.Spec.Networking != nil && b.Cluster.Spec.Networking.AmazonVPC != nil {
+		addAmazonVPCCNIPermissions(p, resource, b.Cluster.Spec.IAM.Legacy, b.Cluster.GetName())
+	}
+
 	return p, nil
 }
 
@@ -243,6 +252,8 @@ func (b *PolicyBuilder) BuildAWSPolicyBastion() (*Policy, error) {
 func (b *PolicyBuilder) IAMPrefix() string {
 	switch b.Region {
 	case "cn-north-1":
+		return "arn:aws-cn"
+	case "cn-northwest-1":
 		return "arn:aws-cn"
 	case "us-gov-west-1":
 		return "arn:aws-us-gov"
@@ -349,15 +360,30 @@ func (b *PolicyBuilder) AddS3Permissions(p *Policy) (*Policy, error) {
 						),
 					})
 
-					if b.Cluster.Spec.Networking != nil && b.Cluster.Spec.Networking.Kuberouter != nil {
-						p.Statement = append(p.Statement, &Statement{
-							Sid:    "kopsK8sS3NodeBucketGetKuberouter",
-							Effect: StatementEffectAllow,
-							Action: stringorslice.Slice([]string{"s3:Get*"}),
-							Resource: stringorslice.Of(
-								strings.Join([]string{b.IAMPrefix(), ":s3:::", iamS3Path, "/pki/private/kube-router/*"}, ""),
-							),
-						})
+					if b.Cluster.Spec.Networking != nil {
+						// @check if kuberoute is enabled and permit access to the private key
+						if b.Cluster.Spec.Networking.Kuberouter != nil {
+							p.Statement = append(p.Statement, &Statement{
+								Sid:    "kopsK8sS3NodeBucketGetKuberouter",
+								Effect: StatementEffectAllow,
+								Action: stringorslice.Slice([]string{"s3:Get*"}),
+								Resource: stringorslice.Of(
+									strings.Join([]string{b.IAMPrefix(), ":s3:::", iamS3Path, "/pki/private/kube-router/*"}, ""),
+								),
+							})
+						}
+
+						// @check if calico is enabled as the CNI provider and permit access to the client TLS certificate by default
+						if b.Cluster.Spec.Networking.Calico != nil {
+							p.Statement = append(p.Statement, &Statement{
+								Sid:    "kopsK8sS3NodeBucketGetCalicoClient",
+								Effect: StatementEffectAllow,
+								Action: stringorslice.Slice([]string{"s3:Get*"}),
+								Resource: stringorslice.Of(
+									strings.Join([]string{b.IAMPrefix(), ":s3:::", iamS3Path, "/pki/private/calico-client/*"}, ""),
+								),
+							})
+						}
 					}
 				}
 			}
@@ -368,6 +394,40 @@ func (b *PolicyBuilder) AddS3Permissions(p *Policy) (*Policy, error) {
 			// We could implement this approach, but it seems better to
 			// get all clouds using cluster-readable storage
 			return nil, fmt.Errorf("path is not cluster readable: %v", root)
+		}
+	}
+
+	// On the master, grant IAM permissions to the backup store, if it is configured
+	if b.Role == kops.InstanceGroupRoleMaster {
+		backupStores := sets.NewString()
+		for _, c := range b.Cluster.Spec.EtcdClusters {
+			if c.Backups == nil || c.Backups.BackupStore == "" || backupStores.Has(c.Backups.BackupStore) {
+				continue
+			}
+			backupStore := c.Backups.BackupStore
+
+			vfsPath, err := vfs.Context.BuildVfsPath(backupStore)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse VFS path %q: %v", backupStore, err)
+			}
+
+			if s3Path, ok := vfsPath.(*vfs.S3Path); ok {
+				iamS3Path := s3Path.Bucket() + "/" + s3Path.Key()
+				iamS3Path = strings.TrimSuffix(iamS3Path, "/")
+
+				p.Statement = append(p.Statement, &Statement{
+					Sid:    "kopsEtcdBackups",
+					Effect: StatementEffectAllow,
+					Action: stringorslice.Slice([]string{"s3:GetObject", "s3:DeleteObject", "s3:PutObject"}),
+					Resource: stringorslice.Of(
+						strings.Join([]string{b.IAMPrefix(), ":s3:::", iamS3Path, "/*"}, ""),
+					),
+				})
+			} else {
+				glog.Warningf("unknown backup store, can't apply IAM policy: %q", backupStore)
+			}
+
+			backupStores.Insert(backupStore)
 		}
 	}
 
@@ -509,7 +569,7 @@ func addNodeEC2Policies(p *Policy, resource stringorslice.StringOrSlice) {
 	p.Statement = append(p.Statement, &Statement{
 		Sid:      "kopsK8sEC2NodePerms",
 		Effect:   StatementEffectAllow,
-		Action:   stringorslice.Slice([]string{"ec2:DescribeInstances"}),
+		Action:   stringorslice.Slice([]string{"ec2:DescribeInstances", "ec2:DescribeRegions"}),
 		Resource: resource,
 	})
 }
@@ -543,6 +603,7 @@ func addMasterEC2Policies(p *Policy, resource stringorslice.StringOrSlice, legac
 				Effect: StatementEffectAllow,
 				Action: stringorslice.Slice([]string{
 					"ec2:DescribeInstances",      // aws.go
+					"ec2:DescribeRegions",        // s3context.go
 					"ec2:DescribeRouteTables",    // aws.go
 					"ec2:DescribeSecurityGroups", // aws.go
 					"ec2:DescribeSubnets",        // aws.go
@@ -554,7 +615,6 @@ func addMasterEC2Policies(p *Policy, resource stringorslice.StringOrSlice, legac
 				Sid:    "kopsK8sEC2MasterPermsAllResources",
 				Effect: StatementEffectAllow,
 				Action: stringorslice.Slice([]string{
-					"ec2:CreateRoute",             // aws.go
 					"ec2:CreateSecurityGroup",     // aws.go
 					"ec2:CreateTags",              // aws.go, tag.go
 					"ec2:CreateVolume",            // aws.go
@@ -568,6 +628,7 @@ func addMasterEC2Policies(p *Policy, resource stringorslice.StringOrSlice, legac
 				Action: stringorslice.Of(
 					"ec2:AttachVolume",                  // aws.go
 					"ec2:AuthorizeSecurityGroupIngress", // aws.go
+					"ec2:CreateRoute",                   // aws.go
 					"ec2:DeleteRoute",                   // aws.go
 					"ec2:DeleteSecurityGroup",           // aws.go
 					"ec2:DeleteVolume",                  // aws.go
@@ -599,6 +660,7 @@ func addMasterELBPolicies(p *Policy, resource stringorslice.StringOrSlice, legac
 			Sid:    "kopsK8sELBMasterPermsRestrictive",
 			Effect: StatementEffectAllow,
 			Action: stringorslice.Of(
+				"elasticloadbalancing:AddTags",                                 // aws_loadbalancer.go
 				"elasticloadbalancing:AttachLoadBalancerToSubnets",             // aws_loadbalancer.go
 				"elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",       // aws_loadbalancer.go
 				"elasticloadbalancing:CreateLoadBalancer",                      // aws_loadbalancer.go
@@ -617,6 +679,28 @@ func addMasterELBPolicies(p *Policy, resource stringorslice.StringOrSlice, legac
 			),
 			Resource: resource,
 		})
+
+		p.Statement = append(p.Statement, &Statement{
+			Sid:    "kopsK8sNLBMasterPermsRestrictive",
+			Effect: StatementEffectAllow,
+			Action: stringorslice.Of(
+				"ec2:DescribeVpcs",                                       // aws_loadbalancer.go
+				"elasticloadbalancing:AddTags",                           // aws_loadbalancer.go
+				"elasticloadbalancing:CreateListener",                    // aws_loadbalancer.go
+				"elasticloadbalancing:CreateTargetGroup",                 // aws_loadbalancer.go
+				"elasticloadbalancing:DeleteListener",                    // aws_loadbalancer.go
+				"elasticloadbalancing:DeleteTargetGroup",                 // aws_loadbalancer.go
+				"elasticloadbalancing:DescribeListeners",                 // aws_loadbalancer.go
+				"elasticloadbalancing:DescribeLoadBalancerPolicies",      // aws_loadbalancer.go
+				"elasticloadbalancing:DescribeTargetGroups",              // aws_loadbalancer.go
+				"elasticloadbalancing:DescribeTargetHealth",              // aws_loadbalancer.go
+				"elasticloadbalancing:ModifyListener",                    // aws_loadbalancer.go
+				"elasticloadbalancing:ModifyTargetGroup",                 // aws_loadbalancer.go
+				"elasticloadbalancing:RegisterTargets",                   // aws_loadbalancer.go
+				"elasticloadbalancing:SetLoadBalancerPoliciesOfListener", // aws_loadbalancer.go
+			),
+			Resource: resource,
+		})
 	}
 }
 
@@ -629,6 +713,7 @@ func addMasterASPolicies(p *Policy, resource stringorslice.StringOrSlice, legacy
 				"autoscaling:DescribeAutoScalingGroups",
 				"autoscaling:DescribeAutoScalingInstances",
 				"autoscaling:DescribeLaunchConfigurations",
+				"autoscaling:DescribeTags",
 				"autoscaling:GetAsgForInstance",
 				"autoscaling:SetDesiredCapacity",
 				"autoscaling:TerminateInstanceInAutoScalingGroup",
@@ -646,6 +731,7 @@ func addMasterASPolicies(p *Policy, resource stringorslice.StringOrSlice, legacy
 				Action: stringorslice.Of(
 					"autoscaling:DescribeAutoScalingGroups",    // aws_instancegroups.go
 					"autoscaling:DescribeLaunchConfigurations", // aws.go
+					"autoscaling:DescribeTags",                 // auto_scaling.go
 					"autoscaling:GetAsgForInstance",            // aws_manager.go
 				),
 				Resource: resource,
@@ -691,7 +777,7 @@ func addRoute53ListHostedZonesPermission(p *Policy) {
 	})
 }
 
-func addRomanaCNIPermissions(p *Policy, resource stringorslice.StringOrSlice, legacyIAM bool) {
+func addRomanaCNIPermissions(p *Policy, resource stringorslice.StringOrSlice, legacyIAM bool, clusterName string) {
 	if legacyIAM {
 		// Legacy IAM provides ec2:*, so no additional permissions required
 		return
@@ -700,11 +786,52 @@ func addRomanaCNIPermissions(p *Policy, resource stringorslice.StringOrSlice, le
 		// Comments are which Romana component makes the call
 		p.Statement = append(p.Statement,
 			&Statement{
-				Sid:    "kopsK8sEC2MasterPermsRomanaCNI",
+				Sid:    "kopsK8sEC2RomanaCNIMasterPermsAllResources",
 				Effect: StatementEffectAllow,
 				Action: stringorslice.Slice([]string{
 					"ec2:DescribeAvailabilityZones", // vpcrouter
 					"ec2:DescribeVpcs",              // vpcrouter
+				}),
+				Resource: resource,
+			},
+			&Statement{
+				Sid:    "kopsK8sEC2RomanaCNIMasterPermsTaggedResources",
+				Effect: StatementEffectAllow,
+				Action: stringorslice.Slice([]string{
+					"ec2:CreateRoute",  // vpcrouter
+					"ec2:DeleteRoute",  // vpcrouter
+					"ec2:ReplaceRoute", // vpcrouter
+				}),
+				Resource: resource,
+				Condition: Condition{
+					"StringEquals": map[string]string{
+						"ec2:ResourceTag/KubernetesCluster": clusterName,
+					},
+				},
+			},
+		)
+	}
+}
+
+func addAmazonVPCCNIPermissions(p *Policy, resource stringorslice.StringOrSlice, legacyIAM bool, clusterName string) {
+	if legacyIAM {
+		// Legacy IAM provides ec2:*, so no additional permissions required
+		return
+	} else {
+		p.Statement = append(p.Statement,
+			&Statement{
+				Sid:    "kopsK8sEC2NodeAmazonVPCPerms",
+				Effect: StatementEffectAllow,
+				Action: stringorslice.Slice([]string{
+					"ec2:CreateNetworkInterface",
+					"ec2:AttachNetworkInterface",
+					"ec2:DeleteNetworkInterface",
+					"ec2:DetachNetworkInterface",
+					"ec2:DescribeNetworkInterfaces",
+					"ec2:DescribeInstances",
+					"ec2:ModifyNetworkInterfaceAttribute",
+					"ec2:AssignPrivateIpAddresses",
+					"tag:TagResources",
 				}),
 				Resource: resource,
 			},

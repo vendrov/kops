@@ -23,6 +23,18 @@ spec:
 When configuring a LoadBalancer, you can also choose to have a public ELB or an internal (VPC only) ELB.  The `type`
 field should be `Public` or `Internal`.
 
+Also, you can add precreated additional security groups to the load balancer by setting `additionalSecurityGroups`.
+
+```yaml
+spec:
+  api:
+    loadBalancer:
+      type: Public
+      additionalSecurityGroups:
+      - sg-xxxxxxxx
+      - sg-xxxxxxxx
+```
+
 Additionally, you can increase idle timeout of the load balancer by setting its `idleTimeoutSeconds`. The default idle timeout is 5 minutes, with a maximum of 3600 seconds (60 minutes) being allowed by AWS.
 For more information see [configuring idle timeouts](http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/config-idle-timeout.html).
 
@@ -94,7 +106,7 @@ ID of a subnet to share in an existing VPC.
 #### egress
 The resource identifier (ID) of something in your existing VPC that you would like to use as "egress" to the outside world.
 
-This feature was originally envisioned to allow re-use of NAT Gateways. In this case, the usage is as follows. Although NAT gateways are "public"-facing resources, in the Cluster spec, you must specify them in the private subnet section. One way to think about this is that you are specifying "egress", which is the default route out from this private subnet.
+This feature was originally envisioned to allow re-use of NAT gateways. In this case, the usage is as follows. Although NAT gateways are "public"-facing resources, in the Cluster spec, you must specify them in the private subnet section. One way to think about this is that you are specifying "egress", which is the default route out from this private subnet.
 
 ```
 spec:
@@ -108,6 +120,19 @@ spec:
     name: utility-us-east-1a
     id: subnet-12345
     type: Utility
+    zone: us-east-1a
+```
+
+#### publicIP
+The IP of an existing EIP that you would like to attach to the NAT gateway.
+
+```
+spec:
+  subnets:
+  - cidr: 10.20.64.0/21
+    name: us-east-1a
+    publicIP: 203.93.148.142
+    type: Private
     zone: us-east-1a
 ```
 
@@ -125,8 +150,11 @@ spec:
     oidcIssuerURL: https://your-oidc-provider.svc.cluster.local
     oidcClientID: kubernetes
     oidcUsernameClaim: sub
+    oidcUsernamePrefix: "oidc:"
     oidcGroupsClaim: user_roles
+    oidcGroupsPrefix: "oidc:"
     oidcCAFile: /etc/kubernetes/ssl/kc-ca.pem
+
 ```
 
 #### audit logging
@@ -140,10 +168,24 @@ spec:
     auditLogMaxAge: 10
     auditLogMaxBackups: 1
     auditLogMaxSize: 100
-    auditPolicyFile: /srv/kubernetes/audit.conf
+    auditPolicyFile: /srv/kubernetes/audit.yaml
 ```
 
-Note: you could use the fileAssets feature to push an advanced audit policy file on the master nodes.
+**Note**: The auditPolicyFile is needed. If the flag is omitted, no events are logged.
+
+You could use the [fileAssets](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#fileassets)  feature to push an advanced audit policy file on the master nodes.
+
+Example policy file can be found [here]( https://raw.githubusercontent.com/kubernetes/website/master/docs/tasks/debug-application-cluster/audit-policy.yaml)
+
+#### Max Requests Inflight 
+
+The maximum number of non-mutating requests in flight at a given time. When the server exceeds this, it rejects requests. Zero for no limit. (default 400)
+
+```yaml
+spec:
+  kubeAPIServer:
+    maxRequestsInflight: 1000
+```
 
 #### runtimeConfig
 
@@ -159,6 +201,8 @@ spec:
       apps/v1alpha1: "true"
 ```
 
+Will result in the flag `--runtime-config=batch/v2alpha1=true,apps/v1alpha1=true`. Note that `kube-apiserver` accepts `true` as a value for switch-like flags.
+
 #### serviceNodePortRange
 
 This value is passed as `--service-node-port-range` for `kube-apiserver`.
@@ -169,8 +213,6 @@ spec:
     serviceNodePortRange: 30000-33000
 ```
 
-Will result in the flag `--runtime-config=batch/v2alpha1=true,apps/v1alpha1=true`. Note that `kube-apiserver` accepts `true` as a value for switch-like flags.
-
 ### externalDns
 
 This block contains configuration options for your `external-DNS` provider.
@@ -179,7 +221,8 @@ The current external-DNS provider is the kops `dns-controller`, which can set up
 
 ```yaml
 spec:
-  watchIngress: true
+  externalDns:
+    watchIngress: true
 ```
 
 Default _kops_ behavior is false. `watchIngress: true` uses the default _dns-controller_ behavior which is to watch the ingress controller for changes. Set this option at risk of interrupting Service updates in some cases.
@@ -232,7 +275,7 @@ spec:
     horizontalPodAutoscalerUpscaleDelay: 3m0s
 ```
 
-For more details on `horizontalPodAutoscaler` flags see the [HPA docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+For more details on `horizontalPodAutoscaler` flags see the [official HPA docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) and the [Kops guides on how to set it up](horizontal_pod_autoscaling.md).
 
 ####  Feature Gates
 
@@ -360,6 +403,7 @@ spec:
 
 ### cloudConfig
 
+#### disableSecurityGroupIngress
 If you are using aws as `cloudProvider`, you can disable authorization of ELB security group to Kubernetes Nodes security group. In other words, it will not add security group rule.
 This can be usefull to avoid AWS limit: 50 rules per security group.
 ```yaml
@@ -368,7 +412,24 @@ spec:
     disableSecurityGroupIngress: true
 ```
 
-### registryMirrors
+#### elbSecurityGroup
+*WARNING: this works only for Kubernetes version above 1.7.0.*
+
+To avoid creating a security group per elb, you can specify security group id, that will be assigned to your LoadBalancer. It must be security group id, not name.
+`api.loadBalancer.additionalSecurityGroups` must be empty, because Kubernetes will add rules per ports that are specified in service file.
+This can be useful to avoid AWS limits: 500 security groups per region and 50 rules per security group.
+
+```yaml
+spec:
+  cloudConfig:
+    elbSecurityGroup: sg-123445678
+```
+
+### docker
+
+It is possible to override Docker daemon options for all masters and nodes in the cluster. See the [API docs](https://godoc.org/k8s.io/kops/pkg/apis/kops#DockerConfig) for the full list of options.
+
+#### registryMirrors
 
 If you have a bunch of Docker instances (physicsal or vm) running, each time one of them pulls an image that is not present on the host, it will fetch it from the internet (DockerHub). By caching these images, you can keep the traffic within your local network and avoid egress bandwidth usage.
 This setting benefits not only cluster provisioning but also image pulling.
@@ -383,15 +444,17 @@ spec:
     - https://registry.example.com
 ```
 
-#### WARNING: this works only for Kubernetes version above 1.7.0.
+#### storage
 
-For avoid to create security group per each elb, you can specify security group id, that will be assigned to your LoadBalancer. It must be security group id, not name. Also, security group must be empty, because Kubernetes will add rules per ports that are specified in service file.
-This can be usefull to avoid AWS limits: 500 security groups per region and 50 rules per security group.
+The Docker [Storage Driver](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-storage-driver) can be specified in order to override the default. Be sure the driver you choose is supported by your operating system and docker version.
 
 ```yaml
-spec:
-  cloudConfig:
-    elbSecurityGroup: sg-123445678
+docker:
+  storage: devicemapper
+  storageOpts:
+    - "dm.thinpooldev=/dev/mapper/thin-pool"
+    - "dm.use_deferred_deletion=true"
+    - "dm.use_deferred_removal=true"
 ```
 
 ### sshKeyName
@@ -402,4 +465,16 @@ Providing the name of a key already in AWS is an alternative to `--ssh-public-ke
 ```yaml
 spec:
   sshKeyName: myexistingkey
+```
+
+### target
+
+In some use-cases you may wish to augment the target output with extra options.  `target` supports a minimal amount of options you can do this with.  Currently only the terraform target supports this, but if other use cases present themselves, kops may eventually support more.
+
+```yaml
+spec:
+  target:
+    terraform:
+      providerExtraConfig:
+        alias: foo
 ```

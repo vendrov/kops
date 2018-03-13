@@ -184,6 +184,23 @@ func (b *APILoadBalancerBuilder) Build(c *fi.ModelBuilderContext) error {
 		}
 	}
 
+	// Add precreated additional security groups to the ELB
+	{
+		for _, id := range b.Cluster.Spec.API.LoadBalancer.AdditionalSecurityGroups {
+			t := &awstasks.SecurityGroup{
+				Name:   fi.String(id),
+				ID:     fi.String(id),
+				Shared: fi.Bool(true),
+
+				Lifecycle: b.SecurityLifecycle,
+			}
+			if err := c.EnsureTask(t); err != nil {
+				return err
+			}
+			elb.SecurityGroups = append(elb.SecurityGroups, t)
+		}
+	}
+
 	// Allow HTTPS to the master instances from the ELB
 	{
 		t := &awstasks.SecurityGroupRule{
@@ -199,7 +216,7 @@ func (b *APILoadBalancerBuilder) Build(c *fi.ModelBuilderContext) error {
 		c.AddTask(t)
 	}
 
-	if dns.IsGossipHostname(b.Cluster.Name) {
+	if dns.IsGossipHostname(b.Cluster.Name) || b.UsePrivateDNS() {
 		// Ensure the ELB hostname is included in the TLS certificate,
 		// if we're not going to use an alias for it
 		// TODO: I don't love this technique for finding the task by name & modifying it

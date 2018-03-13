@@ -19,6 +19,7 @@ package protokube
 import (
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	"cloud.google.com/go/compute/metadata"
@@ -76,7 +77,7 @@ func (a *GCEVolumes) ClusterID() string {
 	return a.clusterName
 }
 
-// ClusterID returns the current GCE project
+// Project returns the current GCE project
 func (a *GCEVolumes) Project() string {
 	return a.project
 }
@@ -308,6 +309,20 @@ func (v *GCEVolumes) FindVolumes() ([]*Volume, error) {
 	//}
 
 	return volumes, nil
+}
+
+// FindMountedVolume implements Volumes::FindMountedVolume
+func (v *GCEVolumes) FindMountedVolume(volume *Volume) (string, error) {
+	device := volume.LocalDevice
+
+	_, err := os.Stat(pathFor(device))
+	if err == nil {
+		return device, nil
+	}
+	if os.IsNotExist(err) {
+		return "", nil
+	}
+	return "", fmt.Errorf("error checking for device %q: %v", device, err)
 }
 
 // AttachVolume attaches the specified volume to this instance, returning the mountpoint & nil if successful

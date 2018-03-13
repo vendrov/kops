@@ -29,6 +29,21 @@
             "Value": "1",
             "PropagateAtLaunch": true
           }
+        ],
+        "MetricsCollection": [
+          {
+            "Granularity": "1Minute",
+            "Metrics": [
+              "GroupDesiredCapacity",
+              "GroupInServiceInstances",
+              "GroupMaxSize",
+              "GroupMinSize",
+              "GroupPendingInstances",
+              "GroupStandbyInstances",
+              "GroupTerminatingInstances",
+              "GroupTotalInstances"
+            ]
+          }
         ]
       }
     },
@@ -60,6 +75,21 @@
             "Key": "k8s.io/role/node",
             "Value": "1",
             "PropagateAtLaunch": true
+          }
+        ],
+        "MetricsCollection": [
+          {
+            "Granularity": "1Minute",
+            "Metrics": [
+              "GroupDesiredCapacity",
+              "GroupInServiceInstances",
+              "GroupMaxSize",
+              "GroupMinSize",
+              "GroupPendingInstances",
+              "GroupStandbyInstances",
+              "GroupTerminatingInstances",
+              "GroupTotalInstances"
+            ]
           }
         ]
       }
@@ -139,6 +169,10 @@
           {
             "Key": "Name",
             "Value": "minimal.example.com"
+          },
+          {
+            "Key": "kubernetes.io/cluster/minimal.example.com",
+            "Value": "owned"
           }
         ]
       }
@@ -154,6 +188,10 @@
           {
             "Key": "Name",
             "Value": "minimal.example.com"
+          },
+          {
+            "Key": "kubernetes.io/cluster/minimal.example.com",
+            "Value": "owned"
           }
         ]
       }
@@ -184,6 +222,10 @@
           {
             "Key": "Name",
             "Value": "minimal.example.com"
+          },
+          {
+            "Key": "kubernetes.io/cluster/minimal.example.com",
+            "Value": "owned"
           }
         ]
       }
@@ -413,6 +455,10 @@
             "Value": "us-test-1a.minimal.example.com"
           },
           {
+            "Key": "SubnetType",
+            "Value": "Public"
+          },
+          {
             "Key": "kubernetes.io/cluster/minimal.example.com",
             "Value": "owned"
           },
@@ -567,6 +613,7 @@
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeLaunchConfigurations",
+                "autoscaling:DescribeTags",
                 "autoscaling:GetAsgForInstance",
                 "autoscaling:SetDesiredCapacity",
                 "autoscaling:TerminateInstanceInAutoScalingGroup",
@@ -675,7 +722,8 @@
           "Statement": [
             {
               "Action": [
-                "ec2:DescribeInstances"
+                "ec2:DescribeInstances",
+                "ec2:DescribeRegions"
               ],
               "Effect": "Allow",
               "Resource": [

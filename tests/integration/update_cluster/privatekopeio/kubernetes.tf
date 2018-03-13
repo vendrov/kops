@@ -88,6 +88,9 @@ resource "aws_autoscaling_group" "bastion-privatekopeio-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1a-masters-privatekopeio-example-com" {
@@ -114,6 +117,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-privatekopeio-exampl
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-privatekopeio-example-com" {
@@ -140,6 +146,9 @@ resource "aws_autoscaling_group" "nodes-privatekopeio-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-privatekopeio-example-com" {
@@ -280,8 +289,9 @@ resource "aws_internet_gateway" "privatekopeio-example-com" {
   vpc_id = "${aws_vpc.privatekopeio-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatekopeio.example.com"
-    Name              = "privatekopeio.example.com"
+    KubernetesCluster                                 = "privatekopeio.example.com"
+    Name                                              = "privatekopeio.example.com"
+    "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
   }
 }
 
@@ -386,8 +396,9 @@ resource "aws_route_table" "private-us-test-1a-privatekopeio-example-com" {
   vpc_id = "${aws_vpc.privatekopeio-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatekopeio.example.com"
-    Name              = "private-us-test-1a.privatekopeio.example.com"
+    KubernetesCluster                                 = "privatekopeio.example.com"
+    Name                                              = "private-us-test-1a.privatekopeio.example.com"
+    "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
   }
 }
 
@@ -395,8 +406,9 @@ resource "aws_route_table" "privatekopeio-example-com" {
   vpc_id = "${aws_vpc.privatekopeio-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatekopeio.example.com"
-    Name              = "privatekopeio.example.com"
+    KubernetesCluster                                 = "privatekopeio.example.com"
+    Name                                              = "privatekopeio.example.com"
+    "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
   }
 }
 
@@ -635,6 +647,7 @@ resource "aws_subnet" "us-test-1a-privatekopeio-example-com" {
   tags = {
     KubernetesCluster                                 = "privatekopeio.example.com"
     Name                                              = "us-test-1a.privatekopeio.example.com"
+    SubnetType                                        = "Private"
     "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
     "kubernetes.io/role/internal-elb"                 = "1"
   }
@@ -648,6 +661,7 @@ resource "aws_subnet" "utility-us-test-1a-privatekopeio-example-com" {
   tags = {
     KubernetesCluster                                 = "privatekopeio.example.com"
     Name                                              = "utility-us-test-1a.privatekopeio.example.com"
+    SubnetType                                        = "Utility"
     "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
     "kubernetes.io/role/elb"                          = "1"
   }
@@ -670,8 +684,9 @@ resource "aws_vpc_dhcp_options" "privatekopeio-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "privatekopeio.example.com"
-    Name              = "privatekopeio.example.com"
+    KubernetesCluster                                 = "privatekopeio.example.com"
+    Name                                              = "privatekopeio.example.com"
+    "kubernetes.io/cluster/privatekopeio.example.com" = "owned"
   }
 }
 

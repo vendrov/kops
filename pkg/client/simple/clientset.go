@@ -43,20 +43,14 @@ type Clientset interface {
 	// InstanceGroupsFor returns the InstanceGroupInterface bounds to the namespace for a particular Cluster
 	InstanceGroupsFor(cluster *kops.Cluster) kopsinternalversion.InstanceGroupInterface
 
-	// FederationsFor returns the FederationInterface bounds to the namespace for a particular Federation
-	FederationsFor(federation *kops.Federation) kopsinternalversion.FederationInterface
-
-	// GetFederation reads a federation by name
-	GetFederation(name string) (*kops.Federation, error)
-
-	// ListFederations returns all federations
-	ListFederations(options metav1.ListOptions) (*kops.FederationList, error)
-
 	// SecretStore builds the secret store for the specified cluster
 	SecretStore(cluster *kops.Cluster) (fi.SecretStore, error)
 
 	// KeyStore builds the key store for the specified cluster
 	KeyStore(cluster *kops.Cluster) (fi.CAStore, error)
+
+	// SSHCredentialStore builds the SSHCredential store for the specified cluster
+	SSHCredentialStore(cluster *kops.Cluster) (fi.SSHCredentialStore, error)
 
 	// DeleteCluster deletes all the state for the specified cluster
 	DeleteCluster(cluster *kops.Cluster) error

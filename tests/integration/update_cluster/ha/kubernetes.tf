@@ -66,6 +66,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-ha-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1b-masters-ha-example-com" {
@@ -92,6 +95,9 @@ resource "aws_autoscaling_group" "master-us-test-1b-masters-ha-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1c-masters-ha-example-com" {
@@ -118,6 +124,9 @@ resource "aws_autoscaling_group" "master-us-test-1c-masters-ha-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-ha-example-com" {
@@ -144,6 +153,9 @@ resource "aws_autoscaling_group" "nodes-ha-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "a-etcd-events-ha-example-com" {
@@ -266,8 +278,9 @@ resource "aws_internet_gateway" "ha-example-com" {
   vpc_id = "${aws_vpc.ha-example-com.id}"
 
   tags = {
-    KubernetesCluster = "ha.example.com"
-    Name              = "ha.example.com"
+    KubernetesCluster                      = "ha.example.com"
+    Name                                   = "ha.example.com"
+    "kubernetes.io/cluster/ha.example.com" = "owned"
   }
 }
 
@@ -385,8 +398,9 @@ resource "aws_route_table" "ha-example-com" {
   vpc_id = "${aws_vpc.ha-example-com.id}"
 
   tags = {
-    KubernetesCluster = "ha.example.com"
-    Name              = "ha.example.com"
+    KubernetesCluster                      = "ha.example.com"
+    Name                                   = "ha.example.com"
+    "kubernetes.io/cluster/ha.example.com" = "owned"
   }
 }
 
@@ -543,6 +557,7 @@ resource "aws_subnet" "us-test-1a-ha-example-com" {
   tags = {
     KubernetesCluster                      = "ha.example.com"
     Name                                   = "us-test-1a.ha.example.com"
+    SubnetType                             = "Public"
     "kubernetes.io/cluster/ha.example.com" = "owned"
     "kubernetes.io/role/elb"               = "1"
   }
@@ -556,6 +571,7 @@ resource "aws_subnet" "us-test-1b-ha-example-com" {
   tags = {
     KubernetesCluster                      = "ha.example.com"
     Name                                   = "us-test-1b.ha.example.com"
+    SubnetType                             = "Public"
     "kubernetes.io/cluster/ha.example.com" = "owned"
     "kubernetes.io/role/elb"               = "1"
   }
@@ -569,6 +585,7 @@ resource "aws_subnet" "us-test-1c-ha-example-com" {
   tags = {
     KubernetesCluster                      = "ha.example.com"
     Name                                   = "us-test-1c.ha.example.com"
+    SubnetType                             = "Public"
     "kubernetes.io/cluster/ha.example.com" = "owned"
     "kubernetes.io/role/elb"               = "1"
   }
@@ -591,8 +608,9 @@ resource "aws_vpc_dhcp_options" "ha-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "ha.example.com"
-    Name              = "ha.example.com"
+    KubernetesCluster                      = "ha.example.com"
+    Name                                   = "ha.example.com"
+    "kubernetes.io/cluster/ha.example.com" = "owned"
   }
 }
 

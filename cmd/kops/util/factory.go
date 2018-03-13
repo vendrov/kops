@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/client-go/rest"
 	gceacls "k8s.io/kops/pkg/acls/gce"
+	s3acls "k8s.io/kops/pkg/acls/s3"
 	kopsclient "k8s.io/kops/pkg/client/clientset_generated/clientset"
 	"k8s.io/kops/pkg/client/simple"
 	"k8s.io/kops/pkg/client/simple/api"
@@ -43,6 +44,7 @@ type Factory struct {
 
 func NewFactory(options *FactoryOptions) *Factory {
 	gceacls.Register()
+	s3acls.Register()
 
 	return &Factory{
 		options: options,
@@ -106,7 +108,10 @@ func (f *Factory) Clientset() (simple.Clientset, error) {
 				return nil, field.Invalid(field.NewPath("State Store"), registryPath, INVALID_STATE_ERROR)
 			}
 
-			f.clientset = vfsclientset.NewVFSClientset(basePath)
+			// For kops CLI / controller, we do allow vfs list (unlike nodeup!)
+			allowVFSList := true
+
+			f.clientset = vfsclientset.NewVFSClientset(basePath, allowVFSList)
 		}
 	}
 

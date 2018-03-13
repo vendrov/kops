@@ -88,6 +88,9 @@ resource "aws_autoscaling_group" "bastion-privatedns1-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "master-us-test-1a-masters-privatedns1-example-com" {
@@ -114,6 +117,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-privatedns1-example-
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-privatedns1-example-com" {
@@ -140,6 +146,9 @@ resource "aws_autoscaling_group" "nodes-privatedns1-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-privatedns1-example-com" {
@@ -284,8 +293,9 @@ resource "aws_internet_gateway" "privatedns1-example-com" {
   vpc_id = "${aws_vpc.privatedns1-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatedns1.example.com"
-    Name              = "privatedns1.example.com"
+    KubernetesCluster                               = "privatedns1.example.com"
+    Name                                            = "privatedns1.example.com"
+    "kubernetes.io/cluster/privatedns1.example.com" = "owned"
   }
 }
 
@@ -364,6 +374,12 @@ resource "aws_launch_configuration" "nodes-privatedns1-example-com" {
 resource "aws_nat_gateway" "us-test-1a-privatedns1-example-com" {
   allocation_id = "${aws_eip.us-test-1a-privatedns1-example-com.id}"
   subnet_id     = "${aws_subnet.utility-us-test-1a-privatedns1-example-com.id}"
+
+  tags = {
+    KubernetesCluster                               = "privatedns1.example.com"
+    Name                                            = "us-test-1a.privatedns1.example.com"
+    "kubernetes.io/cluster/privatedns1.example.com" = "owned"
+  }
 }
 
 resource "aws_route" "0-0-0-0--0" {
@@ -400,8 +416,9 @@ resource "aws_route_table" "private-us-test-1a-privatedns1-example-com" {
   vpc_id = "${aws_vpc.privatedns1-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatedns1.example.com"
-    Name              = "private-us-test-1a.privatedns1.example.com"
+    KubernetesCluster                               = "privatedns1.example.com"
+    Name                                            = "private-us-test-1a.privatedns1.example.com"
+    "kubernetes.io/cluster/privatedns1.example.com" = "owned"
   }
 }
 
@@ -409,8 +426,9 @@ resource "aws_route_table" "privatedns1-example-com" {
   vpc_id = "${aws_vpc.privatedns1-example-com.id}"
 
   tags = {
-    KubernetesCluster = "privatedns1.example.com"
-    Name              = "privatedns1.example.com"
+    KubernetesCluster                               = "privatedns1.example.com"
+    Name                                            = "privatedns1.example.com"
+    "kubernetes.io/cluster/privatedns1.example.com" = "owned"
   }
 }
 
@@ -649,6 +667,7 @@ resource "aws_subnet" "us-test-1a-privatedns1-example-com" {
   tags = {
     KubernetesCluster                               = "privatedns1.example.com"
     Name                                            = "us-test-1a.privatedns1.example.com"
+    SubnetType                                      = "Private"
     "kubernetes.io/cluster/privatedns1.example.com" = "owned"
     "kubernetes.io/role/internal-elb"               = "1"
   }
@@ -662,6 +681,7 @@ resource "aws_subnet" "utility-us-test-1a-privatedns1-example-com" {
   tags = {
     KubernetesCluster                               = "privatedns1.example.com"
     Name                                            = "utility-us-test-1a.privatedns1.example.com"
+    SubnetType                                      = "Utility"
     "kubernetes.io/cluster/privatedns1.example.com" = "owned"
     "kubernetes.io/role/elb"                        = "1"
   }
@@ -684,8 +704,9 @@ resource "aws_vpc_dhcp_options" "privatedns1-example-com" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    KubernetesCluster = "privatedns1.example.com"
-    Name              = "privatedns1.example.com"
+    KubernetesCluster                               = "privatedns1.example.com"
+    Name                                            = "privatedns1.example.com"
+    "kubernetes.io/cluster/privatedns1.example.com" = "owned"
   }
 }
 

@@ -63,7 +63,7 @@ func (c *commonVFS) init(kind string, basePath vfs.Path, storeVersion runtime.Gr
 	c.basePath = basePath
 }
 
-func (c *commonVFS) get(name string) (runtime.Object, error) {
+func (c *commonVFS) find(name string) (runtime.Object, error) {
 	o, err := c.readConfig(c.basePath.Join(name))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -162,10 +162,11 @@ func (c *commonVFS) writeConfig(cluster *kops.Cluster, configPath vfs.Path, o ru
 		return err
 	}
 
+	rs := bytes.NewReader(data)
 	if create {
-		err = configPath.CreateFile(data, acl)
+		err = configPath.CreateFile(rs, acl)
 	} else {
-		err = configPath.WriteFile(data, acl)
+		err = configPath.WriteFile(rs, acl)
 	}
 	if err != nil {
 		if create && os.IsExist(err) {
@@ -240,7 +241,7 @@ func (c *commonVFS) readAll(items interface{}) (interface{}, error) {
 	}
 
 	for _, name := range names {
-		o, err := c.get(name)
+		o, err := c.find(name)
 		if err != nil {
 			return nil, err
 		}

@@ -47,8 +47,16 @@ func (m *MockEC2) CreateVpcRequest(*ec2.CreateVpcInput) (*request.Request, *ec2.
 	panic("Not implemented")
 	return nil, nil
 }
+func (m *MockEC2) CreateVpcWithContext(aws.Context, *ec2.CreateVpcInput, ...request.Option) (*ec2.CreateVpcOutput, error) {
+	panic("Not implemented")
+	return nil, nil
+}
 func (m *MockEC2) CreateVpc(request *ec2.CreateVpcInput) (*ec2.CreateVpcOutput, error) {
 	glog.Infof("CreateVpc: %v", request)
+
+	if request.DryRun != nil {
+		glog.Fatalf("DryRun")
+	}
 
 	m.vpcNumber++
 	n := m.vpcNumber
@@ -79,6 +87,11 @@ func (m *MockEC2) CreateVpc(request *ec2.CreateVpcInput) (*ec2.CreateVpcOutput, 
 }
 
 func (m *MockEC2) DescribeVpcsRequest(*ec2.DescribeVpcsInput) (*request.Request, *ec2.DescribeVpcsOutput) {
+	panic("Not implemented")
+	return nil, nil
+}
+
+func (m *MockEC2) DescribeVpcsWithContext(aws.Context, *ec2.DescribeVpcsInput, ...request.Option) (*ec2.DescribeVpcsOutput, error) {
 	panic("Not implemented")
 	return nil, nil
 }
@@ -128,6 +141,10 @@ func (m *MockEC2) DescribeVpcAttributeRequest(*ec2.DescribeVpcAttributeInput) (*
 	panic("Not implemented")
 	return nil, nil
 }
+func (m *MockEC2) DescribeVpcAttributeWithContext(aws.Context, *ec2.DescribeVpcAttributeInput, ...request.Option) (*ec2.DescribeVpcAttributeOutput, error) {
+	panic("Not implemented")
+	return nil, nil
+}
 func (m *MockEC2) DescribeVpcAttribute(request *ec2.DescribeVpcAttributeInput) (*ec2.DescribeVpcAttributeOutput, error) {
 	glog.Infof("DescribeVpcs: %v", request)
 
@@ -146,14 +163,34 @@ func (m *MockEC2) DescribeVpcAttribute(request *ec2.DescribeVpcAttributeInput) (
 	return response, nil
 }
 
-func (m *MockEC2) DescribeInternetGatewaysRequest(*ec2.DescribeInternetGatewaysInput) (*request.Request, *ec2.DescribeInternetGatewaysOutput) {
+func (m *MockEC2) ModifyVpcAttribute(request *ec2.ModifyVpcAttributeInput) (*ec2.ModifyVpcAttributeOutput, error) {
+	glog.Infof("ModifyVpcAttribute: %v", request)
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	vpc := m.Vpcs[*request.VpcId]
+	if vpc == nil {
+		return nil, fmt.Errorf("not found")
+	}
+
+	if request.EnableDnsHostnames != nil {
+		vpc.attributes.EnableDnsHostnames = request.EnableDnsHostnames
+	}
+
+	if request.EnableDnsSupport != nil {
+		vpc.attributes.EnableDnsSupport = request.EnableDnsSupport
+	}
+
+	response := &ec2.ModifyVpcAttributeOutput{}
+
+	return response, nil
+}
+func (m *MockEC2) ModifyVpcAttributeWithContext(aws.Context, *ec2.ModifyVpcAttributeInput, ...request.Option) (*ec2.ModifyVpcAttributeOutput, error) {
 	panic("Not implemented")
 	return nil, nil
 }
-func (m *MockEC2) DescribeInternetGateways(*ec2.DescribeInternetGatewaysInput) (*ec2.DescribeInternetGatewaysOutput, error) {
-	return &ec2.DescribeInternetGatewaysOutput{
-		InternetGateways: []*ec2.InternetGateway{{
-			InternetGatewayId: aws.String("fake-ig"),
-		}},
-	}, nil
+func (m *MockEC2) ModifyVpcAttributeRequest(*ec2.ModifyVpcAttributeInput) (*request.Request, *ec2.ModifyVpcAttributeOutput) {
+	panic("Not implemented")
+	return nil, nil
 }

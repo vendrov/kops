@@ -22,13 +22,12 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/golang/glog"
 	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
-
-	"github.com/golang/glog"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // s is a helper that builds a *string from a string value
@@ -96,9 +95,13 @@ func getProxyEnvVars(proxies *kops.EgressProxySpec) []v1.EnvVar {
 
 // buildCertificateRequest retrieves the certificate from a keystore
 func buildCertificateRequest(c *fi.ModelBuilderContext, b *NodeupModelContext, name, path string) error {
-	cert, err := b.KeyStore.Cert(name, false)
+	cert, err := b.KeyStore.FindCert(name)
 	if err != nil {
 		return err
+	}
+
+	if cert == nil {
+		return fmt.Errorf("certificate %q not found", name)
 	}
 
 	serialized, err := cert.AsString()
@@ -115,6 +118,7 @@ func buildCertificateRequest(c *fi.ModelBuilderContext, b *NodeupModelContext, n
 		Path:     location,
 		Contents: fi.NewStringResource(serialized),
 		Type:     nodetasks.FileType_File,
+		Mode:     s("0600"),
 	})
 
 	return nil
@@ -122,9 +126,13 @@ func buildCertificateRequest(c *fi.ModelBuilderContext, b *NodeupModelContext, n
 
 // buildPrivateKeyRequest retrieves a private key from the store
 func buildPrivateKeyRequest(c *fi.ModelBuilderContext, b *NodeupModelContext, name, path string) error {
-	k, err := b.KeyStore.PrivateKey(name, false)
+	k, err := b.KeyStore.FindPrivateKey(name)
 	if err != nil {
 		return err
+	}
+
+	if k == nil {
+		return fmt.Errorf("private key %q not found", name)
 	}
 
 	serialized, err := k.AsString()
@@ -141,6 +149,7 @@ func buildPrivateKeyRequest(c *fi.ModelBuilderContext, b *NodeupModelContext, na
 		Path:     location,
 		Contents: fi.NewStringResource(serialized),
 		Type:     nodetasks.FileType_File,
+		Mode:     s("0600"),
 	})
 
 	return nil

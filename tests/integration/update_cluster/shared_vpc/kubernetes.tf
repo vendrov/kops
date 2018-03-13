@@ -66,6 +66,9 @@ resource "aws_autoscaling_group" "master-us-test-1a-masters-sharedvpc-example-co
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_autoscaling_group" "nodes-sharedvpc-example-com" {
@@ -92,6 +95,9 @@ resource "aws_autoscaling_group" "nodes-sharedvpc-example-com" {
     value               = "1"
     propagate_at_launch = true
   }
+
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
 }
 
 resource "aws_ebs_volume" "us-test-1a-etcd-events-sharedvpc-example-com" {
@@ -209,15 +215,15 @@ resource "aws_launch_configuration" "nodes-sharedvpc-example-com" {
 resource "aws_route" "0-0-0-0--0" {
   route_table_id         = "${aws_route_table.sharedvpc-example-com.id}"
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "fake-ig"
+  gateway_id             = "igw-1"
 }
 
 resource "aws_route_table" "sharedvpc-example-com" {
   vpc_id = "vpc-12345678"
 
   tags = {
-    KubernetesCluster = "sharedvpc.example.com"
-    Name              = "sharedvpc.example.com"
+    KubernetesCluster                             = "sharedvpc.example.com"
+    "kubernetes.io/cluster/sharedvpc.example.com" = "shared"
   }
 }
 
@@ -364,6 +370,7 @@ resource "aws_subnet" "us-test-1a-sharedvpc-example-com" {
   tags = {
     KubernetesCluster                             = "sharedvpc.example.com"
     Name                                          = "us-test-1a.sharedvpc.example.com"
+    SubnetType                                    = "Public"
     "kubernetes.io/cluster/sharedvpc.example.com" = "owned"
     "kubernetes.io/role/elb"                      = "1"
   }

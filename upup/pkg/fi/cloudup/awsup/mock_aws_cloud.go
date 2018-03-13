@@ -24,16 +24,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/aws/aws-sdk-go/service/elb"
-	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/route53/route53iface"
 	"github.com/golang/glog"
 	"k8s.io/api/core/v1"
+	"k8s.io/kops/dnsprovider/pkg/dnsprovider"
+	dnsproviderroute53 "k8s.io/kops/dnsprovider/pkg/dnsprovider/providers/aws/route53"
 	"k8s.io/kops/pkg/apis/kops"
 	"k8s.io/kops/pkg/cloudinstances"
 	"k8s.io/kops/upup/pkg/fi"
-	"k8s.io/kubernetes/federation/pkg/dnsprovider"
-	dnsproviderroute53 "k8s.io/kubernetes/federation/pkg/dnsprovider/providers/aws/route53"
 )
 
 type MockAWSCloud struct {
@@ -73,7 +73,9 @@ type MockCloud struct {
 	MockAutoscaling    autoscalingiface.AutoScalingAPI
 	MockCloudFormation *cloudformation.CloudFormation
 	MockEC2            ec2iface.EC2API
+	MockIAM            iamiface.IAMAPI
 	MockRoute53        route53iface.Route53API
+	MockELB            elbiface.ELBAPI
 }
 
 func (c *MockAWSCloud) DeleteGroup(g *cloudinstances.CloudInstanceGroup) error {
@@ -149,11 +151,11 @@ func (c *MockAWSCloud) GetTags(resourceID string) (map[string]string, error) {
 }
 
 func (c *MockAWSCloud) GetELBTags(loadBalancerName string) (map[string]string, error) {
-	return nil, fmt.Errorf("MockAWSCloud GetELBTags not implemented")
+	return getELBTags(c, loadBalancerName)
 }
 
 func (c *MockAWSCloud) CreateELBTags(loadBalancerName string, tags map[string]string) error {
-	return fmt.Errorf("MockAWSCloud CreateELBTags not implemented")
+	return createELBTags(c, loadBalancerName, tags)
 }
 
 func (c *MockAWSCloud) DescribeInstance(instanceID string) (*ec2.Instance, error) {
@@ -161,7 +163,7 @@ func (c *MockAWSCloud) DescribeInstance(instanceID string) (*ec2.Instance, error
 }
 
 func (c *MockAWSCloud) DescribeVPC(vpcID string) (*ec2.Vpc, error) {
-	return nil, fmt.Errorf("MockAWSCloud DescribeVPC not implemented")
+	return describeVPC(c, vpcID)
 }
 
 func (c *MockAWSCloud) ResolveImage(name string) (*ec2.Image, error) {
@@ -189,19 +191,23 @@ func (c *MockAWSCloud) EC2() ec2iface.EC2API {
 	return c.MockEC2
 }
 
-func (c *MockAWSCloud) IAM() *iam.IAM {
-	glog.Fatalf("MockAWSCloud IAM not implemented")
-	return nil
+func (c *MockAWSCloud) IAM() iamiface.IAMAPI {
+	if c.MockIAM == nil {
+		glog.Fatalf("MockAWSCloud MockIAM not set")
+	}
+	return c.MockIAM
 }
 
-func (c *MockAWSCloud) ELB() *elb.ELB {
-	glog.Fatalf("MockAWSCloud ELB not implemented")
-	return nil
+func (c *MockAWSCloud) ELB() elbiface.ELBAPI {
+	if c.MockELB == nil {
+		glog.Fatalf("MockAWSCloud MockELB not set")
+	}
+	return c.MockELB
 }
 
 func (c *MockAWSCloud) Autoscaling() autoscalingiface.AutoScalingAPI {
 	if c.MockAutoscaling == nil {
-		glog.Fatalf("MockAWSCloud Autoscaling not implemented")
+		glog.Fatalf("MockAWSCloud Autoscaling not set")
 	}
 	return c.MockAutoscaling
 }
@@ -214,7 +220,7 @@ func (c *MockAWSCloud) Route53() route53iface.Route53API {
 }
 
 func (c *MockAWSCloud) FindVPCInfo(id string) (*fi.VPCInfo, error) {
-	return nil, fmt.Errorf("MockAWSCloud FindVPCInfo not implemented")
+	return findVPCInfo(c, id)
 }
 
 // DefaultInstanceType determines an instance type for the specified cluster & instance group

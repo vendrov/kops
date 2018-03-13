@@ -152,7 +152,7 @@ func ListResourcesAWS(cloud awsup.AWSCloud, clusterName string) (map[string]*Res
 			id := resource.ID
 			routeTableIds[id] = resource
 		}
-		natGateways, err := FindNatGateways(cloud, routeTableIds)
+		natGateways, err := FindNatGateways(cloud, routeTableIds, clusterName)
 		if err != nil {
 			return nil, err
 		}
@@ -436,6 +436,14 @@ func DumpInstance(op *DumpOperation, r *Resource) error {
 			}
 		}
 	}
+	for _, tag := range ec2Instance.Tags {
+		key := aws.StringValue(tag.Key)
+		if !strings.HasPrefix(key, awsup.TagNameRolePrefix) {
+			continue
+		}
+		role := strings.TrimPrefix(key, awsup.TagNameRolePrefix)
+		i.Roles = append(i.Roles, role)
+	}
 	op.Dump.Instances = append(op.Dump.Instances, i)
 
 	return nil
@@ -692,10 +700,10 @@ func ListKeypairs(cloud fi.Cloud, clusterName string) ([]*Resource, error) {
 	keypairName := "kubernetes." + clusterName
 
 	glog.V(2).Infof("Listing EC2 Keypairs")
-	request := &ec2.DescribeKeyPairsInput{
-	// We need to match both the name and a prefix
-	//Filters: []*ec2.Filter{awsup.NewEC2Filter("key-name", keypairName)},
-	}
+
+	// TODO: We need to match both the name and a prefix
+	// TODO: usee 'Filters: []*ec2.Filter{awsup.NewEC2Filter("key-name", keypairName)},'
+	request := &ec2.DescribeKeyPairsInput{}
 	response, err := c.EC2().DescribeKeyPairs(request)
 	if err != nil {
 		return nil, fmt.Errorf("error listing KeyPairs: %v", err)
@@ -1037,6 +1045,7 @@ func ListDhcpOptions(cloud fi.Cloud, clusterName string) ([]*Resource, error) {
 			ID:      aws.StringValue(o.DhcpOptionsId),
 			Type:    "dhcp-options",
 			Deleter: DeleteDhcpOptions,
+			Shared:  HasSharedTag(ec2.ResourceTypeDhcpOptions+":"+aws.StringValue(o.DhcpOptionsId), o.Tags, clusterName),
 		}
 
 		var blocks []string
@@ -1142,6 +1151,7 @@ func ListInternetGateways(cloud fi.Cloud, clusterName string) ([]*Resource, erro
 			ID:      aws.StringValue(o.InternetGatewayId),
 			Type:    "internet-gateway",
 			Deleter: DeleteInternetGateway,
+			Shared:  HasSharedTag(ec2.ResourceTypeInternetGateway+":"+aws.StringValue(o.InternetGatewayId), o.Tags, clusterName),
 		}
 
 		var blocks []string
@@ -1376,7 +1386,7 @@ func FindAutoScalingLaunchConfigurations(cloud fi.Cloud, securityGroups sets.Str
 	return resourceTrackers, nil
 }
 
-func FindNatGateways(cloud fi.Cloud, routeTables map[string]*Resource) ([]*Resource, error) {
+func FindNatGateways(cloud fi.Cloud, routeTables map[string]*Resource, clusterName string) ([]*Resource, error) {
 	if len(routeTables) == 0 {
 		return nil, nil
 	}
@@ -1460,16 +1470,24 @@ func FindNatGateways(cloud fi.Cloud, routeTables map[string]*Resource) ([]*Resou
 						name = aws.StringValue(address.AllocationId)
 					}
 
-					eipTracker := &Resource{
-						Name:    name,
-						ID:      aws.StringValue(address.AllocationId),
-						Type:    TypeElasticIp,
-						Deleter: DeleteElasticIP,
-						Shared:  !ownedNatGatewayIds.Has(natGatewayId),
+					request := &ec2.DescribeAddressesInput{}
+					request.AllocationIds = []*string{address.AllocationId}
+					response, err := c.EC2().DescribeAddresses(request)
+					if err != nil {
+						return nil, fmt.Errorf("error from DescribeAddresses: %v", err)
 					}
-					resourceTrackers = append(resourceTrackers, eipTracker)
 
-					ngwTracker.Blocks = append(ngwTracker.Blocks, eipTracker.Type+":"+eipTracker.ID)
+					for _, eip := range response.Addresses {
+						eipTracker := &Resource{
+							Name:    name,
+							ID:      aws.StringValue(address.AllocationId),
+							Type:    TypeElasticIp,
+							Deleter: DeleteElasticIP,
+							Shared:  HasSharedTag(TypeElasticIp+":"+*eip.AllocationId, eip.Tags, clusterName) || !ownedNatGatewayIds.Has(natGatewayId),
+						}
+						resourceTrackers = append(resourceTrackers, eipTracker)
+						ngwTracker.Blocks = append(ngwTracker.Blocks, eipTracker.Type+":"+eipTracker.ID)
+					}
 				}
 			}
 		}

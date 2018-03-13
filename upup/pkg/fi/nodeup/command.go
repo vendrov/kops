@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/kops/nodeup/pkg/distros"
 	"k8s.io/kops/nodeup/pkg/model"
@@ -37,12 +38,15 @@ import (
 	"k8s.io/kops/upup/pkg/fi/nodeup/cloudinit"
 	"k8s.io/kops/upup/pkg/fi/nodeup/local"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
+	"k8s.io/kops/upup/pkg/fi/secrets"
 	"k8s.io/kops/upup/pkg/fi/utils"
 	"k8s.io/kops/util/pkg/vfs"
 )
 
 // MaxTaskDuration is the amount of time to keep trying for; we retry for a long time - there is not really any great fallback
 const MaxTaskDuration = 365 * 24 * time.Hour
+
+const TagMaster = "_kubernetes_master"
 
 // NodeUpCommand the configiruation for nodeup
 type NodeUpCommand struct {
@@ -171,11 +175,6 @@ func (c *NodeUpCommand) Run(out io.Writer) error {
 	glog.Infof("Config tags: %v", c.config.Tags)
 	glog.Infof("OS tags: %v", osTags)
 
-	tf, err := newTemplateFunctions(c.config, c.cluster, c.instanceGroup, nodeTags)
-	if err != nil {
-		return fmt.Errorf("error initializing: %v", err)
-	}
-
 	modelContext := &model.NodeupModelContext{
 		Architecture:  model.ArchitectureAmd64,
 		Assets:        assetStore,
@@ -183,10 +182,33 @@ func (c *NodeUpCommand) Run(out io.Writer) error {
 		Distribution:  distribution,
 		InstanceGroup: c.instanceGroup,
 		IsMaster:      nodeTags.Has(TagMaster),
-		KeyStore:      tf.keyStore,
 		NodeupConfig:  c.config,
-		SecretStore:   tf.secretStore,
 	}
+
+	if c.cluster.Spec.SecretStore != "" {
+		glog.Infof("Building SecretStore at %q", c.cluster.Spec.SecretStore)
+		p, err := vfs.Context.BuildVfsPath(c.cluster.Spec.SecretStore)
+		if err != nil {
+			return fmt.Errorf("error building secret store path: %v", err)
+		}
+
+		modelContext.SecretStore = secrets.NewVFSSecretStore(c.cluster, p)
+	} else {
+		return fmt.Errorf("SecretStore not set")
+	}
+
+	if c.cluster.Spec.KeyStore != "" {
+		glog.Infof("Building KeyStore at %q", c.cluster.Spec.KeyStore)
+		p, err := vfs.Context.BuildVfsPath(c.cluster.Spec.KeyStore)
+		if err != nil {
+			return fmt.Errorf("error building key store path: %v", err)
+		}
+
+		modelContext.KeyStore = fi.NewVFSCAStore(c.cluster, p, false)
+	} else {
+		return fmt.Errorf("KeyStore not set")
+	}
+
 	if err := modelContext.Init(); err != nil {
 		return err
 	}
@@ -215,8 +237,9 @@ func (c *NodeUpCommand) Run(out io.Writer) error {
 	} else {
 		loader.Builders = append(loader.Builders, &model.KubeRouterBuilder{NodeupModelContext: modelContext})
 	}
-
-	tf.populate(loader.TemplateFunctions)
+	if c.cluster.Spec.Networking.Calico != nil {
+		loader.Builders = append(loader.Builders, &model.CalicoBuilder{NodeupModelContext: modelContext})
+	}
 
 	taskMap, err := loader.Build(c.ModelDir)
 	if err != nil {
@@ -249,7 +272,7 @@ func (c *NodeUpCommand) Run(out io.Writer) error {
 			Tags:     nodeTags,
 		}
 	case "dryrun":
-		assetBuilder := assets.NewAssetBuilder(c.cluster.Spec.Assets)
+		assetBuilder := assets.NewAssetBuilder(c.cluster, "")
 		target = fi.NewDryRunTarget(assetBuilder, out)
 	case "cloudinit":
 		checkExisting = false
@@ -308,7 +331,7 @@ func evaluateSpec(c *api.Cluster) error {
 }
 
 func evaluateHostnameOverride(hostnameOverride string) (string, error) {
-	if hostnameOverride == "" {
+	if hostnameOverride == "" || hostnameOverride == "@hostname" {
 		return "", nil
 	}
 	k := strings.TrimSpace(hostnameOverride)

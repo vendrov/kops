@@ -22,9 +22,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -41,6 +44,7 @@ import (
 	"k8s.io/kops/pkg/featureflag"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup"
+	"k8s.io/kops/upup/pkg/fi/cloudup/awsup"
 	"k8s.io/kops/upup/pkg/fi/cloudup/gce"
 	"k8s.io/kops/upup/pkg/fi/utils"
 	"k8s.io/kubernetes/pkg/kubectl/cmd/templates"
@@ -71,8 +75,9 @@ type CreateClusterOptions struct {
 	KubernetesVersion    string
 	OutDir               string
 	Image                string
-	SSHPublicKey         string
 	VPCID                string
+	SubnetIDs            []string
+	UtilitySubnetIDs     []string
 	NetworkCIDR          string
 	DNSZone              string
 	AdminAccess          []string
@@ -81,6 +86,9 @@ type CreateClusterOptions struct {
 	NodeSecurityGroups   []string
 	MasterSecurityGroups []string
 	AssociatePublicIP    *bool
+
+	// SSHPublicKeys is a map of the SSH public keys we should configure; required on AWS, not required on GCE
+	SSHPublicKeys map[string][]byte
 
 	// Overrides allows settings values direct in the spec
 	Overrides []string
@@ -139,7 +147,6 @@ func (o *CreateClusterOptions) InitDefaults() {
 	o.Yes = false
 	o.Target = cloudup.TargetDirect
 	o.Models = strings.Join(cloudup.CloudupModels, ",")
-	o.SSHPublicKey = "~/.ssh/id_rsa.pub"
 	o.Networking = "kubenet"
 	o.Channel = api.DefaultChannel
 	o.Topology = api.TopologyPublic
@@ -149,11 +156,11 @@ func (o *CreateClusterOptions) InitDefaults() {
 	// Default to open API & SSH access
 	o.AdminAccess = []string{"0.0.0.0/0"}
 
-	o.Authorization = AuthorizationFlagAlwaysAllow
+	o.Authorization = AuthorizationFlagRBAC
 }
 
 var (
-	create_cluster_long = templates.LongDesc(i18n.T(`
+	createClusterLong = templates.LongDesc(i18n.T(`
 	Create a kubernetes cluster using command line flags.
 	This command creates cloud based resources such as networks and virtual machines. Once
 	the infrastructure is in place Kubernetes is installed on the virtual machines.
@@ -161,7 +168,7 @@ var (
 	These operations are done in parallel and rely on eventual consistency.
 	`))
 
-	create_cluster_example = templates.Examples(i18n.T(`
+	createClusterExample = templates.Examples(i18n.T(`
 	# Create a cluster in AWS
 	kops create cluster --name=kubernetes-cluster.example.com \
 	--state=s3://kops-state-1234 --zones=eu-west-1a \
@@ -206,20 +213,21 @@ var (
 
 	`))
 
-	create_cluster_short = i18n.T("Create a Kubernetes cluster.")
+	createClusterShort = i18n.T("Create a Kubernetes cluster.")
 )
 
 func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 	options := &CreateClusterOptions{}
 	options.InitDefaults()
 
+	sshPublicKey := "~/.ssh/id_rsa.pub"
 	associatePublicIP := false
 
 	cmd := &cobra.Command{
 		Use:     "cluster",
-		Short:   create_cluster_short,
-		Long:    create_cluster_long,
-		Example: create_cluster_example,
+		Short:   createClusterShort,
+		Long:    createClusterLong,
+		Example: createClusterExample,
 		Run: func(cmd *cobra.Command, args []string) {
 			if cmd.Flag("associate-public-ip").Changed {
 				options.AssociatePublicIP = &associatePublicIP
@@ -233,6 +241,11 @@ func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 
 			options.ClusterName = rootCommand.clusterName
 
+			options.SSHPublicKeys, err = loadSSHPublicKeys(sshPublicKey, cmd.Flag("ssh-public-key").Changed)
+			if err != nil {
+				exitWithError(err)
+			}
+
 			err = RunCreateCluster(f, out, options)
 			if err != nil {
 				exitWithError(err)
@@ -241,7 +254,7 @@ func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVarP(&options.Yes, "yes", "y", options.Yes, "Specify --yes to immediately create the cluster")
-	cmd.Flags().StringVar(&options.Target, "target", options.Target, fmt.Sprintf("Valid targets: %s, %s, %s. Set this flag to %s if you want kops to generate terraform", cloudup.TargetDirect, cloudup.TargetTerraform, cloudup.TargetDirect, cloudup.TargetTerraform))
+	cmd.Flags().StringVar(&options.Target, "target", options.Target, fmt.Sprintf("Valid targets: %s, %s, %s. Set this flag to %s if you want kops to generate terraform", cloudup.TargetDirect, cloudup.TargetTerraform, cloudup.TargetCloudformation, cloudup.TargetTerraform))
 	cmd.Flags().StringVar(&options.Models, "model", options.Models, "Models to apply (separate multiple models with commas)")
 
 	// Configuration / state location
@@ -257,7 +270,7 @@ func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&options.Project, "project", options.Project, "Project to use (must be set on GCE)")
 	cmd.Flags().StringVar(&options.KubernetesVersion, "kubernetes-version", options.KubernetesVersion, "Version of kubernetes to run (defaults to version in channel)")
 
-	cmd.Flags().StringVar(&options.SSHPublicKey, "ssh-public-key", options.SSHPublicKey, "SSH public key to use")
+	cmd.Flags().StringVar(&sshPublicKey, "ssh-public-key", sshPublicKey, "SSH public key to use")
 
 	cmd.Flags().StringVar(&options.NodeSize, "node-size", options.NodeSize, "Set instance size for nodes")
 
@@ -267,6 +280,8 @@ func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 	cmd.Flags().Int32Var(&options.NodeVolumeSize, "node-volume-size", options.NodeVolumeSize, "Set instance volume size (in GB) for nodes")
 
 	cmd.Flags().StringVar(&options.VPCID, "vpc", options.VPCID, "Set to use a shared VPC")
+	cmd.Flags().StringSliceVar(&options.SubnetIDs, "subnets", options.SubnetIDs, "Set to use shared subnets")
+	cmd.Flags().StringSliceVar(&options.UtilitySubnetIDs, "utility-subnets", options.UtilitySubnetIDs, "Set to use shared utility subnets")
 	cmd.Flags().StringVar(&options.NetworkCIDR, "network-cidr", options.NetworkCIDR, "Set to override the default network CIDR")
 
 	cmd.Flags().Int32Var(&options.MasterCount, "master-count", options.MasterCount, "Set the number of masters.  Defaults to one master per master-zone")
@@ -275,7 +290,7 @@ func NewCmdCreateCluster(f *util.Factory, out io.Writer) *cobra.Command {
 
 	cmd.Flags().StringVar(&options.Image, "image", options.Image, "Image to use for all instances.")
 
-	cmd.Flags().StringVar(&options.Networking, "networking", "kubenet", "Networking mode to use.  kubenet (default), classic, external, kopeio-vxlan (or kopeio), weave, flannel-vxlan (or flannel), flannel-udp, calico, canal, kube-router, romana.")
+	cmd.Flags().StringVar(&options.Networking, "networking", "kubenet", "Networking mode to use.  kubenet (default), classic, external, kopeio-vxlan (or kopeio), weave, flannel-vxlan (or flannel), flannel-udp, calico, canal, kube-router, romana, amazon-vpc-routed-eni.")
 
 	cmd.Flags().StringVar(&options.DNSZone, "dns-zone", options.DNSZone, "DNS hosted zone to use (defaults to longest matching zone)")
 	cmd.Flags().StringVar(&options.OutDir, "out", options.OutDir, "Path to write any local output")
@@ -412,8 +427,6 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 	}
 	cluster.Spec.ConfigBase = configBase.Path()
 
-	glog.V(4).Infof("networking mode=%s => %s", c.Networking, fi.DebugAsJsonString(cluster.Spec.Networking))
-
 	// In future we could change the default if the flag is not specified, e.g. in 1.7 maybe the default is RBAC?
 	cluster.Spec.Authorization = &api.AuthorizationSpec{}
 	if strings.EqualFold(c.Authorization, AuthorizationFlagAlwaysAllow) {
@@ -431,6 +444,26 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 	allZones := sets.NewString()
 	allZones.Insert(c.Zones...)
 	allZones.Insert(c.MasterZones...)
+
+	if c.VPCID != "" {
+		cluster.Spec.NetworkID = c.VPCID
+	} else if api.CloudProviderID(cluster.Spec.CloudProvider) == api.CloudProviderAWS && len(c.SubnetIDs) > 0 {
+		cloudTags := map[string]string{}
+		awsCloud, err := awsup.NewAWSCloud(c.Zones[0][:len(c.Zones[0])-1], cloudTags)
+		if err != nil {
+			return fmt.Errorf("error loading cloud: %v", err)
+		}
+		res, err := awsCloud.EC2().DescribeSubnets(&ec2.DescribeSubnetsInput{
+			SubnetIds: []*string{aws.String(c.SubnetIDs[0])},
+		})
+		if err != nil {
+			return fmt.Errorf("error describing subnet %s: %v", c.SubnetIDs[0], err)
+		}
+		if len(res.Subnets) == 0 || res.Subnets[0].VpcId == nil {
+			return fmt.Errorf("failed to determine VPC id of subnet %s", c.SubnetIDs[0])
+		}
+		cluster.Spec.NetworkID = *res.Subnets[0].VpcId
+	}
 
 	if cluster.Spec.CloudProvider == "" {
 		for _, zone := range allZones.List() {
@@ -497,6 +530,13 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		}
 		zoneToSubnetMap[region] = subnet
 	} else {
+		var zoneToSubnetProviderID map[string]string
+		if len(c.Zones) > 0 && len(c.SubnetIDs) > 0 && api.CloudProviderID(cluster.Spec.CloudProvider) == api.CloudProviderAWS {
+			zoneToSubnetProviderID, err = getZoneToSubnetProviderID(cluster.Spec.NetworkID, c.Zones[0][:len(c.Zones[0])-1], c.SubnetIDs)
+			if err != nil {
+				return err
+			}
+		}
 		for _, zoneName := range allZones.List() {
 			// We create default subnets named the same as the zones
 			subnetName := zoneName
@@ -507,6 +547,9 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 					Name:   subnetName,
 					Zone:   subnetName,
 					Egress: c.Egress,
+				}
+				if subnetID, ok := zoneToSubnetProviderID[zoneName]; ok {
+					subnet.ProviderID = subnetID
 				}
 				cluster.Spec.Subnets = append(cluster.Spec.Subnets, *subnet)
 			}
@@ -765,8 +808,22 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		}
 	}
 
+	// Populate project
 	if c.Project != "" {
 		cluster.Spec.Project = c.Project
+	}
+	if api.CloudProviderID(cluster.Spec.CloudProvider) == api.CloudProviderGCE {
+		if cluster.Spec.Project == "" {
+			project, err := gce.DefaultProject()
+			if err != nil {
+				glog.Warningf("unable to get default google cloud project: %v", err)
+			} else if project == "" {
+				glog.Warningf("default google cloud project not set (try `gcloud config set project <name>`")
+			} else {
+				glog.Infof("using google cloud project: %s", project)
+			}
+			cluster.Spec.Project = project
+		}
 	}
 
 	if c.KubernetesVersion != "" {
@@ -811,13 +868,13 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		cluster.Spec.Networking.Kuberouter = &api.KuberouterNetworkingSpec{}
 	case "romana":
 		cluster.Spec.Networking.Romana = &api.RomanaNetworkingSpec{}
+	case "amazonvpc", "amazon-vpc-routed-eni":
+		cluster.Spec.Networking.AmazonVPC = &api.AmazonVPCNetworkingSpec{}
 	default:
 		return fmt.Errorf("unknown networking mode %q", c.Networking)
 	}
 
-	if c.VPCID != "" {
-		cluster.Spec.NetworkID = c.VPCID
-	}
+	glog.V(4).Infof("networking mode=%s => %s", c.Networking, fi.DebugAsJsonString(cluster.Spec.Networking))
 
 	if c.NetworkCIDR != "" {
 		cluster.Spec.NetworkCIDR = c.NetworkCIDR
@@ -848,7 +905,7 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 
 	case api.TopologyPrivate:
 		if !supportsPrivateTopology(cluster.Spec.Networking) {
-			return fmt.Errorf("Invalid networking option %s. Currently only '--networking kopeio-vxlan (or kopeio)', '--networking weave', '--networking flannel', '--networking calico', '--networking canal', '--networking kube-router', '--networking romana' are supported for private topologies", c.Networking)
+			return fmt.Errorf("Invalid networking option %s. Currently only '--networking kopeio-vxlan (or kopeio)', '--networking weave', '--networking flannel', '--networking calico', '--networking canal', '--networking kube-router', '--networking romana', '--networking amazon-vpc-routed-eni' are supported for private topologies", c.Networking)
 		}
 		cluster.Spec.Topology = &api.TopologySpec{
 			Masters: api.TopologyPrivate,
@@ -860,6 +917,15 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		}
 
 		var utilitySubnets []api.ClusterSubnetSpec
+
+		var zoneToSubnetProviderID map[string]string
+		if len(c.Zones) > 0 && len(c.UtilitySubnetIDs) > 0 && api.CloudProviderID(cluster.Spec.CloudProvider) == api.CloudProviderAWS {
+			zoneToSubnetProviderID, err = getZoneToSubnetProviderID(cluster.Spec.NetworkID, c.Zones[0][:len(c.Zones[0])-1], c.UtilitySubnetIDs)
+			if err != nil {
+				return err
+			}
+		}
+
 		for _, s := range cluster.Spec.Subnets {
 			if s.Type == api.SubnetTypeUtility {
 				continue
@@ -868,6 +934,9 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 				Name: "utility-" + s.Name,
 				Zone: s.Zone,
 				Type: api.SubnetTypeUtility,
+			}
+			if subnetID, ok := zoneToSubnetProviderID[s.Zone]; ok {
+				subnet.ProviderID = subnetID
 			}
 			utilitySubnets = append(utilitySubnets, subnet)
 		}
@@ -959,18 +1028,6 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		Legacy:                 false,
 	}
 
-	sshPublicKeys := make(map[string][]byte)
-	if c.SSHPublicKey != "" {
-		c.SSHPublicKey = utils.ExpandPath(c.SSHPublicKey)
-		authorized, err := ioutil.ReadFile(c.SSHPublicKey)
-		if err != nil {
-			return fmt.Errorf("error reading SSH key file %q: %v", c.SSHPublicKey, err)
-		}
-		sshPublicKeys[fi.SecretNameSSHPrimary] = authorized
-
-		glog.Infof("Using SSH public key: %v\n", c.SSHPublicKey)
-	}
-
 	if len(c.AdminAccess) != 0 {
 		if len(c.SSHAccess) != 0 {
 			cluster.Spec.SSHAccess = c.SSHAccess
@@ -1001,7 +1058,7 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		return err
 	}
 
-	assetBuilder := assets.NewAssetBuilder(cluster.Spec.Assets)
+	assetBuilder := assets.NewAssetBuilder(cluster, "")
 	fullCluster, err := cloudup.PopulateClusterSpec(clientset, cluster, assetBuilder)
 	if err != nil {
 		return err
@@ -1054,20 +1111,22 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		return fmt.Errorf("error writing updated configuration: %v", err)
 	}
 
-	keyStore, err := clientset.KeyStore(cluster)
-	if err != nil {
-		return err
-	}
-
 	err = registry.WriteConfigDeprecated(cluster, configBase.Join(registry.PathClusterCompleted), fullCluster)
 	if err != nil {
 		return fmt.Errorf("error writing completed cluster spec: %v", err)
 	}
 
-	for k, data := range sshPublicKeys {
-		err = keyStore.AddSSHPublicKey(k, data)
+	if len(c.SSHPublicKeys) != 0 {
+		sshCredentialStore, err := clientset.SSHCredentialStore(cluster)
 		if err != nil {
-			return fmt.Errorf("error adding SSH public key: %v", err)
+			return err
+		}
+
+		for k, data := range c.SSHPublicKeys {
+			err = sshCredentialStore.AddSSHPublicKey(k, data)
+			if err != nil {
+				return fmt.Errorf("error adding SSH public key: %v", err)
+			}
 		}
 	}
 
@@ -1093,7 +1152,7 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 		//  updateClusterOptions.MaxTaskDuration = c.MaxTaskDuration
 		//  updateClusterOptions.CreateKubecfg = c.CreateKubecfg
 
-		err := RunUpdateCluster(f, clusterName, out, updateClusterOptions)
+		_, err := RunUpdateCluster(f, clusterName, out, updateClusterOptions)
 		if err != nil {
 			return err
 		}
@@ -1128,7 +1187,7 @@ func RunCreateCluster(f *util.Factory, out io.Writer, c *CreateClusterOptions) e
 
 func supportsPrivateTopology(n *api.NetworkingSpec) bool {
 
-	if n.CNI != nil || n.Kopeio != nil || n.Weave != nil || n.Flannel != nil || n.Calico != nil || n.Canal != nil || n.Kuberouter != nil || n.Romana != nil {
+	if n.CNI != nil || n.Kopeio != nil || n.Weave != nil || n.Flannel != nil || n.Calico != nil || n.Canal != nil || n.Kuberouter != nil || n.Romana != nil || n.AmazonVPC != nil {
 		return true
 	}
 	return false
@@ -1197,9 +1256,65 @@ func setOverrides(overrides []string, cluster *api.Cluster, instanceGroups []*ap
 		switch kv[0] {
 		case "cluster.spec.nodePortAccess":
 			cluster.Spec.NodePortAccess = append(cluster.Spec.NodePortAccess, kv[1])
+		case "cluster.spec.etcdClusters[*].version":
+			for _, etcd := range cluster.Spec.EtcdClusters {
+				etcd.Version = kv[1]
+			}
 		default:
 			return fmt.Errorf("unhandled override: %q", override)
 		}
 	}
 	return nil
+}
+
+func getZoneToSubnetProviderID(VPCID string, region string, subnetIDs []string) (map[string]string, error) {
+	res := make(map[string]string)
+	cloudTags := map[string]string{}
+	awsCloud, err := awsup.NewAWSCloud(region, cloudTags)
+	if err != nil {
+		return res, fmt.Errorf("error loading cloud: %v", err)
+	}
+	vpcInfo, err := awsCloud.FindVPCInfo(VPCID)
+	if err != nil {
+		return res, fmt.Errorf("error describing VPC: %v", err)
+	}
+	if vpcInfo == nil {
+		return res, fmt.Errorf("VPC %q not found", VPCID)
+	}
+	subnetByID := make(map[string]*fi.SubnetInfo)
+	for _, subnetInfo := range vpcInfo.Subnets {
+		subnetByID[subnetInfo.ID] = subnetInfo
+	}
+	for _, subnetID := range subnetIDs {
+		subnet, ok := subnetByID[subnetID]
+		if !ok {
+			return res, fmt.Errorf("subnet %s not found in VPC %s", subnetID, VPCID)
+		}
+		if res[subnet.Zone] != "" {
+			return res, fmt.Errorf("subnet %s and %s have the same zone", subnetID, res[subnet.Zone])
+		}
+		res[subnet.Zone] = subnetID
+	}
+	return res, nil
+}
+
+func loadSSHPublicKeys(sshPublicKey string, flagSpecified bool) (map[string][]byte, error) {
+	sshPublicKeys := make(map[string][]byte)
+	if sshPublicKey != "" {
+		sshPublicKey = utils.ExpandPath(sshPublicKey)
+		authorized, err := ioutil.ReadFile(sshPublicKey)
+		if err != nil {
+			// Ignore file-not-found unless the user actively specified the flag
+			if !flagSpecified && os.IsNotExist(err) {
+				glog.V(2).Infof("SSH key file %q does not exist; ignoring", sshPublicKey)
+			} else {
+				return nil, fmt.Errorf("error reading SSH key file %q: %v", sshPublicKey, err)
+			}
+		} else {
+			sshPublicKeys[fi.SecretNameSSHPrimary] = authorized
+
+			glog.Infof("Using SSH public key: %v\n", sshPublicKey)
+		}
+	}
+	return sshPublicKeys, nil
 }

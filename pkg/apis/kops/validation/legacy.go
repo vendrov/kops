@@ -80,6 +80,7 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 	switch kops.CloudProviderID(c.Spec.CloudProvider) {
 	case kops.CloudProviderBareMetal:
 		requiresSubnets = false
+		requiresSubnetCIDR = false
 		requiresNetworkCIDR = false
 		if c.Spec.NetworkCIDR != "" {
 			return field.Invalid(fieldSpec.Child("NetworkCIDR"), c.Spec.NetworkCIDR, "NetworkCIDR should not be set on bare metal")
@@ -157,6 +158,20 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 		}
 	}
 
+	// Check AdditionalNetworkCIDRs
+	var additionalNetworkCIDRs []*net.IPNet
+	{
+		if len(c.Spec.AdditionalNetworkCIDRs) > 0 {
+			for _, AdditionalNetworkCIDR := range c.Spec.AdditionalNetworkCIDRs {
+				_, IPNetAdditionalNetworkCIDR, err := net.ParseCIDR(AdditionalNetworkCIDR)
+				if err != nil {
+					return field.Invalid(fieldSpec.Child("AdditionalNetworkCIDRs"), AdditionalNetworkCIDR, fmt.Sprintf("Cluster had an invalid AdditionalNetworkCIDRs"))
+				}
+				additionalNetworkCIDRs = append(additionalNetworkCIDRs, IPNetAdditionalNetworkCIDR)
+			}
+		}
+	}
+
 	// Check NonMasqueradeCIDR
 	var nonMasqueradeCIDR *net.IPNet
 	{
@@ -169,7 +184,7 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 			return field.Invalid(fieldSpec.Child("NonMasqueradeCIDR"), nonMasqueradeCIDRString, "Cluster had an invalid NonMasqueradeCIDR")
 		}
 
-		if networkCIDR != nil && subnetsOverlap(nonMasqueradeCIDR, networkCIDR) {
+		if networkCIDR != nil && subnetsOverlap(nonMasqueradeCIDR, networkCIDR) && c.Spec.Networking != nil && c.Spec.Networking.AmazonVPC == nil {
 			return field.Invalid(fieldSpec.Child("NonMasqueradeCIDR"), nonMasqueradeCIDRString, fmt.Sprintf("NonMasqueradeCIDR %q cannot overlap with NetworkCIDR %q", nonMasqueradeCIDRString, c.Spec.NetworkCIDR))
 		}
 
@@ -326,7 +341,7 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 					return field.Invalid(fieldSubnet.Child("CIDR"), s.CIDR, "Subnet had an invalid CIDR")
 				}
 
-				if networkCIDR != nil && !isSubnet(networkCIDR, subnetCIDR) {
+				if networkCIDR != nil && !validateSubnetCIDR(networkCIDR, additionalNetworkCIDRs, subnetCIDR) {
 					return field.Invalid(fieldSubnet.Child("CIDR"), s.CIDR, fmt.Sprintf("Subnet %q had a CIDR %q that was not a subnet of the NetworkCIDR %q", s.Name, s.CIDR, c.Spec.NetworkCIDR))
 				}
 			}
@@ -469,9 +484,18 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 		}
 	}
 
+	if c.Spec.Networking != nil && c.Spec.Networking.AmazonVPC != nil &&
+		c.Spec.Kubelet != nil && (c.Spec.Kubelet.CloudProvider != "aws") {
+		return field.Invalid(fieldSpec.Child("Networking"), "amazon-vpc-routed-eni", "amazon-vpc-routed-eni networking is supported only in AWS")
+	}
+
 	if kubernetesRelease.LT(semver.MustParse("1.7.0")) {
 		if c.Spec.Networking != nil && c.Spec.Networking.Romana != nil {
 			return field.Invalid(fieldSpec.Child("Networking"), "romana", "romana networking is not supported with kubernetes versions 1.6 or lower")
+		}
+
+		if c.Spec.Networking != nil && c.Spec.Networking.AmazonVPC != nil {
+			return field.Invalid(fieldSpec.Child("Networking"), "amazon-vpc-routed-eni", "amazon-vpc-routed-eni networking is not supported with kubernetes versions 1.6 or lower")
 		}
 	}
 
@@ -480,6 +504,21 @@ func ValidateCluster(c *kops.Cluster, strict bool) *field.Error {
 	}
 
 	return nil
+}
+
+// validateSubnetCIDR is responsible for validating subnets are part of the CIRDs assigned to the cluster.
+func validateSubnetCIDR(networkCIDR *net.IPNet, additionalNetworkCIDRs []*net.IPNet, subnetCIDR *net.IPNet) bool {
+	if isSubnet(networkCIDR, subnetCIDR) {
+		return true
+	}
+
+	for _, additionalNetworkCIDR := range additionalNetworkCIDRs {
+		if isSubnet(additionalNetworkCIDR, subnetCIDR) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // validateEtcdClusterSpec is responsible for validating the etcd cluster spec

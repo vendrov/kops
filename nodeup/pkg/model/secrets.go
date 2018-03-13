@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"k8s.io/kops/pkg/tokens"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/nodeup/nodetasks"
 )
@@ -41,9 +42,12 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 
 	// retrieve the platform ca
 	{
-		ca, err := b.KeyStore.CertificatePool(fi.CertificateId_CA, false)
+		ca, err := b.KeyStore.FindCertificatePool(fi.CertificateId_CA)
 		if err != nil {
 			return err
+		}
+		if ca == nil {
+			return fmt.Errorf("certificate %q not found", fi.CertificateId_CA)
 		}
 
 		serialized, err := ca.AsString()
@@ -80,9 +84,12 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 	}
 
 	{
-		cert, err := b.KeyStore.Cert("master", false)
+		cert, err := b.KeyStore.FindCert("master")
 		if err != nil {
 			return err
+		}
+		if cert == nil {
+			return fmt.Errorf("certificate %q not found", "master")
 		}
 
 		serialized, err := cert.AsString()
@@ -99,11 +106,13 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 	}
 
 	{
-		k, err := b.KeyStore.PrivateKey("master", false)
+		k, err := b.KeyStore.FindPrivateKey("master")
 		if err != nil {
 			return err
 		}
-
+		if k == nil {
+			return fmt.Errorf("private key %q not found", "master")
+		}
 		serialized, err := k.AsString()
 		if err != nil {
 			return err
@@ -113,15 +122,19 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 			Path:     filepath.Join(b.PathSrvKubernetes(), "server.key"),
 			Contents: fi.NewStringResource(serialized),
 			Type:     nodetasks.FileType_File,
+			Mode:     s("0600"),
 		}
 		c.AddTask(t)
 	}
 
 	if b.IsKubernetesGTE("1.7") {
 		// TODO: Remove - we use the apiserver-aggregator keypair instead (which is signed by a different CA)
-		cert, err := b.KeyStore.Cert("apiserver-proxy-client", false)
+		cert, err := b.KeyStore.FindCert("apiserver-proxy-client")
 		if err != nil {
 			return fmt.Errorf("apiserver proxy client cert lookup failed: %v", err.Error())
+		}
+		if cert == nil {
+			return fmt.Errorf("certificate %q not found", "apiserver-proxy-client")
 		}
 
 		serialized, err := cert.AsString()
@@ -136,9 +149,12 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 		}
 		c.AddTask(t)
 
-		key, err := b.KeyStore.PrivateKey("apiserver-proxy-client", false)
+		key, err := b.KeyStore.FindPrivateKey("apiserver-proxy-client")
 		if err != nil {
 			return fmt.Errorf("apiserver proxy client private key lookup failed: %v", err.Error())
+		}
+		if key == nil {
+			return fmt.Errorf("private key %q not found", "apiserver-proxy-client")
 		}
 
 		serialized, err = key.AsString()
@@ -150,6 +166,7 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 			Path:     filepath.Join(b.PathSrvKubernetes(), "proxy-client.key"),
 			Contents: fi.NewStringResource(serialized),
 			Type:     nodetasks.FileType_File,
+			Mode:     s("0600"),
 		}
 		c.AddTask(t)
 	}
@@ -191,16 +208,13 @@ func (b *SecretBuilder) Build(c *fi.ModelBuilderContext) error {
 	}
 
 	if b.SecretStore != nil {
-		allTokens, err := b.allTokens()
+		allTokens, err := b.allAuthTokens()
 		if err != nil {
 			return err
 		}
 
 		var lines []string
 		for id, token := range allTokens {
-			if id == "dockerconfig" || id == "encryptionconfig" {
-				continue
-			}
 			lines = append(lines, token+","+id+","+id)
 		}
 		csv := strings.Join(lines, "\n")
@@ -250,6 +264,9 @@ func (b *SecretBuilder) writePrivateKey(c *fi.ModelBuilderContext, id string) er
 	if err != nil {
 		return fmt.Errorf("private key lookup failed for %q: %v", id, err)
 	}
+	if key == nil {
+		return fmt.Errorf("private key %q not found", id)
+	}
 
 	serialized, err := key.AsString()
 	if err != nil {
@@ -260,25 +277,26 @@ func (b *SecretBuilder) writePrivateKey(c *fi.ModelBuilderContext, id string) er
 		Path:     filepath.Join(b.PathSrvKubernetes(), id+".key"),
 		Contents: fi.NewStringResource(serialized),
 		Type:     nodetasks.FileType_File,
+		Mode:     s("0600"),
 	}
 	c.AddTask(t)
 
 	return nil
 }
 
-// allTokens returns a map of all tokens
-func (b *SecretBuilder) allTokens() (map[string]string, error) {
+// allTokens returns a map of all auth tokens that are present
+func (b *SecretBuilder) allAuthTokens() (map[string]string, error) {
+	possibleTokens := tokens.GetKubernetesAuthTokens_Deprecated()
+
 	tokens := make(map[string]string)
-	ids, err := b.SecretStore.ListSecrets()
-	if err != nil {
-		return nil, err
-	}
-	for _, id := range ids {
+	for _, id := range possibleTokens {
 		token, err := b.SecretStore.FindSecret(id)
 		if err != nil {
 			return nil, err
 		}
-		tokens[id] = string(token.Data)
+		if token != nil {
+			tokens[id] = string(token.Data)
+		}
 	}
 	return tokens, nil
 }

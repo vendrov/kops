@@ -48,12 +48,18 @@ type KubeBoot struct {
 	DNS DNSProvider
 	// ModelDir is the model directory
 	ModelDir string
+	// EtcdBackupImage is the image to use for backing up etcd
+	EtcdBackupImage string
+	// EtcdBackupStore is the VFS path to which we should backup etcd
+	EtcdBackupStore string
 	// Etcd container registry location.
 	EtcdImageSource string
 	// EtcdElectionTimeout is is the leader election timeout
 	EtcdElectionTimeout string
 	// EtcdHeartbeatInterval is the heartbeat interval
 	EtcdHeartbeatInterval string
+	// TLSAuth indicates we should enforce peer and client verification
+	TLSAuth bool
 	// TLSCA is the path to a client ca for etcd
 	TLSCA string
 	// TLSCert is the path to a tls certificate for etcd
@@ -69,7 +75,8 @@ type KubeBoot struct {
 	// Kubernetes is the context methods for kubernetes
 	Kubernetes *KubernetesContext
 	// Master indicates we are a master node
-	Master          bool
+	Master bool
+
 	volumeMounter   *VolumeMountController
 	etcdControllers map[string]*EtcdController
 }
@@ -119,19 +126,6 @@ func (k *KubeBoot) syncOnce() error {
 		glog.V(4).Infof("Not in role master; won't scan for volumes")
 	}
 
-	if k.Master && k.ApplyTaints {
-		if err := applyMasterTaints(k.Kubernetes); err != nil {
-			glog.Warningf("error updating master taints: %v", err)
-		}
-	}
-
-	if k.InitializeRBAC {
-		// @TODO: Idempotency: good question; not sure this should ever be done on the node though
-		if err := applyRBAC(k.Kubernetes); err != nil {
-			glog.Warningf("error initializing rbac: %v", err)
-		}
-	}
-
 	// Ensure kubelet is running. We avoid doing this automatically so
 	// that when kubelet comes up the first time, all volume mounts
 	// and DNS are available, avoiding the scenario where
@@ -140,9 +134,21 @@ func (k *KubeBoot) syncOnce() error {
 		glog.Warningf("error ensuring kubelet started: %v", err)
 	}
 
-	for _, channel := range k.Channels {
-		if err := applyChannel(channel); err != nil {
-			glog.Warningf("error applying channel %q: %v", channel, err)
+	if k.Master {
+		if k.ApplyTaints {
+			if err := applyMasterTaints(k.Kubernetes); err != nil {
+				glog.Warningf("error updating master taints: %v", err)
+			}
+		}
+		if k.InitializeRBAC {
+			if err := applyRBAC(k.Kubernetes); err != nil {
+				glog.Warningf("error initializing rbac: %v", err)
+			}
+		}
+		for _, channel := range k.Channels {
+			if err := applyChannel(channel); err != nil {
+				glog.Warningf("error applying channel %q: %v", channel, err)
+			}
 		}
 	}
 

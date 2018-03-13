@@ -39,6 +39,8 @@ type AutoscalingGroupModelBuilder struct {
 
 	BootstrapScript *model.BootstrapScript
 	Lifecycle       *fi.Lifecycle
+
+	SecurityLifecycle *fi.Lifecycle
 }
 
 var _ fi.ModelBuilder = &AutoscalingGroupModelBuilder{}
@@ -58,16 +60,15 @@ func (b *AutoscalingGroupModelBuilder) Build(c *fi.ModelBuilderContext) error {
 					return err
 				}
 			}
-			volumeType := fi.StringValue(ig.Spec.RootVolumeType)
-			volumeIops := fi.Int32Value(ig.Spec.RootVolumeIops)
 
-			switch volumeType {
-			case "io1":
-				if volumeIops == 0 {
-					volumeIops = DefaultVolumeIops
-				}
-			default:
+			volumeType := fi.StringValue(ig.Spec.RootVolumeType)
+			if volumeType == "" {
 				volumeType = DefaultVolumeType
+			}
+
+			volumeIops := fi.Int32Value(ig.Spec.RootVolumeIops)
+			if volumeIops == 0 {
+				volumeIops = DefaultVolumeIops
 			}
 
 			t := &awstasks.LaunchConfiguration{
@@ -99,6 +100,8 @@ func (b *AutoscalingGroupModelBuilder) Build(c *fi.ModelBuilderContext) error {
 					Name:   fi.String(id),
 					ID:     fi.String(id),
 					Shared: fi.Bool(true),
+
+					Lifecycle: b.SecurityLifecycle,
 				}
 				if err := c.EnsureTask(sgTask); err != nil {
 					return err
@@ -173,6 +176,18 @@ func (b *AutoscalingGroupModelBuilder) Build(c *fi.ModelBuilderContext) error {
 				Name:      s(name),
 				Lifecycle: b.Lifecycle,
 
+				Granularity: s("1Minute"),
+				Metrics: []string{
+					"GroupMinSize",
+					"GroupMaxSize",
+					"GroupDesiredCapacity",
+					"GroupInServiceInstances",
+					"GroupPendingInstances",
+					"GroupStandbyInstances",
+					"GroupTerminatingInstances",
+					"GroupTotalInstances",
+				},
+
 				LaunchConfiguration: launchConfiguration,
 			}
 
@@ -208,6 +223,12 @@ func (b *AutoscalingGroupModelBuilder) Build(c *fi.ModelBuilderContext) error {
 				return fmt.Errorf("error building cloud tags: %v", err)
 			}
 			t.Tags = tags
+
+			if ig.Spec.SuspendProcesses != nil {
+				for _, p := range ig.Spec.SuspendProcesses {
+					t.SuspendProcesses = append(t.SuspendProcesses, p)
+				}
+			}
 
 			c.AddTask(t)
 		}

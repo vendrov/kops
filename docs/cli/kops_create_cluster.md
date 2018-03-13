@@ -68,7 +68,7 @@ kops create cluster
       --admin-access stringSlice             Restrict API access to this CIDR.  If not set, access will not be restricted by IP. (default [0.0.0.0/0])
       --api-loadbalancer-type string         Sets the API loadbalancer type to either 'public' or 'internal'
       --associate-public-ip                  Specify --associate-public-ip=[true|false] to enable/disable association of public IP for master ASG and nodes. Default is 'true'.
-      --authorization string                 Authorization mode to use: AlwaysAllow or RBAC (default "AlwaysAllow")
+      --authorization string                 Authorization mode to use: AlwaysAllow or RBAC (default "RBAC")
       --bastion                              Pass the --bastion flag to enable a bastion instance group. Only applies to private topology.
       --channel string                       Channel for default versions and configuration to use (default "stable")
       --cloud string                         Cloud provider to use - gce, aws, vsphere
@@ -88,7 +88,7 @@ kops create cluster
       --master-zones stringSlice             Zones in which to run masters (must be an odd number)
       --model string                         Models to apply (separate multiple models with commas) (default "config,proto,cloudup")
       --network-cidr string                  Set to override the default network CIDR
-      --networking string                    Networking mode to use.  kubenet (default), classic, external, kopeio-vxlan (or kopeio), weave, flannel-vxlan (or flannel), flannel-udp, calico, canal, kube-router, romana. (default "kubenet")
+      --networking string                    Networking mode to use.  kubenet (default), classic, external, kopeio-vxlan (or kopeio), weave, flannel-vxlan (or flannel), flannel-udp, calico, canal, kube-router, romana, amazon-vpc-routed-eni. (default "kubenet")
       --node-count int32                     Set the number of nodes
       --node-security-groups stringSlice     Add precreated additional security groups to nodes.
       --node-size string                     Set instance size for nodes
@@ -99,8 +99,10 @@ kops create cluster
       --project string                       Project to use (must be set on GCE)
       --ssh-access stringSlice               Restrict SSH access to this CIDR.  If not set, access will not be restricted by IP. (default [0.0.0.0/0])
       --ssh-public-key string                SSH public key to use (default "~/.ssh/id_rsa.pub")
-      --target string                        Valid targets: direct, terraform, direct. Set this flag to terraform if you want kops to generate terraform (default "direct")
+      --subnets stringSlice                  Set to use shared subnets
+      --target string                        Valid targets: direct, terraform, cloudformation. Set this flag to terraform if you want kops to generate terraform (default "direct")
   -t, --topology string                      Controls network topology for the cluster. public|private. Default is 'public'. (default "public")
+      --utility-subnets stringSlice          Set to use shared utility subnets
       --vpc string                           Set to use a shared VPC
   -y, --yes                                  Specify --yes to immediately create the cluster
       --zones stringSlice                    Zones in which to run the cluster
@@ -114,8 +116,8 @@ kops create cluster
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory
       --logtostderr                      log to standard error instead of files (default false)
-      --name string                      Name of cluster
-      --state string                     Location of state storage
+      --name string                      Name of cluster. Overrides KOPS_CLUSTER_NAME environment variable
+      --state string                     Location of state storage. Overrides KOPS_STATE_STORE environment variable
       --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
   -v, --v Level                          log level for V logs
       --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
